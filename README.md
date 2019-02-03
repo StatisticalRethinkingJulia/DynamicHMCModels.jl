@@ -1,4 +1,4 @@
-# StatisticalRethinkingDynamicHMCDynamicHMC
+# StatisticalRethinkingDynamicHMC
 
 
 | **Project Status**                                                               |  **Documentation**                                                               | **Build Status**                                                                                |

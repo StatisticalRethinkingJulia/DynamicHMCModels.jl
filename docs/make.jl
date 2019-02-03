@@ -1,24 +1,19 @@
-using StatisticalRethinking
+using StatisticalRethinkingDynamicHMC
 using Literate
 using Documenter
 
 # The idea: generate both docs and notebooks using Literate
 # Based on ideas and work from Tamas Papp!
 
-DOC_ROOT = rel_path("..", "docs")
-DocDir =  rel_path("..", "docs", "src")
+DOC_ROOT = rel_path_d("..", "docs")
+DocDir =  rel_path_d("..", "docs", "src")
 
 page_list = Array{Pair{String, Any}, 1}();
 append!(page_list, [Pair("Home", "intro.md")]);
-append!(page_list, [Pair("Layout", "layout.md")])
-append!(page_list, [Pair("Versions", "versions.md")]);
-append!(page_list, [Pair("Notes", "notes.md")]);
-append!(page_list, [Pair("Acknowledgements", "acknowledgements.md")]);
-append!(page_list, [Pair("References", "references.md")])
 
 for chapter in keys(script_dict)
-  ProjDir = rel_path( "..", "scripts", chapter)
-  DocDir =  rel_path("..", "docs", "src", chapter)
+  ProjDir = rel_path_d( "..", "scripts", chapter)
+  DocDir =  rel_path_d("..", "docs", "src", chapter)
   
   !isdir(ProjDir) && break
   
@@ -49,11 +44,11 @@ append!(page_list, [Pair("Functions", "index.md")])
 
 makedocs(root = DOC_ROOT,
     modules = Module[],
-    sitename = "StatisticalRethinking.jl",
+    sitename = "StatisticalRethinkingDynamicHMC.jl",
     authors = "Rob Goedman, Richard Torkar, and contributors.",
     pages = page_list
 )
 
 deploydocs(root = DOC_ROOT,
-    repo = "github.com/StanJulia/StatisticalRethinking.jl.git",
+    repo = "github.com/StanJulia/StatisticalRethinkingDynamicHMC.jl.git",
  )

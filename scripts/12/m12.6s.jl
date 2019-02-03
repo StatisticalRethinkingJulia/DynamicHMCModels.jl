@@ -1,10 +1,10 @@
-using StatisticalRethinking
+using StatisticalRethinkingDynamicHMC
 using CmdStan, StanMCMCChain
 
-ProjDir = rel_path("..", "scripts", "12")
+ProjDir = rel_path_d("..", "scripts", "12")
 cd(ProjDir)
 
-d = CSV.read(rel_path( "..", "data",  "Kline.csv"), delim=';');
+d = CSV.read(rel_path_d( "..", "data",  "Kline.csv"), delim=';');
 size(d) # Should be 10x5
 
 # New col log_pop, set log() for population data

@@ -17,4 +17,4 @@ DynamicHMC
 MCMCDiagnostics
 Parameters
 ForwardDiff
-StatisticalRethinking
+StatisticalRethinkingDynamicHMC

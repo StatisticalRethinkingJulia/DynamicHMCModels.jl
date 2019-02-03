@@ -1,36 +1,15 @@
 ```@meta
-CurrentModule = StatisticalRethinking
+CurrentModule = StatisticalRethinkingDynamicHMC
 ```
 
-## `maximum_a_posteriori`
+## `rel_path_d`
 ```@docs
-maximum_a_posteriori(model, lower_bound, upper_bound)
+rel_path_d(parts...)
 ```
 
-## `link`
+## `generate_d`
 ```@docs
-link(xrange, chain, vars, xbar) 
+generate_d(; sd=script_dict_d_)
+generate_d(chapter::AbstractString; sd=script_dict_d_)
+generate_d(chapter::AbstractString, scriptfile::AbstractString; sd=script_dict_d_)
 ```
-
-## `rel_path`
-```@docs
-rel_path(parts...)
-```
-
-## `generate`
-```@docs
-generate(; sd=script_dict)
-generate(chapter::AbstractString; sd=script_dict)
-generate(chapter::AbstractString, scriptfile::AbstractString; sd=script_dict)
-```
-
-## `ScriptEntry`
-```@docs
-ScriptEntry
-```
-
-## `scriptentry`
-```@docs
-scriptentry(scriptfile; nb = true, exe = true, doc = true)
-```
-

@@ -1,17 +1,17 @@
 # Load Julia packages (libraries) needed  for the snippets in chapter 0
 
-using StatisticalRethinking
+using StatisticalRethinkingDynamicHMC
 using DynamicHMC, TransformVariables, LogDensityProblems, MCMCDiagnostics
 using Parameters, ForwardDiff
 
 # CmdStan uses a tmp directory to store the output of cmdstan
 
-ProjDir = rel_path("..", "scripts", "05")
+ProjDir = rel_path_d("..", "scripts", "05")
 cd(ProjDir)
 
 # Read the milk data
 
-wd = CSV.read(rel_path("..", "data", "milk.csv"), delim=';')
+wd = CSV.read(rel_path_d("..", "data", "milk.csv"), delim=';')
 df = convert(DataFrame, wd);
 dcc = filter(row -> !(row[:neocortex_perc] == "NA"), df)
 dcc[:kcal_per_g] = convert(Vector{Float64}, dcc[:kcal_per_g])

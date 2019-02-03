@@ -1,17 +1,17 @@
 # Load Julia packages (libraries) needed  for the snippets in chapter 0
 
-using StatisticalRethinking
+using StatisticalRethinkingDynamicHMC
 using CmdStan, StanMCMCChain
 gr(size=(500,500));
 
 # CmdStan uses a tmp directory to store the output of cmdstan
 
-ProjDir = rel_path("..", "scripts", "05")
+ProjDir = rel_path_d("..", "scripts", "05")
 cd(ProjDir)
 
 # ### snippet 5.1
 
-wd = CSV.read(rel_path("..", "data", "WaffleDivorce.csv"), delim=';')
+wd = CSV.read(rel_path_d("..", "data", "WaffleDivorce.csv"), delim=';')
 df = convert(DataFrame, wd);
 mean_ma = mean(df[:MedianAgeMarriage])
 df[:MedianAgeMarriage_s] = convert(Vector{Float64},

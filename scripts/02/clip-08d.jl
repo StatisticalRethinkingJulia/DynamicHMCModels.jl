@@ -1,8 +1,6 @@
 # # Estimate Binomial draw probabilility
 
-using StatisticalRethinking
-using DynamicHMC, TransformVariables, LogDensityProblems, MCMCDiagnostics
-using Parameters, ForwardDiff
+using StatisticalRethinkingDynamicHMC
 
 # Define a structure to hold the data.
 

@@ -1,17 +1,17 @@
 # # Linear regression
 
-using StatisticalRethinking
+using StatisticalRethinkingDynamicHMC
 using DynamicHMC, TransformVariables, LogDensityProblems, MCMCDiagnostics
 using Parameters, ForwardDiff
 
-ProjDir = rel_path("..", "scripts", "05")
+ProjDir = rel_path_d("..", "scripts", "05")
 cd(ProjDir)
 
 # Import the dataset.
 
 # ### snippet 5.1
 
-wd = CSV.read(rel_path("..", "data", "WaffleDivorce.csv"), delim=';')
+wd = CSV.read(rel_path_d("..", "data", "WaffleDivorce.csv"), delim=';')
 df = convert(DataFrame, wd);
 mean_ma = mean(df[:MedianAgeMarriage])
 df[:MedianAgeMarriage_s] = convert(Vector{Float64},

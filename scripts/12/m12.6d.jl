@@ -1,10 +1,10 @@
-using StatisticalRethinking
+using StatisticalRethinkingDynamicHMC
 using DynamicHMC, TransformVariables, LogDensityProblems, MCMCDiagnostics
 using Parameters, ForwardDiff, LinearAlgebra
 
-ProjDir = rel_path("..", "scripts", "12")
+ProjDir = rel_path_d("..", "scripts", "12")
 
-df = CSV.read(rel_path( "..", "data",  "Kline.csv"), delim=';');
+df = CSV.read(rel_path_d( "..", "data",  "Kline.csv"), delim=';');
 size(df) # Should be 10x5
 
 # New col logpop, set log() for population data

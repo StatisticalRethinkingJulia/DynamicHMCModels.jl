@@ -1,17 +1,17 @@
 # Load Julia packages (libraries) needed  for the snippets in chapter 0
 
-using StatisticalRethinking
+using StatisticalRethinkingDynamicHMC
 using DynamicHMC, TransformVariables, LogDensityProblems, MCMCDiagnostics
 using Parameters, ForwardDiff
 
 # CmdStan uses a tmp directory to store the output of cmdstan
 
-ProjDir = rel_path("..", "scripts", "08")
+ProjDir = rel_path_d("..", "scripts", "08")
 cd(ProjDir)
 
 # ### snippet 5.1
 
-d = CSV.read(rel_path("..", "data", "rugged.csv"), delim=';');
+d = CSV.read(rel_path_d("..", "data", "rugged.csv"), delim=';');
 df = convert(DataFrame, d);
 
 dcc = filter(row -> !(ismissing(row[:rgdppc_2000])), df)

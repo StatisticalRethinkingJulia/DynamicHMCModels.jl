@@ -1,4 +1,4 @@
-using StatisticalRethinking
+using StatisticalRethinkingDynamicHMC
 using Turing
 
 Turing.setadbackend(:reverse_diff);

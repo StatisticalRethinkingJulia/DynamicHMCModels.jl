@@ -1,10 +1,10 @@
-using StatisticalRethinking
+using StatisticalRethinkingDynamicHMC
 using Turing
 
 Turing.setadbackend(:reverse_diff)
 #nbTuring.turnprogress(false);
 
-d = CSV.read(joinpath(dirname(Base.pathof(StatisticalRethinking)), "..", "data",
+d = CSV.read(joinpath(dirname(Base.pathof(StatisticalRethinkingDynamicHMC)), "..", "data",
     "chimpanzees.csv"), delim=';');
 size(d) # Should be 504x8
 

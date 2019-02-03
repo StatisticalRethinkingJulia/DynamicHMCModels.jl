@@ -145,7 +145,8 @@ Generate notebook and script `file` in `chapter`, e.g. generate("04", "m4.1d.jl"
 or  generate("04/m4.1d.jl")
 
 """
-function generate_d(chapter::AbstractString, scriptfile::AbstractString; sd=script_dict_d)
+function generate_d(chapter::AbstractString, scriptfile::AbstractString; 
+  sd=script_dict_d)
   DocDir = rel_path_d("..", "docs", "src")
   ProjDir = rel_path_d("..", "scripts", chapter)
 

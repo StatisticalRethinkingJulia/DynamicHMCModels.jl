@@ -1,8 +1,8 @@
-module StatisticalRethinkingDynamicHMCDynamicHMC
+module StatisticalRethinkingDynamicHMC
 
 using Reexport 
 
-@reexport using StatisticalRethinkingDynamicHMC
+@reexport using StatisticalRethinking
 @reexport using DynamicHMC, TransformVariables, LogDensityProblems
 @reexport using MCMCDiagnostics
 @reexport using Parameters, ForwardDiff
@@ -13,10 +13,9 @@ const src_path = @__DIR__
 
 """
 
-# rel_path
+# rel_path_d
 
-Relative path using the StatisticalRethinkingDynamicHMC src/ directory. Copied from
-[DynamicHMCExamples.jl](https://github.com/tpapp/DynamicHMCExamples.jl)
+Relative path using the StatisticalRethinkingDynamicHMC src/ directory. 
 
 ### Example to get access to the data subdirectory
 ```julia

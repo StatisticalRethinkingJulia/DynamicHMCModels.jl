@@ -1,4 +1,4 @@
-using StatisticalRethinkingDynamicHMCDynamicHMC
+using StatisticalRethinkingDynamicHMC
 using Test
 
 println("Tests are executed in docs job.")

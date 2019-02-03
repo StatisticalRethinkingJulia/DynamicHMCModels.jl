@@ -1,4 +1,4 @@
-using StatisticalRethinkingDynamicHMC, Literate
+using SRDynamicHMC, Literate
 
 """
 

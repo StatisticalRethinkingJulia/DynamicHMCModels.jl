@@ -1,4 +1,4 @@
-using StatisticalRethinkingDynamicHMC
+using SRDynamicHMC
 using Test
 
 println("Tests are executed in docs job.")

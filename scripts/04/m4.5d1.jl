@@ -3,7 +3,7 @@
 # We estimate simple linear regression model with a half-T prior.
 # First, we load the packages we use.
 
-using StatisticalRethinkingDynamicHMC
+using SRDynamicHMC
 using DynamicHMC, TransformVariables, LogDensityProblems, MCMCDiagnostics
 using Parameters, ForwardDiff
 

@@ -1,6 +1,6 @@
 # # Estimate Binomial draw probabilility
 
-using StatisticalRethinkingDynamicHMC
+using SRDynamicHMC
 
 # Define a structure to hold the data.
 

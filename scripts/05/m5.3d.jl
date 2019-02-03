@@ -1,6 +1,6 @@
 # # Linear regression
 
-using StatisticalRethinkingDynamicHMC
+using SRDynamicHMC
 using DynamicHMC, TransformVariables, LogDensityProblems, MCMCDiagnostics
 using Parameters, ForwardDiff
 

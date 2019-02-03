@@ -2,7 +2,7 @@
 
 # Result is not conform cmdstan result
 
-using StatisticalRethinkingDynamicHMC
+using SRDynamicHMC
 using DynamicHMC, TransformVariables, LogDensityProblems, MCMCDiagnostics
 using Parameters, ForwardDiff
 

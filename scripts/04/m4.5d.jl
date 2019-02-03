@@ -1,6 +1,6 @@
 # # Polynomial weight model model
 
-using StatisticalRethinkingDynamicHMC
+using SRDynamicHMC
 using DynamicHMC, TransformVariables, LogDensityProblems, MCMCDiagnostics
 using Parameters, ForwardDiff
 

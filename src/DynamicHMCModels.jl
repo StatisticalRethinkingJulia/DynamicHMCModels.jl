@@ -2,13 +2,13 @@ module DynamicHMCModels
 
 using Reexport 
 
-@reexport using StatisticalRethinking, CSV
+@reexport using SR, CSV
 @reexport using DynamicHMC, TransformVariables, LogDensityProblems
 @reexport using MCMCDiagnostics
 @reexport using Parameters, ForwardDiff
 
 using DataStructures
-import StatisticalRethinking: scriptentry
+import SR: scriptentry
 
 const src_path = @__DIR__
 

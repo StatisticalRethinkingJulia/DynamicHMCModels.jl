@@ -1,5 +1,5 @@
 julia 1.0
-StatisticalRethinking
+SR
 Distributions
 DataFrames
 StatsPlots

@@ -35,7 +35,7 @@ function (problem::m_12_06d_model)(θ)
     ll += sum(logpdf.(Normal(0, 10), β[1])) # a
     ll += sum(logpdf.(Normal(0, 1), β[2])) # a
     ll += sum(
-      [loglikelihood(Binomial(1, logistic(α[S[i]] + dot(X[i, :], β))), [y[i]]) for i in 1:N]
+      [loglikelihood(Poisson(exp(α[S[i]] + dot(X[i, :], β))), [y[i]]) for i in 1:N]
     )
     ll
 end

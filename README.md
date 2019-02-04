@@ -1,4 +1,4 @@
-# StatisticalRethinkingDynamicHMC
+# StatisticalRethinkingJulia/DynamicHMCModels
 
 
 | **Project Status**                                                               |  **Documentation**                                                               | **Build Status**                                                                                |
@@ -20,18 +20,18 @@ The  documentation has been generated using Literate.jl and Documenter.jl based 
 Question and contributions are very welcome, as are feature requests and suggestions. Please open an [issue][issues-url] if you encounter any problems or have a question.
 
 [docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
-[docs-dev-url]: https://stanjulia.github.io/StatisticalRethinkingDynamicHMC.jl/latest
+[docs-dev-url]: https://stanjulia.github.io/StatisticalRethinkingJulia/DynamicHMCModels.jl/latest
 
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
-[docs-stable-url]: https://stanjulia.github.io/StatisticalRethinkingDynamicHMC.jl/stable
+[docs-stable-url]: https://stanjulia.github.io/StatisticalRethinkingJulia/DynamicHMCModels.jl/stable
 
-[travis-img]: https://travis-ci.org/StatisticalRethinkingJulia/StatisticalRethinkingDynamicHMC.jl.svg?branch=master
-[travis-url]: https://travis-ci.org/StatisticalRethinkingJulia/StatisticalRethinkingDynamicHMC.jl
+[travis-img]: https://travis-ci.org/StatisticalRethinkingJulia/StatisticalRethinkingJulia/DynamicHMCModels.jl.svg?branch=master
+[travis-url]: https://travis-ci.org/StatisticalRethinkingJulia/StatisticalRethinkingJulia/DynamicHMCModels.jl
 
-[codecov-img]: https://codecov.io/gh/StatisticalRethinkingJulia/StatisticalRethinkingDynamicHMC.jl/branch/master/graph/badge.svg
-[codecov-url]: https://codecov.io/gh/StatisticalRethinkingJulia/StatisticalRethinkingDynamicHMC.jl
+[codecov-img]: https://codecov.io/gh/StatisticalRethinkingJulia/StatisticalRethinkingJulia/DynamicHMCModels.jl/branch/master/graph/badge.svg
+[codecov-url]: https://codecov.io/gh/StatisticalRethinkingJulia/StatisticalRethinkingJulia/DynamicHMCModels.jl
 
-[issues-url]: https://github.com/StatisticalRethinkingJulia/StatisticalRethinkingDynamicHMC.jl/issues
+[issues-url]: https://github.com/StatisticalRethinkingJulia/StatisticalRethinkingJulia/DynamicHMCModels.jl/issues
 
 [project-status-img]: https://img.shields.io/badge/lifecycle-wip-orange.svg
 

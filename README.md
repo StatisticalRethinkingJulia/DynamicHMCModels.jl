@@ -9,6 +9,8 @@
 
 This package contains Julia versions of selected models contained in the R package "rethinking" associated with the book [Statistical Rethinking](https://xcelab.net/rm/statistical-rethinking/) by Richard McElreath.
 
+SRDynamicHMC contails the models from Statistical Rethinking using DynamicHMC.jl
+
 ## Acknowledgements
 
 The  documentation has been generated using Literate.jl and Documenter.jl based on several ideas demonstrated by Tamas Papp in above mentioned  [DynamicHMCExamples.jl](https://tpapp.github.io/DynamicHMCExamples.jl).

@@ -60,7 +60,9 @@ chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
 posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));
 posterior[1:5]
 
-posterior_β = mean(first, posterior)
+posterior_β = mean(posterior[i].β for i in 1:length(posterior))
+posterior_α = mean(posterior[i].α for i in 1:length(posterior))
+posterior_σ = mean(posterior[i].σ for i in 1:length(posterior))
 
 ess = mapslices(effective_sample_size, get_position_matrix(chain); dims = 1)
 ess
@@ -90,9 +92,7 @@ Empirical Posterior Estimates:
 sigma_society    0.310352849  0.1374834682 0.00217380450 0.0057325226  575.187461
 ";
 
-rc, chn, cnames = stan(stanmodel, m12_6_1_data, ProjDir, diagnostics=false, CmdStanDir=CMDSTAN_HOME);
-
-describe(chn)
+[posterior_β, posterior_α, posterior_σ]
 
 # This file was generated using Literate.jl, https://github.com/fredrikekre/Literate.jl
 

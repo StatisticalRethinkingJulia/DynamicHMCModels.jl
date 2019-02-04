@@ -2,12 +2,13 @@ module SRDynamicHMC
 
 using Reexport 
 
-@reexport using StatisticalRethinking
+@reexport using StatisticalRethinking, CSV
 @reexport using DynamicHMC, TransformVariables, LogDensityProblems
 @reexport using MCMCDiagnostics
 @reexport using Parameters, ForwardDiff
 
 using DataStructures
+import StatisticalRethinking: scriptentry
 
 const src_path = @__DIR__
 
@@ -29,6 +30,7 @@ include("generate_d.jl")
 
 export
   rel_path_d,
-  generate_d
+  generate_d,
+  scriptentry
 
 end # module

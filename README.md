@@ -25,13 +25,13 @@ Question and contributions are very welcome, as are feature requests and suggest
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [docs-stable-url]: https://stanjulia.github.io/StatisticalRethinkingDynamicHMC.jl/stable
 
-[travis-img]: https://travis-ci.org/StanJulia/StatisticalRethinkingDynamicHMC.jl.svg?branch=master
-[travis-url]: https://travis-ci.org/StanJulia/StatisticalRethinkingDynamicHMC.jl
+[travis-img]: https://travis-ci.org/StatisticalRethinkingJulia/StatisticalRethinkingDynamicHMC.jl.svg?branch=master
+[travis-url]: https://travis-ci.org/StatisticalRethinkingJulia/StatisticalRethinkingDynamicHMC.jl
 
-[codecov-img]: https://codecov.io/gh/StanJulia/StatisticalRethinkingDynamicHMC.jl/branch/master/graph/badge.svg
-[codecov-url]: https://codecov.io/gh/StanJulia/StatisticalRethinkingDynamicHMC.jl
+[codecov-img]: https://codecov.io/gh/StatisticalRethinkingJulia/StatisticalRethinkingDynamicHMC.jl/branch/master/graph/badge.svg
+[codecov-url]: https://codecov.io/gh/StatisticalRethinkingJulia/StatisticalRethinkingDynamicHMC.jl
 
-[issues-url]: https://github.com/StanJulia/StatisticalRethinkingDynamicHMC.jl/issues
+[issues-url]: https://github.com/StatisticalRethinkingJulia/StatisticalRethinkingDynamicHMC.jl/issues
 
 [project-status-img]: https://img.shields.io/badge/lifecycle-wip-orange.svg
 

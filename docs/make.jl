@@ -20,7 +20,7 @@ for chapter in keys(script_dict)
   cd(ProjDir) do
     
     script_list = Array{Pair{String, Any}, 1}();
-    for script in script_dict[chapter]
+    for script in script_dict_d[chapter]
       if script.doc
         file = script.scriptfile
         append!(script_list, [Pair(file[1:end-3], "$(chapter)/$(file[1:end-3]).md")])
@@ -50,5 +50,5 @@ makedocs(root = DOC_ROOT,
 )
 
 deploydocs(root = DOC_ROOT,
-    repo = "github.com/StanJulia/SRDynamicHMC.jl.git",
+    repo = "github.com/StatisticalRethinkingJulia/SRDynamicHMC.jl.git",
  )

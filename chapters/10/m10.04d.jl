@@ -1,15 +1,9 @@
-# Load Julia packages (libraries) needed  for the snippets in chapter 0
-
 using SRDynamicHMC
 using DynamicHMC, TransformVariables, LogDensityProblems, MCMCDiagnostics
 using Parameters, ForwardDiff, LinearAlgebra
 
-# CmdStan uses a tmp directory to store the output of cmdstan
-
 ProjDir = rel_path_d("..", "scripts", "10")
 cd(ProjDir)
-
-# ### snippet 10.4
 
 d = CSV.read(rel_path("..", "data", "chimpanzees.csv"), delim=';');
 df = convert(DataFrame, d);
@@ -33,8 +27,6 @@ struct m_10_04d_model{TY <: AbstractVector, TX <: AbstractMatrix,
     N_actors::Int
 end
 
-# Make the type callable with the parameters *as a single argument*.
-
 function (problem::m_10_04d_model)(θ)
     @unpack y, X, A, N, N_actors = problem   # extract the data
     @unpack β, α = θ  # works on the named tuple too
@@ -46,8 +38,6 @@ function (problem::m_10_04d_model)(θ)
     )
     ll
 end
-
-# Instantiate the model with data and inits.
 
 #m_10_04_data = Dict("N" => size(df, 1), "actor" => df[:actor],
 #"pulled_left" => df[:pulled_left], "prosoc_left" => df[:prosoc_left],
@@ -62,43 +52,25 @@ p = m_10_04d_model(y, X, A, N, N_actors);
 θ = (β = [1.0, 0.0], α = [-1.0, 10.0, -1.0, -1.0, -1.0, 0.0, 2.0])
 p(θ)
 
-# Write a function to return properly dimensioned transformation.
-
 problem_transformation(p::m_10_04d_model) =
     as( (β = as(Array, size(p.X, 2)), α = as(Array, p.N_actors), ) )
-
-# Wrap the problem with a transformation, then use Flux for the gradient.
 
 P = TransformedLogDensity(problem_transformation(p), p)
 ∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
 
-# Tune and sample.
-
 chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
-
-# We use the transformation to obtain the posterior from the chain.
 
 posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));
 posterior[1:5]
 
-# Extract the parameter posterior means: `β`,
-
 posterior_β = mean(first, posterior)
 
-# Extract the parameter posterior means: `β`,
-
 posterior_α = mean(last, posterior)
-
-# Effective sample sizes (of untransformed draws)
 
 ess = mapslices(effective_sample_size, get_position_matrix(chain); dims = 1)
 ess
 
-# NUTS-specific statistics
-
 NUTS_statistics(chain)
-
-# Result rethinking
 
 rethinking = "
 Iterations = 1:1000
@@ -119,8 +91,7 @@ a.7  1.81090866 0.39318577 0.0062168129 0.0071483527 1000
 bpC -0.12913322 0.29935741 0.0047332562 0.0049519863 1000
 ";
 
-# Means of draws
-
 [posterior_β, posterior_α]
 
-# End of `10/m10.04d.jl`
+# This file was generated using Literate.jl, https://github.com/fredrikekre/Literate.jl
+

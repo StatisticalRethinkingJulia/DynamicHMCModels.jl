@@ -82,7 +82,7 @@ Generate notebooks and scripts in a single chapter, e.g. generate("04")
 function generate_d(chapter::AbstractString; sd=script_dict_d)
   split_chapter = split(chapter, "/")
   if length(split_chapter) == 2
-    generate(split_chapter...)
+    generate_d(split_chapter...)
   else
     DocDir = rel_path_d("..", "docs", "src")
     ProjDir = rel_path_d("..", "scripts", chapter)

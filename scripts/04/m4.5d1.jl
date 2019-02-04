@@ -12,7 +12,7 @@ cd(ProjDir)
 
 # Import the dataset.
 
-howell1 = CSV.read(rel_path_d("..", "data", "Howell1.csv"), delim=';')
+howell1 = CSV.read(rel_path("..", "data", "Howell1.csv"), delim=';')
 df = convert(DataFrame, howell1);
 
 # Use only adults and standardize

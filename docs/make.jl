@@ -1,4 +1,4 @@
-using SRDynamicHMC
+using DynamicHMCModels
 using Literate
 using Documenter
 
@@ -11,7 +11,7 @@ DocDir =  rel_path_d("..", "docs", "src")
 page_list = Array{Pair{String, Any}, 1}();
 append!(page_list, [Pair("Home", "intro.md")]);
 
-for chapter in keys(script_dict)
+for chapter in keys(script_dict_d)
   ProjDir = rel_path_d( "..", "scripts", chapter)
   DocDir =  rel_path_d("..", "docs", "src", chapter)
   
@@ -44,11 +44,11 @@ append!(page_list, [Pair("Functions", "index.md")])
 
 makedocs(root = DOC_ROOT,
     modules = Module[],
-    sitename = "SRDynamicHMC.jl",
+    sitename = "DynamicHMCModels.jl",
     authors = "Rob Goedman, Richard Torkar, and contributors.",
     pages = page_list
 )
 
 deploydocs(root = DOC_ROOT,
-    repo = "github.com/StatisticalRethinkingJulia/SRDynamicHMC.jl.git",
+    repo = "github.com/StatisticalRethinkingJulia/DynamicHMCModels.jl.git",
  )

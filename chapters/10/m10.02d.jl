@@ -1,4 +1,4 @@
-using SRDynamicHMC
+using DynamicHMCModels
 using DynamicHMC, TransformVariables, LogDensityProblems, MCMCDiagnostics
 using Parameters, ForwardDiff, LinearAlgebra
 

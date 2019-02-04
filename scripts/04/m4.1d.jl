@@ -2,7 +2,7 @@
 
 # We estimate simple linear regression model with a half-T prior.
 
-using SRDynamicHMC
+using DynamicHMCModels
 using DynamicHMC, TransformVariables, LogDensityProblems, MCMCDiagnostics
 using Parameters, ForwardDiff
 

@@ -1,4 +1,4 @@
-name = "SRDynamicHMC"
+name = "DynamicHMCModels"
 uuid = "cbae43a2-2fe9-5e04-a1d5-c72fcdfa8da4"
 authors = ["Rob J Goedman <goedman@icloud.com"]
 version = "0.1.0"

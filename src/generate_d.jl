@@ -1,4 +1,4 @@
-using SRDynamicHMC, Literate
+using DynamicHMCModels, Literate
 
 """
 

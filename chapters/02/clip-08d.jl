@@ -1,4 +1,4 @@
-using SRDynamicHMC
+using DynamicHMCModels
 
 struct BernoulliProblem
     "Total number of draws in the data."

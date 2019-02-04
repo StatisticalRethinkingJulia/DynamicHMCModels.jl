@@ -1,5 +1,5 @@
 ```@meta
-CurrentModule = SRDynamicHMC
+CurrentModule = DynamicHMCModels
 ```
 
 ## `rel_path_d`

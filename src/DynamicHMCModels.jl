@@ -1,4 +1,4 @@
-module SRDynamicHMC
+module DynamicHMCModels
 
 using Reexport 
 
@@ -16,7 +16,7 @@ const src_path = @__DIR__
 
 # rel_path_d
 
-Relative path using the SRDynamicHMC src/ directory. 
+Relative path using the DynamicHMCModels src/ directory. 
 
 ### Example to get access to the data subdirectory
 ```julia

@@ -2,7 +2,7 @@ module DynamicHMCModels
 
 using Reexport 
 
-@reexport using SR, CSV
+@reexport using StatisticalRethinking, CSV
 @reexport using DynamicHMC, TransformVariables, LogDensityProblems
 @reexport using MCMCDiagnostics
 @reexport using Parameters, ForwardDiff

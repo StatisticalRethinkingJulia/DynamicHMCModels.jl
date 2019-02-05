@@ -10,7 +10,7 @@ using Reexport
 using DataStructures
 import SR: scriptentry
 
-const src_path = @__DIR__
+const src_path_d = @__DIR__
 
 """
 
@@ -23,7 +23,7 @@ Relative path using the DynamicHMCModels src/ directory.
 rel_path_d("..", "data")
 ```
 """
-rel_path_d(parts...) = normpath(joinpath(src_path, parts...))
+rel_path_d(parts...) = normpath(joinpath(src_path_d, parts...))
 
 include("scriptdict_d.jl")
 include("generate_d.jl")

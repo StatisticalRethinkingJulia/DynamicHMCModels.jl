@@ -1,6 +1,4 @@
 using DynamicHMCModels
-using DynamicHMC, TransformVariables, LogDensityProblems, MCMCDiagnostics
-using Parameters, ForwardDiff, LinearAlgebra
 
 ProjDir = rel_path_d("..", "scripts", "10")
 cd(ProjDir)

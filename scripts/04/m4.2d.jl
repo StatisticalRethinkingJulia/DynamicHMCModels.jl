@@ -3,8 +3,6 @@
 # Result is not conform cmdstan result
 
 using DynamicHMCModels
-using DynamicHMC, TransformVariables, LogDensityProblems, MCMCDiagnostics
-using Parameters, ForwardDiff
 
 ProjDir = rel_path_d("..", "scripts", "04")
 cd(ProjDir)

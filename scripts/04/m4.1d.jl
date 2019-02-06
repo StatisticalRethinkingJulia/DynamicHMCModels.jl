@@ -3,8 +3,6 @@
 # We estimate simple linear regression model with a half-T prior.
 
 using DynamicHMCModels
-using DynamicHMC, TransformVariables, LogDensityProblems, MCMCDiagnostics
-using Parameters, ForwardDiff
 
 ProjDir = rel_path_d("..", "scripts", "04")
 cd(ProjDir)

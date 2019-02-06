@@ -1,8 +1,6 @@
 # Load Julia packages (libraries) needed  for the snippets in chapter 0
 
 using DynamicHMCModels
-using DynamicHMC, TransformVariables, LogDensityProblems, MCMCDiagnostics
-using Parameters, ForwardDiff, LinearAlgebra
 
 # ### snippet 10.4
 

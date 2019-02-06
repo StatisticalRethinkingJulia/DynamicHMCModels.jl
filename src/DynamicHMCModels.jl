@@ -4,7 +4,7 @@ using Reexport
 
 @reexport using StatisticalRethinking, CSV
 @reexport using DynamicHMC, TransformVariables, LogDensityProblems
-@reexport using MCMCDiagnostics
+@reexport using MCMCDiagnostics, LinearAlgebra
 @reexport using Parameters, ForwardDiff
 
 using DataStructures

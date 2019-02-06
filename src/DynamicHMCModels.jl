@@ -8,7 +8,6 @@ using Reexport
 @reexport using Parameters, ForwardDiff
 
 using DataStructures
-import SR: scriptentry
 
 const src_path_d = @__DIR__
 

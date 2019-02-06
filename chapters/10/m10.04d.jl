@@ -39,10 +39,6 @@ function (problem::m_10_04d_model)(θ)
     ll
 end
 
-#m_10_04_data = Dict("N" => size(df, 1), "actor" => df[:actor],
-#"pulled_left" => df[:pulled_left], "prosoc_left" => df[:prosoc_left],
-#"N_actors" => 7, "condition" => df[:condition]);
-
 N = size(df, 1)
 N_actors = length(unique(df[:actor]))
 X = hcat(ones(Int64, N), df[:prosoc_left] .* df[:condition]);
@@ -57,6 +53,9 @@ problem_transformation(p::m_10_04d_model) =
 
 P = TransformedLogDensity(problem_transformation(p), p)
 ∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
+#∇P = LogDensityRejectErrors(ADgradient(:Flux, P));
+#∇P = ADgradient(:ForwardDiff, P);
+#∇P = ADgradient(:Flux, P);
 
 chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
 

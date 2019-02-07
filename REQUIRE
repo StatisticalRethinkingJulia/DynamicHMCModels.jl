@@ -18,3 +18,5 @@ DynamicHMC
 MCMCDiagnostics
 Parameters
 ForwardDiff
+Plots
+Optim

@@ -29,7 +29,7 @@ include("generate_d.jl")
 
 export
   rel_path_d,
-  generate_d,
-  scriptentry
+  scripts_dict_d,
+  generate_d
 
 end # module

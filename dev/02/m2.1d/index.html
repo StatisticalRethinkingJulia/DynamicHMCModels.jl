@@ -9,29 +9,29 @@ end;</code></pre></div><p>Make the type callable with the parameters <em>as a si
     loglikelihood(Binomial(n, α), s)
 end</code></pre></div><p>Create the data and complete setting up the problem.</p><div><pre><code class="language-julia">obs = rand(Binomial(9, 2/3), 1)
 p = BernoulliProblem(9, obs)
-p((α = 0.5, ))</code></pre><pre><code class="language-none">-1.807507826196193</code></pre></div><p>Write a function to return properly dimensioned transformation.</p><div><pre><code class="language-julia">problem_transformation(p::BernoulliProblem) =
+p((α = 0.5, ))</code></pre><pre><code class="language-none">-1.4020427180880297</code></pre></div><p>Write a function to return properly dimensioned transformation.</p><div><pre><code class="language-julia">problem_transformation(p::BernoulliProblem) =
     as((α = as𝕀, ),  )</code></pre></div><p>Use a flat priors (the default, omitted) for α</p><div><pre><code class="language-julia">P = TransformedLogDensity(problem_transformation(p), p)
 ∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));</code></pre></div><p>Sample</p><div><pre><code class="language-julia">chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000)</code></pre><pre><code class="language-none">MCMC, adapting ϵ (75 steps)
-0.0015 s/step ...done
+0.0014 s/step ...done
 MCMC, adapting ϵ (25 steps)
-1.0e-5 s/step ...done
+1.2e-5 s/step ...done
 MCMC, adapting ϵ (50 steps)
-0.0027 s/step ...done
+0.0025 s/step ...done
 MCMC, adapting ϵ (100 steps)
-0.00016 s/step ...done
+9.3e-6 s/step ...done
 MCMC, adapting ϵ (200 steps)
-1.0e-5 s/step ...done
+7.8e-6 s/step ...done
 MCMC, adapting ϵ (400 steps)
-9.1e-6 s/step ...done
+4.8e-5 s/step ...done
 MCMC, adapting ϵ (50 steps)
-1.1e-5 s/step ...done
+1.2e-5 s/step ...done
 MCMC (1000 steps)
-7.4e-6 s/step ...done
-(NUTS_Transition{Array{Float64,1},Float64}[NUTS_Transition{Array{Float64,1},Float64}([-0.237932], -3.74036, 1, DoubledTurn, 1.0, 1), NUTS_Transition{Array{Float64,1},Float64}([-0.654532], -2.91126, 2, DoubledTurn, 0.993256, 3), NUTS_Transition{Array{Float64,1},Float64}([-0.256482], -3.04211, 2, DoubledTurn, 0.937131, 3), NUTS_Transition{Array{Float64,1},Float64}([-0.414244], -3.79319, 2, DoubledTurn, 0.768678, 3), NUTS_Transition{Array{Float64,1},Float64}([-0.15212], -3.00001, 1, DoubledTurn, 0.92784, 1), NUTS_Transition{Array{Float64,1},Float64}([-0.684337], -3.00294, 2, DoubledTurn, 0.98818, 3), NUTS_Transition{Array{Float64,1},Float64}([0.43414], -4.19741, 1, AdjacentTurn, 0.683929, 3), NUTS_Transition{Array{Float64,1},Float64}([-0.555528], -3.61998, 1, AdjacentTurn, 1.0, 3), NUTS_Transition{Array{Float64,1},Float64}([-0.0729331], -3.10053, 1, AdjacentTurn, 0.913775, 3), NUTS_Transition{Array{Float64,1},Float64}([0.210964], -3.66155, 2, DoubledTurn, 0.920643, 3)  …  NUTS_Transition{Array{Float64,1},Float64}([-0.165616], -3.75527, 2, DoubledTurn, 0.767673, 3), NUTS_Transition{Array{Float64,1},Float64}([-0.228896], -4.71603, 2, DoubledTurn, 0.588587, 3), NUTS_Transition{Array{Float64,1},Float64}([-0.228896], -3.23509, 1, DoubledTurn, 0.827236, 1), NUTS_Transition{Array{Float64,1},Float64}([0.15143], -3.48045, 1, DoubledTurn, 0.808319, 1), NUTS_Transition{Array{Float64,1},Float64}([-0.375274], -3.20328, 1, DoubledTurn, 1.0, 1), NUTS_Transition{Array{Float64,1},Float64}([0.0662619], -3.3015, 1, DoubledTurn, 0.827796, 1), NUTS_Transition{Array{Float64,1},Float64}([-0.421864], -3.10353, 1, DoubledTurn, 1.0, 1), NUTS_Transition{Array{Float64,1},Float64}([-0.629005], -2.80749, 2, DoubledTurn, 0.999793, 3), NUTS_Transition{Array{Float64,1},Float64}([-0.68714], -2.87773, 2, DoubledTurn, 0.972288, 3), NUTS_Transition{Array{Float64,1},Float64}([0.982667], -6.15523, 1, AdjacentTurn, 0.389339, 3)], NUTS sampler in 1 dimensions
-  stepsize (ϵ) ≈ 1.07
+8.2e-6 s/step ...done
+(NUTS_Transition{Array{Float64,1},Float64}[NUTS_Transition{Array{Float64,1},Float64}([-0.399676], -3.21077, 1, DoubledTurn, 0.946198, 1), NUTS_Transition{Array{Float64,1},Float64}([-0.140305], -3.459, 2, DoubledTurn, 0.975471, 3), NUTS_Transition{Array{Float64,1},Float64}([-0.0751055], -2.88308, 2, DoubledTurn, 1.0, 3), NUTS_Transition{Array{Float64,1},Float64}([0.511641], -3.20784, 1, AdjacentTurn, 0.951152, 3), NUTS_Transition{Array{Float64,1},Float64}([-0.236786], -3.4947, 1, AdjacentTurn, 0.934986, 3), NUTS_Transition{Array{Float64,1},Float64}([-0.428779], -3.26133, 1, DoubledTurn, 0.944536, 1), NUTS_Transition{Array{Float64,1},Float64}([0.436883], -3.16754, 2, AdjacentTurn, 1.0, 7), NUTS_Transition{Array{Float64,1},Float64}([0.436883], -5.16529, 1, AdjacentTurn, 0.647678, 3), NUTS_Transition{Array{Float64,1},Float64}([0.604867], -2.98157, 2, DoubledTurn, 0.989882, 3), NUTS_Transition{Array{Float64,1},Float64}([0.847927], -3.3257, 1, DoubledTurn, 0.936025, 1)  …  NUTS_Transition{Array{Float64,1},Float64}([-0.496257], -3.59094, 1, DoubledTurn, 1.0, 1), NUTS_Transition{Array{Float64,1},Float64}([0.144991], -3.43027, 1, AdjacentTurn, 0.98892, 3), NUTS_Transition{Array{Float64,1},Float64}([0.349356], -2.96406, 2, DoubledTurn, 0.96845, 3), NUTS_Transition{Array{Float64,1},Float64}([0.10023], -2.77525, 2, AdjacentTurn, 0.999971, 7), NUTS_Transition{Array{Float64,1},Float64}([0.0656102], -2.78019, 2, DoubledTurn, 0.996971, 3), NUTS_Transition{Array{Float64,1},Float64}([0.0515864], -2.79894, 2, DoubledTurn, 0.996322, 3), NUTS_Transition{Array{Float64,1},Float64}([0.111514], -2.77951, 2, DoubledTurn, 0.998579, 3), NUTS_Transition{Array{Float64,1},Float64}([0.394444], -2.86277, 1, AdjacentTurn, 0.981929, 3), NUTS_Transition{Array{Float64,1},Float64}([0.146332], -3.08398, 2, DoubledTurn, 0.963299, 3), NUTS_Transition{Array{Float64,1},Float64}([0.0828288], -3.0735, 2, DoubledTurn, 0.953694, 3)], NUTS sampler in 1 dimensions
+  stepsize (ϵ) ≈ 0.934
   maximum depth = 10
-  Gaussian kinetic energy, √diag(M⁻¹): [0.717616]
-)</code></pre></div><p>To get the posterior for <span>$α$</span> use <code>get_position</code> and then transform back.</p><div><pre><code class="language-julia">posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));</code></pre></div><p>Extract the parameter.</p><div><pre><code class="language-julia">posterior_α = first.(posterior);</code></pre></div><p>check the effective sample size</p><div><pre><code class="language-julia">ess_α = effective_sample_size(posterior_α)</code></pre><pre><code class="language-none">268.5736947745755</code></pre></div><p>NUTS-specific statistics</p><div><pre><code class="language-julia">NUTS_statistics(chain)</code></pre><pre><code class="language-none">Hamiltonian Monte Carlo sample of length 1000
-  acceptance rate mean: 0.88, min/25%/median/75%/max: 0.07 0.83 0.96 1.0 1.0
-  termination: AdjacentTurn =&gt; 21% DoubledTurn =&gt; 79%
-  depth: 1 =&gt; 60% 2 =&gt; 40%</code></pre></div><p>check the mean</p><div><pre><code class="language-julia">mean(posterior_α)</code></pre><pre><code class="language-none">0.36003858098825986</code></pre></div><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><footer><hr/><a class="previous" href="../../intro/"><span class="direction">Previous</span><span class="title">Home</span></a><a class="next" href="../../04/m4.1d/"><span class="direction">Next</span><span class="title">m4.1d</span></a></footer></article></body></html>
+  Gaussian kinetic energy, √diag(M⁻¹): [0.601305]
+)</code></pre></div><p>To get the posterior for <span>$α$</span> use <code>get_position</code> and then transform back.</p><div><pre><code class="language-julia">posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));</code></pre></div><p>Extract the parameter.</p><div><pre><code class="language-julia">posterior_α = first.(posterior);</code></pre></div><p>check the effective sample size</p><div><pre><code class="language-julia">ess_α = effective_sample_size(posterior_α)</code></pre><pre><code class="language-none">415.4661770229743</code></pre></div><p>NUTS-specific statistics</p><div><pre><code class="language-julia">NUTS_statistics(chain)</code></pre><pre><code class="language-none">Hamiltonian Monte Carlo sample of length 1000
+  acceptance rate mean: 0.94, min/25%/median/75%/max: 0.28 0.91 0.97 1.0 1.0
+  termination: AdjacentTurn =&gt; 40% DoubledTurn =&gt; 60%
+  depth: 1 =&gt; 59% 2 =&gt; 41% 3 =&gt; 0%</code></pre></div><p>check the mean</p><div><pre><code class="language-julia">mean(posterior_α)</code></pre><pre><code class="language-none">0.5504909967393676</code></pre></div><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><footer><hr/><a class="previous" href="../../intro/"><span class="direction">Previous</span><span class="title">Home</span></a><a class="next" href="../../04/m4.1d/"><span class="direction">Next</span><span class="title">m4.1d</span></a></footer></article></body></html>

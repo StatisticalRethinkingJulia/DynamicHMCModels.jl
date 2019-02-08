@@ -1,6 +1,7 @@
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 DynamicHMC = "bbc10e6e-7c05-544b-b16e-64fede858acb"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 GR = "28b8d3ca-fb5f-59d9-8090-bfdbd6d07a71"

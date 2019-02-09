@@ -43,45 +43,45 @@ p(θ)</code></pre><pre><code class="language-none">-305.21943396408915</code></p
 #∇P = LogDensityRejectErrors(ADgradient(:Flux, P));
 #∇P = ADgradient(:ForwardDiff, P);
 #∇P = ADgradient(:Flux, P);</code></pre></div><p>Tune and sample.</p><div><pre><code class="language-julia">chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);</code></pre><pre><code class="language-none">MCMC, adapting ϵ (75 steps)
-0.022 s/step ...done
+0.016 s/step ...done
 MCMC, adapting ϵ (25 steps)
-0.018 s/step ...done
-MCMC, adapting ϵ (50 steps)
 0.014 s/step ...done
-MCMC, adapting ϵ (100 steps)
-0.005 s/step ...done
-MCMC, adapting ϵ (200 steps)
-0.0038 s/step ...done
-MCMC, adapting ϵ (400 steps)
-step 207 (of 400), 0.0049 s/step
-0.0042 s/step ...done
 MCMC, adapting ϵ (50 steps)
+0.01 s/step ...done
+MCMC, adapting ϵ (100 steps)
+0.007 s/step ...done
+MCMC, adapting ϵ (200 steps)
 0.0046 s/step ...done
+MCMC, adapting ϵ (400 steps)
+step 223 (of 400), 0.0045 s/step
+0.0044 s/step ...done
+MCMC, adapting ϵ (50 steps)
+0.0039 s/step ...done
 MCMC (1000 steps)
-step 278 (of 1000), 0.0036 s/step
-step 544 (of 1000), 0.0037 s/step
-step 821 (of 1000), 0.0037 s/step
-0.0036 s/step ...done</code></pre></div><p>We use the transformation to obtain the posterior from the chain.</p><div><pre><code class="language-julia">posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));
+step 254 (of 1000), 0.004 s/step
+step 496 (of 1000), 0.004 s/step
+step 761 (of 1000), 0.004 s/step
+0.0039 s/step ...done</code></pre></div><p>We use the transformation to obtain the posterior from the chain.</p><div><pre><code class="language-julia">posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));
 posterior[1:5]</code></pre><pre><code class="language-none">5-element Array{NamedTuple{(:β, :α),Tuple{Array{Float64,1},Array{Float64,1}}},1}:
- (β = [-0.12499, 0.199823], α = [-0.448652, 17.7539, -0.542425, -0.656394, 0.00760039, 0.794994, 2.35945])
- (β = [1.1066, 0.521129], α = [-1.21505, 14.31, -2.14214, -1.48149, -1.56196, -0.867179, 1.04501])
- (β = [1.27857, 0.672711], α = [-1.73716, 11.5605, -2.40399, -2.01633, -2.03658, -1.26456, 0.415603])
- (β = [2.63426, 0.763195], α = [-2.79159, 8.30317, -3.60864, -3.10253, -3.31204, -2.33827, 0.122978])
- (β = [0.910179, 0.590642], α = [-1.53103, 5.03156, -1.54432, -1.88779, -1.45482, -0.831845, 0.811544])</code></pre></div><p>Extract the parameter posterior means: <code>β</code>,</p><div><pre><code class="language-julia">posterior_β = mean(first, posterior)</code></pre><pre><code class="language-none">2-element Array{Float64,1}:
- 1.6872715941046215
- 0.41350682649007275</code></pre></div><p>Extract the parameter posterior means: <code>β</code>,</p><div><pre><code class="language-julia">posterior_α = mean(last, posterior)</code></pre><pre><code class="language-none">7-element Array{Float64,1}:
- -2.130158452820532
- 10.295986514636814
- -2.4333502054516267
- -2.4417106834167046
- -2.135359773117275
- -1.1981509791274398
-  0.35134602703499934</code></pre></div><p>Effective sample sizes (of untransformed draws)</p><div><pre><code class="language-julia">ess = mapslices(effective_sample_size, get_position_matrix(chain); dims = 1)
+ (β = [-2.80886, 0.54413], α = [2.0681, 9.87932, 1.4442, 2.1411, 2.07853, 3.16993, 4.63815])
+ (β = [0.192229, 0.338764], α = [-0.507286, 6.73593, -0.46674, -1.22362, -0.453129, 0.338928, 1.45162])
+ (β = [4.37678, 0.446352], α = [-5.24409, 9.16497, -5.38452, -4.96256, -4.4811, -4.06838, -2.81164])
+ (β = [1.38468, 0.273655], α = [-1.79827, 14.1011, -1.98428, -2.19792, -2.39678, -0.705025, 0.975469])
+ (β = [2.81328, 0.494994], α = [-3.39411, 11.038, -3.79016, -3.90636, -3.0479, -2.63076, -0.790756])</code></pre></div><p>Extract the parameter posterior means: <code>β</code>,</p><div><pre><code class="language-julia">posterior_β = mean(first, posterior)</code></pre><pre><code class="language-none">2-element Array{Float64,1}:
+ 1.627249023210444
+ 0.3970290911791346</code></pre></div><p>Extract the parameter posterior means: <code>β</code>,</p><div><pre><code class="language-julia">posterior_α = mean(last, posterior)</code></pre><pre><code class="language-none">7-element Array{Float64,1}:
+ -2.075216075729177
+ 10.282668045667272
+ -2.372104481576062
+ -2.3679613529880412
+ -2.06565276701062
+ -1.138539811673455
+  0.4081833967279042</code></pre></div><p>Effective sample sizes (of untransformed draws)</p><div><pre><code class="language-julia">ess = mapslices(effective_sample_size, get_position_matrix(chain); dims = 1)
 ess</code></pre><pre><code class="language-none">1×9 Array{Float64,2}:
- 305.059  1000.0  299.4  232.352  305.431  304.468  299.771  309.779  300.297</code></pre></div><p>NUTS-specific statistics</p><div><pre><code class="language-julia">NUTS_statistics(chain)</code></pre><pre><code class="language-none">Hamiltonian Monte Carlo sample of length 1000
-  acceptance rate mean: 0.86, min/25%/median/75%/max: 0.0 0.8 0.93 0.98 1.0
-  termination: AdjacentDivergent =&gt; 1% AdjacentTurn =&gt; 32% DoubledTurn =&gt; 67%
-  depth: 0 =&gt; 0% 1 =&gt; 0% 2 =&gt; 4% 3 =&gt; 74% 4 =&gt; 21% 5 =&gt; 1%</code></pre></div><p>Result rethinking</p><div><pre><code class="language-julia">rethinking = &quot;
+ 419.466  1000.0  410.149  226.72  …  422.497  418.235  418.482  417.634</code></pre></div><p>NUTS-specific statistics</p><div><pre><code class="language-julia">NUTS_statistics(chain)</code></pre><pre><code class="language-none">Hamiltonian Monte Carlo sample of length 1000
+  acceptance rate mean: 0.9, min/25%/median/75%/max: 0.19 0.86 0.95 0.99 1.0
+  termination: AdjacentDivergent =&gt; 0% AdjacentTurn =&gt; 37% DoubledTurn =&gt; 63%
+  depth: 2 =&gt; 1% 3 =&gt; 70% 4 =&gt; 27% 5 =&gt; 2% 6 =&gt; 0%</code></pre></div><p>Result rethinking</p><div><pre><code class="language-julia">rethinking = &quot;
 Iterations = 1:1000
 Thinning interval = 1
 Chains = 1,2,3,4
@@ -99,5 +99,5 @@ a.7  1.81090866 0.39318577 0.0062168129 0.0071483527 1000
  bp  0.83979926 0.26284676 0.0041559722 0.0059795826 1000
 bpC -0.12913322 0.29935741 0.0047332562 0.0049519863 1000
 &quot;;</code></pre></div><p>Means of draws</p><div><pre><code class="language-julia">[posterior_β, posterior_α]</code></pre><pre><code class="language-none">2-element Array{Array{Float64,1},1}:
- [1.68727, 0.413507]
- [-2.13016, 10.296, -2.43335, -2.44171, -2.13536, -1.19815, 0.351346]</code></pre></div><p>End of <code>10/m10.04d.jl</code></p><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><footer><hr/><a class="previous" href="../m10.02d/"><span class="direction">Previous</span><span class="title">m10.02d</span></a><a class="next" href="../../12/m12.6d/"><span class="direction">Next</span><span class="title">m12.6d</span></a></footer></article></body></html>
+ [1.62725, 0.397029]
+ [-2.07522, 10.2827, -2.3721, -2.36796, -2.06565, -1.13854, 0.408183]</code></pre></div><p>End of <code>10/m10.04d.jl</code></p><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><footer><hr/><a class="previous" href="../m10.02d/"><span class="direction">Previous</span><span class="title">m10.02d</span></a><a class="next" href="../../12/m12.6d/"><span class="direction">Next</span><span class="title">m12.6d</span></a></footer></article></body></html>

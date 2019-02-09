@@ -1,4 +1,4 @@
-# StatisticalRethinkingJulia/DynamicHMCModels
+# DynamicHMCModels
 
 
 | **Project Status**                                                               |  **Documentation**                                                               | **Build Status**                                                                                |
@@ -7,11 +7,13 @@
 
 ## Introduction
 
-This package contains Julia versions of selected models contained in the R package "rethinking" associated with the book [Statistical Rethinking](https://xcelab.net/rm/statistical-rethinking/) by Richard McElreath.
+This package contains Julia versions of the mcmc models contained in the R package "rethinking" associated with the book [Statistical Rethinking](https://xcelab.net/rm/statistical-rethinking/) by Richard McElreath. It is part of the [StatisticalRethinkingJulia](https://github.com/StatisticalRethinkingJulia) Github organization of packages.
 
-DynamicHMCModels contails the models from Statistical Rethinking using DynamicHMC.jl
+This package implements the models using [DynamicHMC](https://github.com/tpapp/DynamicHMC.jl).
 
 ## Acknowledgements
+
+Tamas Papp has been very helpful during the development og the DynamicHMC versions of the models.
 
 The  documentation has been generated using Literate.jl and Documenter.jl based on several ideas demonstrated by Tamas Papp in above mentioned  [DynamicHMCExamples.jl](https://tpapp.github.io/DynamicHMCExamples.jl).
 

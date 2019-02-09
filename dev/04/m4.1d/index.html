@@ -17,21 +17,21 @@ p = HeightsProblem(obs, 1.0);
 p((μ = 178, σ = 5.0,))</code></pre><pre><code class="language-none">-5170.976519811121</code></pre></div><p>Write a function to return properly dimensioned transformation.</p><div><pre><code class="language-julia">problem_transformation(p::HeightsProblem) =
     as((σ = asℝ₊, μ  = as(Real, 100, 250)), )</code></pre></div><p>Wrap the problem with a transformation, then use Flux for the gradient.</p><div><pre><code class="language-julia">P = TransformedLogDensity(problem_transformation(p), p)
 ∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));</code></pre></div><p>Tune and sample.</p><div><pre><code class="language-julia">chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);</code></pre><pre><code class="language-none">MCMC, adapting ϵ (75 steps)
-0.0022 s/step ...done
+0.0021 s/step ...done
 MCMC, adapting ϵ (25 steps)
 0.0001 s/step ...done
 MCMC, adapting ϵ (50 steps)
-0.0033 s/step ...done
+0.0043 s/step ...done
 MCMC, adapting ϵ (100 steps)
-5.3e-5 s/step ...done
+7.4e-5 s/step ...done
 MCMC, adapting ϵ (200 steps)
-5.5e-5 s/step ...done
+5.0e-5 s/step ...done
 MCMC, adapting ϵ (400 steps)
-4.5e-5 s/step ...done
+0.0004 s/step ...done
 MCMC, adapting ϵ (50 steps)
-6.2e-5 s/step ...done
+6.8e-5 s/step ...done
 MCMC (1000 steps)
-6.5e-5 s/step ...done</code></pre></div><p>We use the transformation to obtain the posterior from the chain.</p><div><pre><code class="language-julia">posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));</code></pre></div><p>Extract the parameter posterior means: <code>β</code>,</p><div><pre><code class="language-julia">posterior_μ = mean(last, posterior)</code></pre><pre><code class="language-none">154.55177979794888</code></pre></div><p>then <code>σ</code>:</p><div><pre><code class="language-julia">posterior_σ = mean(first, posterior)</code></pre><pre><code class="language-none">7.745344741417464</code></pre></div><p>Effective sample sizes (of untransformed draws)</p><div><pre><code class="language-julia">ess = mapslices(effective_sample_size,
+4.8e-5 s/step ...done</code></pre></div><p>We use the transformation to obtain the posterior from the chain.</p><div><pre><code class="language-julia">posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));</code></pre></div><p>Extract the parameter posterior means: <code>β</code>,</p><div><pre><code class="language-julia">posterior_μ = mean(last, posterior)</code></pre><pre><code class="language-none">154.5970133061486</code></pre></div><p>then <code>σ</code>:</p><div><pre><code class="language-julia">posterior_σ = mean(first, posterior)</code></pre><pre><code class="language-none">7.748273738348586</code></pre></div><p>Effective sample sizes (of untransformed draws)</p><div><pre><code class="language-julia">ess = mapslices(effective_sample_size,
                 get_position_matrix(chain); dims = 1)</code></pre></div><p>NUTS-specific statistics</p><div><pre><code class="language-julia">NUTS_statistics(chain)
 
 cmdstan_result = &quot;
@@ -50,5 +50,5 @@ Quantiles:
 sigma   7.21853   7.5560625   7.751355   7.9566775   8.410391
    mu 153.77992 154.3157500 154.602000 154.8820000 155.431000
 &quot;;</code></pre></div><p>Extract the parameter posterior means: <code>β</code>,</p><div><pre><code class="language-julia">[posterior_μ, posterior_σ]</code></pre><pre><code class="language-none">2-element Array{Float64,1}:
- 154.55177979794888
-   7.745344741417464</code></pre></div><p>end of m4.5d.jl#- <em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><footer><hr/><a class="previous" href="../../02/m2.1d/"><span class="direction">Previous</span><span class="title">m2.1d</span></a><a class="next" href="../m4.2d/"><span class="direction">Next</span><span class="title">m4.2d</span></a></footer></article></body></html>
+ 154.5970133061486
+   7.748273738348586</code></pre></div><p>end of m4.5d.jl#- <em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><footer><hr/><a class="previous" href="../../02/m2.1d/"><span class="direction">Previous</span><span class="title">m2.1d</span></a><a class="next" href="../m4.2d/"><span class="direction">Next</span><span class="title">m4.2d</span></a></footer></article></body></html>

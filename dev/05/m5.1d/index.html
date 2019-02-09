@@ -27,33 +27,33 @@ p = WaffleDivorceProblem(y, X);
 p((β = [1.0, 2.0], σ = 1.0))</code></pre><pre><code class="language-none">-2225.6614871340917</code></pre></div><p>Write a function to return properly dimensioned transformation.</p><div><pre><code class="language-julia">problem_transformation(p::WaffleDivorceProblem) =
     as((β = as(Array, size(p.X, 2)), σ = asℝ₊))</code></pre></div><p>Wrap the problem with a transformation, then use Flux for the gradient.</p><div><pre><code class="language-julia">P = TransformedLogDensity(problem_transformation(p), p)
 ∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));</code></pre></div><p>Tune and sample.</p><div><pre><code class="language-julia">chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);</code></pre><pre><code class="language-none">MCMC, adapting ϵ (75 steps)
-0.0016 s/step ...done
+0.0015 s/step ...done
 MCMC, adapting ϵ (25 steps)
-8.0e-5 s/step ...done
+6.0e-5 s/step ...done
 MCMC, adapting ϵ (50 steps)
-0.0026 s/step ...done
+0.0025 s/step ...done
 MCMC, adapting ϵ (100 steps)
-0.00016 s/step ...done
+4.0e-5 s/step ...done
 MCMC, adapting ϵ (200 steps)
-3.8e-5 s/step ...done
+8.6e-5 s/step ...done
 MCMC, adapting ϵ (400 steps)
-3.8e-5 s/step ...done
+3.3e-5 s/step ...done
 MCMC, adapting ϵ (50 steps)
-4.2e-5 s/step ...done
+6.0e-5 s/step ...done
 MCMC (1000 steps)
-5.5e-5 s/step ...done</code></pre></div><p>We use the transformation to obtain the posterior from the chain.</p><div><pre><code class="language-julia">posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));
+4.6e-5 s/step ...done</code></pre></div><p>We use the transformation to obtain the posterior from the chain.</p><div><pre><code class="language-julia">posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));
 posterior[1:5]</code></pre><pre><code class="language-none">5-element Array{NamedTuple{(:β, :σ),Tuple{Array{Float64,1},Float64}},1}:
- (β = [9.44657, -1.03986], σ = 1.2569777534358608)
- (β = [9.82441, -0.981021], σ = 1.7283977733598743)
- (β = [9.42793, -1.13209], σ = 1.3724190301273436)
- (β = [9.64796, -0.843875], σ = 1.3709906015202749)
- (β = [9.40947, -1.00227], σ = 1.7011519213703357)</code></pre></div><p>Extract the parameter posterior means: <code>β</code>,</p><div><pre><code class="language-julia">posterior_β = mean(first, posterior)</code></pre><pre><code class="language-none">2-element Array{Float64,1}:
-  9.695013202641524
- -1.0899441202999145</code></pre></div><p>then <code>σ</code>:</p><div><pre><code class="language-julia">posterior_σ = mean(last, posterior)</code></pre><pre><code class="language-none">1.490616995996013</code></pre></div><p>Effective sample sizes (of untransformed draws)</p><div><pre><code class="language-julia">ess = mapslices(effective_sample_size,
+ (β = [9.41733, -1.05573], σ = 1.4757192338815746)
+ (β = [9.91556, -1.28299], σ = 1.3997266982401215)
+ (β = [9.49279, -0.991613], σ = 1.4219447638125988)
+ (β = [9.90375, -1.14897], σ = 1.3624386665807544)
+ (β = [9.74796, -1.02352], σ = 1.4865678774125346)</code></pre></div><p>Extract the parameter posterior means: <code>β</code>,</p><div><pre><code class="language-julia">posterior_β = mean(first, posterior)</code></pre><pre><code class="language-none">2-element Array{Float64,1}:
+  9.690655029442818
+ -1.0830304220373235</code></pre></div><p>then <code>σ</code>:</p><div><pre><code class="language-julia">posterior_σ = mean(last, posterior)</code></pre><pre><code class="language-none">1.4985866688461615</code></pre></div><p>Effective sample sizes (of untransformed draws)</p><div><pre><code class="language-julia">ess = mapslices(effective_sample_size,
                 get_position_matrix(chain); dims = 1)</code></pre></div><p>NUTS-specific statistics</p><div><pre><code class="language-julia">NUTS_statistics(chain)</code></pre><pre><code class="language-none">Hamiltonian Monte Carlo sample of length 1000
-  acceptance rate mean: 0.9, min/25%/median/75%/max: 0.09 0.85 0.95 0.99 1.0
-  termination: AdjacentTurn =&gt; 36% DoubledTurn =&gt; 64%
-  depth: 1 =&gt; 6% 2 =&gt; 69% 3 =&gt; 16% 4 =&gt; 7% 5 =&gt; 2%</code></pre></div><p>cmdstan result</p><div><pre><code class="language-julia">cmdstan_result = &quot;
+  acceptance rate mean: 0.92, min/25%/median/75%/max: 0.33 0.88 0.96 0.99 1.0
+  termination: AdjacentTurn =&gt; 9% DoubledTurn =&gt; 91%
+  depth: 1 =&gt; 4% 2 =&gt; 48% 3 =&gt; 48% 4 =&gt; 0%</code></pre></div><p>cmdstan result</p><div><pre><code class="language-julia">cmdstan_result = &quot;
 Iterations = 1:1000
 Thinning interval = 1
 Chains = 1,2,3,4
@@ -71,5 +71,5 @@ Quantiles:
    bA -1.454571 -1.1821025 -1.033065 -0.89366925 -0.61711705
 sigma  1.241496  1.4079225  1.504790  1.61630750  1.86642750
 &quot;;</code></pre></div><p>Extract the parameter posterior means: <code>β</code>,</p><div><pre><code class="language-julia">[posterior_β, posterior_σ]</code></pre><pre><code class="language-none">2-element Array{Any,1}:
-  [9.69501, -1.08994]
- 1.490616995996013</code></pre></div><p>end of m4.5d.jl#- <em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><footer><hr/><a class="previous" href="../../04/m4.5d/"><span class="direction">Previous</span><span class="title">m4.5d</span></a><a class="next" href="../m5.3d/"><span class="direction">Next</span><span class="title">m5.3d</span></a></footer></article></body></html>
+  [9.69066, -1.08303]
+ 1.4985866688461615</code></pre></div><p>end of m4.5d.jl#- <em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><footer><hr/><a class="previous" href="../../04/m4.5d/"><span class="direction">Previous</span><span class="title">m4.5d</span></a><a class="next" href="../m5.3d/"><span class="direction">Next</span><span class="title">m5.3d</span></a></footer></article></body></html>

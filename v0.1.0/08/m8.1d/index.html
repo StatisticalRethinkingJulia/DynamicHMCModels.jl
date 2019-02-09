@@ -50,35 +50,35 @@ p = m_8_1_model(y, X);
 p((β = [1.0, 2.0, 1.0, 2.0], σ = 1.0))</code></pre><pre><code class="language-none">-2770.7279383721293</code></pre></div><p>Write a function to return properly dimensioned transformation.</p><div><pre><code class="language-julia">problem_transformation(p::m_8_1_model) =
     as((β = as(Array, size(p.X, 2)), σ = asℝ₊))</code></pre></div><p>Wrap the problem with a transformation, then use Flux for the gradient.</p><div><pre><code class="language-julia">P = TransformedLogDensity(problem_transformation(p), p)
 ∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));</code></pre></div><p>Tune and sample.</p><div><pre><code class="language-julia">chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);</code></pre><pre><code class="language-none">MCMC, adapting ϵ (75 steps)
-0.002 s/step ...done
+0.0019 s/step ...done
 MCMC, adapting ϵ (25 steps)
-0.00069 s/step ...done
+0.00039 s/step ...done
 MCMC, adapting ϵ (50 steps)
-0.0033 s/step ...done
+0.0028 s/step ...done
 MCMC, adapting ϵ (100 steps)
-0.00035 s/step ...done
+0.00034 s/step ...done
 MCMC, adapting ϵ (200 steps)
 0.00026 s/step ...done
 MCMC, adapting ϵ (400 steps)
-0.00024 s/step ...done
+0.00025 s/step ...done
 MCMC, adapting ϵ (50 steps)
-0.00039 s/step ...done
+0.00024 s/step ...done
 MCMC (1000 steps)
-0.00026 s/step ...done</code></pre></div><p>We use the transformation to obtain the posterior from the chain.</p><div><pre><code class="language-julia">posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));
+0.00024 s/step ...done</code></pre></div><p>We use the transformation to obtain the posterior from the chain.</p><div><pre><code class="language-julia">posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));
 posterior[1:5]</code></pre><pre><code class="language-none">5-element Array{NamedTuple{(:β, :σ),Tuple{Array{Float64,1},Float64}},1}:
- (β = [9.3459, -0.306879, -1.751, 0.463407], σ = 0.9605916147113118)
- (β = [9.35967, -0.378013, -1.725, 0.464697], σ = 0.9508474837902111)
- (β = [9.40549, -0.377842, -2.24563, 0.560331], σ = 0.98628024561102)
- (β = [9.07939, -0.187827, -1.82138, 0.483725], σ = 0.9231233206879004)
- (β = [9.19936, -0.234864, -2.08735, 0.67162], σ = 0.9573145326244009)</code></pre></div><p>Extract the parameter posterior means: <code>β</code>,</p><div><pre><code class="language-julia">posterior_β = mean(first, posterior)</code></pre><pre><code class="language-none">4-element Array{Float64,1}:
-  9.219532618727104
- -0.20065328916041536
- -1.9436492804211132
-  0.390991725287298</code></pre></div><p>then <code>σ</code>:</p><div><pre><code class="language-julia">posterior_σ = mean(last, posterior)</code></pre><pre><code class="language-none">0.9484293886030296</code></pre></div><p>Effective sample sizes (of untransformed draws)</p><div><pre><code class="language-julia">ess = mapslices(effective_sample_size,
+ (β = [9.26295, -0.263193, -1.72946, 0.420764], σ = 0.9858288115479784)
+ (β = [8.89678, -0.0190783, -1.835, 0.437444], σ = 0.9426497286232558)
+ (β = [9.44874, -0.382018, -2.12442, 0.46441], σ = 0.9981974689855733)
+ (β = [9.03594, -0.123413, -1.49962, 0.424879], σ = 0.9499744948836386)
+ (β = [8.96383, -0.0556764, -2.02808, 0.38228], σ = 0.981194879761361)</code></pre></div><p>Extract the parameter posterior means: <code>β</code>,</p><div><pre><code class="language-julia">posterior_β = mean(first, posterior)</code></pre><pre><code class="language-none">4-element Array{Float64,1}:
+  9.226381288609234
+ -0.20512234689226813
+ -1.9421708314273072
+  0.39291186187533905</code></pre></div><p>then <code>σ</code>:</p><div><pre><code class="language-julia">posterior_σ = mean(last, posterior)</code></pre><pre><code class="language-none">0.9476791302004117</code></pre></div><p>Effective sample sizes (of untransformed draws)</p><div><pre><code class="language-julia">ess = mapslices(effective_sample_size,
                 get_position_matrix(chain); dims = 1)</code></pre></div><p>NUTS-specific statistics</p><div><pre><code class="language-julia">NUTS_statistics(chain)</code></pre><pre><code class="language-none">Hamiltonian Monte Carlo sample of length 1000
-  acceptance rate mean: 0.92, min/25%/median/75%/max: 0.39 0.88 0.95 0.99 1.0
-  termination: AdjacentTurn =&gt; 10% DoubledTurn =&gt; 90%
-  depth: 1 =&gt; 0% 2 =&gt; 37% 3 =&gt; 63%</code></pre></div><p>Result rethinking</p><div><pre><code class="language-julia">rethinking = &quot;
+  acceptance rate mean: 0.91, min/25%/median/75%/max: 0.31 0.85 0.94 0.99 1.0
+  termination: AdjacentTurn =&gt; 13% DoubledTurn =&gt; 87%
+  depth: 1 =&gt; 0% 2 =&gt; 41% 3 =&gt; 59% 4 =&gt; 0%</code></pre></div><p>Result rethinking</p><div><pre><code class="language-julia">rethinking = &quot;
        mean   sd  5.5% 94.5% n_eff Rhat
 a      9.22 0.14  9.00  9.46   282    1
 bR    -0.21 0.08 -0.33 -0.08   275    1
@@ -86,5 +86,5 @@ bA    -1.94 0.24 -2.33 -1.59   268    1
 bAR    0.40 0.14  0.18  0.62   271    1
 sigma  0.96 0.05  0.87  1.04   339    1
 &quot;</code></pre><pre><code class="language-none">&quot;\n       mean   sd  5.5% 94.5% n_eff Rhat\na      9.22 0.14  9.00  9.46   282    1\nbR    -0.21 0.08 -0.33 -0.08   275    1\nbA    -1.94 0.24 -2.33 -1.59   268    1\nbAR    0.40 0.14  0.18  0.62   271    1\nsigma  0.96 0.05  0.87  1.04   339    1\n&quot;</code></pre></div><p>Summary</p><div><pre><code class="language-julia">[posterior_β, posterior_σ]</code></pre><pre><code class="language-none">2-element Array{Any,1}:
-  [9.21953, -0.200653, -1.94365, 0.390992]
- 0.9484293886030296</code></pre></div><p>End of <code>08/m8.1s.jl</code></p><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><footer><hr/><a class="previous" href="../../05/m5.6d/"><span class="direction">Previous</span><span class="title">m5.6d</span></a><a class="next" href="../../10/m10.02d/"><span class="direction">Next</span><span class="title">m10.02d</span></a></footer></article></body></html>
+  [9.22638, -0.205122, -1.94217, 0.392912]
+ 0.9476791302004117</code></pre></div><p>End of <code>08/m8.1s.jl</code></p><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><footer><hr/><a class="previous" href="../../05/m5.6d/"><span class="direction">Previous</span><span class="title">m5.6d</span></a><a class="next" href="../../10/m10.02d/"><span class="direction">Next</span><span class="title">m10.02d</span></a></footer></article></body></html>

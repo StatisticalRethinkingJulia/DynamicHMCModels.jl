@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>m12.6d1 · DynamicHMCModels.jl</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link href="../../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>DynamicHMCModels.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../../intro/">Home</a></li><li><span class="toctext">Chapter 02</span><ul><li><a class="toctext" href="../../02/m2.1d/">m2.1d</a></li></ul></li><li><span class="toctext">Chapter 04</span><ul><li><a class="toctext" href="../../04/m4.1d/">m4.1d</a></li><li><a class="toctext" href="../../04/m4.2d/">m4.2d</a></li><li><a class="toctext" href="../../04/m4.5d/">m4.5d</a></li></ul></li><li><span class="toctext">Chapter 05</span><ul><li><a class="toctext" href="../../05/m5.1d/">m5.1d</a></li><li><a class="toctext" href="../../05/m5.3d/">m5.3d</a></li><li><a class="toctext" href="../../05/m5.6d/">m5.6d</a></li></ul></li><li><span class="toctext">Chapter 08</span><ul><li><a class="toctext" href="../../08/m8.1d/">m8.1d</a></li></ul></li><li><span class="toctext">Chapter 10</span><ul><li><a class="toctext" href="../../10/m10.02d/">m10.02d</a></li><li><a class="toctext" href="../../10/m10.02d1/">m10.02d1</a></li><li><a class="toctext" href="../../10/m10.04d/">m10.04d</a></li></ul></li><li><span class="toctext">Chapter 12</span><ul><li><a class="toctext" href="../m12.6d/">m12.6d</a></li><li class="current"><a class="toctext" href>m12.6d1</a><ul class="internal"></ul></li></ul></li><li><a class="toctext" href="../../">Functions</a></li></ul></nav><article id="docs"><header><nav><ul><li>Chapter 12</li><li><a href>m12.6d1</a></li></ul><a class="edit-page" href="https://github.com/StatisticalRethinkingJulia/DynamicHMCModels.jl/blob/master/scripts/12/m12.6d1.jl"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>m12.6d1</span><a class="fa fa-bars" href="#"></a></div></header><div><pre><code class="language-julia">using DynamicHMCModels
+
+ProjDir = rel_path_d(&quot;..&quot;, &quot;scripts&quot;, &quot;12&quot;)
+
+df = CSV.read(rel_path( &quot;..&quot;, &quot;data&quot;,  &quot;Kline.csv&quot;), delim=&#39;;&#39;);
+size(df) # Should be 10x5</code></pre><pre><code class="language-none">(10, 5)</code></pre></div><p>New col logpop, set log() for population data</p><div><pre><code class="language-julia">df[:society] = 1:10;
+df[:logpop] = map((x) -&gt; log(x), df[:population]);
+df[:total_tools] = convert(Vector{Int64}, df[:total_tools])
+first(df[[:total_tools, :logpop, :society]], 5)</code></pre><table class="data-frame"><thead><tr><th></th><th>total_tools</th><th>logpop</th><th>society</th></tr><tr><th></th><th>Int64</th><th>Float64</th><th>Int64</th></tr></thead><tbody><p>5 rows × 3 columns</p><tr><th>1</th><td>13</td><td>7.00307</td><td>1</td></tr><tr><th>2</th><td>22</td><td>7.31322</td><td>2</td></tr><tr><th>3</th><td>24</td><td>8.18869</td><td>3</td></tr><tr><th>4</th><td>43</td><td>8.47449</td><td>4</td></tr><tr><th>5</th><td>33</td><td>8.90924</td><td>5</td></tr></tbody></table></div><p>Define problem data structure</p><div><pre><code class="language-julia">struct m_12_06d{TY &lt;: AbstractVector, TX &lt;: AbstractMatrix,
+  TS &lt;: AbstractVector}
+    &quot;Observations (total_tools).&quot;
+    y::TY
+    &quot;Covariates (logpop)&quot;
+    X::TX
+    &quot;Society&quot;
+    S::TS
+    &quot;Number of observations (10)&quot;
+    N::Int
+    &quot;Number of societies (also 10)&quot;
+    N_societies::Int
+end;</code></pre></div><p>Make the type callable with the parameters <em>as a single argument</em>.</p><div><pre><code class="language-julia">function (problem::m_12_06d)(θ)
+    @unpack y, X, S, N, N_societies = problem   # extract the data
+    @unpack β, α, s = trans(θ)  # β : a, bp, α : a_society, s
+    σ = s[1]^2
+    ll = 0.0
+    ll += logpdf(Cauchy(0, 1), σ) # sigma
+    ll += sum(logpdf.(Normal(0, σ), α)) # α[1:10]
+    ll += logpdf.(Normal(0, 10), β[1]) # a
+    ll += logpdf.(Normal(0, 1), β[2]) # bp
+    ll += sum(
+      [loglikelihood(Poisson(exp(α[S[i]] + dot(X[i, :], β))), [y[i]]) for i in 1:N]
+    )
+end</code></pre></div><p>Instantiate the model with data and inits.</p><div><pre><code class="language-julia">N = size(df, 1)
+N_societies = length(unique(df[:society]))
+X = hcat(ones(Int64, N), df[:logpop]);
+S = df[:society];
+y = df[:total_tools];
+γ = (β = [1.0, 0.25], α = rand(Normal(0, 1), N_societies), s = [0.2]);
+p = m_12_06d(y, X, S, N, N_societies);</code></pre></div><p>Function convert from a single vector of parms to parks NamedTuple</p><div><pre><code class="language-julia">trans = as((β = as(Array, 2), α = as(Array, 10), s = as(Array, 1)));</code></pre></div><p>Define input parameter vector</p><div><pre><code class="language-julia">θ = inverse(trans, γ);
+p(θ)</code></pre><pre><code class="language-none">-3688.3119664145943</code></pre></div><p>Maximum<em>a</em>posterior</p><div><pre><code class="language-julia">using Optim
+
+x0 = θ;
+lower = vcat([0.0, 0.0], -3ones(10), [0.0]);
+upper = vcat([2.0, 1.0], 3ones(10), [5.0]);
+ll(x) = -p(x);
+
+inner_optimizer = GradientDescent()
+
+res = optimize(ll, lower, upper, x0, Fminbox(inner_optimizer));
+res |&gt; display
+println()</code></pre></div><p>Minimum gives MAP estimate:</p><div><pre><code class="language-julia">Optim.minimizer(res) |&gt; display
+println()</code></pre></div><p>Write a function to return properly dimensioned transformation.</p><div><pre><code class="language-julia">problem_transformation(p::m_12_06d) =
+  as( Vector, length(θ) )</code></pre></div><p>Wrap the problem with a transformation, then use ForwardDiff for the gradient.</p><div><pre><code class="language-julia">P = TransformedLogDensity(problem_transformation(p), p)
+∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
+#∇P = ADgradient(:ForwardDiff, P);</code></pre></div><p>Tune and sample.</p><div><pre><code class="language-julia">chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);</code></pre><pre><code class="language-none">MCMC, adapting ϵ (75 steps)
+0.0049 s/step ...done
+MCMC, adapting ϵ (25 steps)
+0.0043 s/step ...done
+MCMC, adapting ϵ (50 steps)
+0.0069 s/step ...done
+MCMC, adapting ϵ (100 steps)
+0.0019 s/step ...done
+MCMC, adapting ϵ (200 steps)
+0.0015 s/step ...done
+MCMC, adapting ϵ (400 steps)
+0.00073 s/step ...done
+MCMC, adapting ϵ (50 steps)
+0.00074 s/step ...done
+MCMC (1000 steps)
+0.00062 s/step ...done</code></pre></div><p>We use the transformation to obtain the posterior from the chain.</p><div><pre><code class="language-julia">posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));
+posterior[1:5]</code></pre><pre><code class="language-none">5-element Array{Array{Float64,1},1}:
+ [1.72462, 0.200388, -0.220256, -0.249304, -0.11511, 0.052766, -0.183947, -0.389226, 0.0697687, -0.122213, 0.280374, 0.0244456, -0.502712]
+ [0.678292, 0.291673, -0.298175, 0.281885, -0.0414096, 0.648525, 0.319904, -0.317301, 0.278567, -0.306956, 0.259257, -0.171465, -0.584904]
+ [0.680682, 0.321007, -0.0184933, -0.203237, -0.0958957, 0.139857, 0.0728431, -0.098792, -0.0525257, -0.317259, 0.136676, -0.316959, -0.371784]
+ [1.10227, 0.256526, -0.401603, 0.271969, -0.0783014, 0.361404, -0.076984, -0.224443, 0.293348, -0.111252, 0.321676, 0.127371, -0.578214]
+ [0.282228, 0.360823, -0.091422, 0.30524, -0.00640164, 0.247526, -0.0422857, -0.358175, 0.344928, -0.228651, 0.322712, -0.553854, -0.489294]</code></pre></div><p>Extract the parameter posterior means.</p><div><pre><code class="language-julia">posterior_β = mean(trans(posterior[i]).β for i in 1:length(posterior))
+posterior_α = mean(trans(posterior[i]).α for i in 1:length(posterior))
+posterior_σ = mean(trans(posterior[i]).s for i in 1:length(posterior))[1]^2</code></pre><pre><code class="language-none">0.26685801595077907</code></pre></div><p>Effective sample sizes (of untransformed draws)</p><div><pre><code class="language-julia">ess = mapslices(effective_sample_size, get_position_matrix(chain); dims = 1)
+ess</code></pre><pre><code class="language-none">1×13 Array{Float64,2}:
+ 608.868  601.207  840.862  918.7  …  621.551  774.26  539.193  366.459</code></pre></div><p>NUTS-specific statistics</p><div><pre><code class="language-julia">NUTS_statistics(chain)</code></pre><pre><code class="language-none">Hamiltonian Monte Carlo sample of length 1000
+  acceptance rate mean: 0.92, min/25%/median/75%/max: 0.11 0.9 0.96 0.99 1.0
+  termination: AdjacentTurn =&gt; 6% DoubledTurn =&gt; 94%
+  depth: 2 =&gt; 0% 3 =&gt; 9% 4 =&gt; 91% 5 =&gt; 0%</code></pre></div><p>CmdStan result</p><div><pre><code class="language-julia">m_12_6_result = &quot;
+Iterations = 1:1000
+Thinning interval = 1
+Chains = 1,2,3,4
+Samples per chain = 1000
+
+Empirical Posterior Estimates:
+                            Mean                SD               Naive SE             MCSE            ESS
+            a          1.076167468  0.7704872560 0.01218247319 0.0210530022 1000.000000
+           bp         0.263056273  0.0823415805 0.00130193470 0.0022645077 1000.000000
+  a_society.1   -0.191723568  0.2421382537 0.00382854195 0.0060563054 1000.000000
+  a_society.2    0.054569029  0.2278506876 0.00360263570 0.0051693148 1000.000000
+  a_society.3   -0.035935050  0.1926364647 0.00304584994 0.0039948433 1000.000000
+  a_society.4    0.334355037  0.1929971201 0.00305155241 0.0063871707  913.029080
+  a_society.5    0.049747513  0.1801287716 0.00284808595 0.0043631095 1000.000000
+  a_society.6   -0.311903245  0.2096126337 0.00331426674 0.0053000536 1000.000000
+  a_society.7    0.148637507  0.1744680594 0.00275858223 0.0047660246 1000.000000
+  a_society.8   -0.164567976  0.1821341074 0.00287979309 0.0034297298 1000.000000
+  a_society.9    0.277066965  0.1758237250 0.00278001719 0.0055844175  991.286501
+ a_society.10   -0.094149204  0.2846206232 0.00450024719 0.0080735022 1000.000000
+sigma_society    0.310352849  0.1374834682 0.00217380450 0.0057325226  575.187461
+&quot;;</code></pre></div><p>Show means</p><div><pre><code class="language-julia">[posterior_β, posterior_α, posterior_σ]</code></pre><pre><code class="language-none">3-element Array{Any,1}:
+  [1.07907, 0.263567]
+  [-0.18334, 0.0468168, -0.0387156, 0.309697, 0.0339989, -0.298356, 0.14242, -0.165015, 0.257248, -0.102744]
+ 0.26685801595077907</code></pre></div><p>End of m12.6d1.jl</p><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><footer><hr/><a class="previous" href="../m12.6d/"><span class="direction">Previous</span><span class="title">m12.6d</span></a><a class="next" href="../../"><span class="direction">Next</span><span class="title">Functions</span></a></footer></article></body></html>

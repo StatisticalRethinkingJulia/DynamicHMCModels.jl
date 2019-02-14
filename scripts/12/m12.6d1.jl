@@ -6,12 +6,15 @@ df = CSV.read(rel_path( "..", "data",  "Kline.csv"), delim=';');
 size(df) # Should be 10x5
 
 # New col logpop, set log() for population data
-df[:logpop] = map((x) -> log(x), df[:population]);
-df[:society] = 1:10;
 
+df[:society] = 1:10;
+df[:logpop] = map((x) -> log(x), df[:population]);
+df[:total_tools] = convert(Vector{Int64}, df[:total_tools])
 first(df[[:total_tools, :logpop, :society]], 5)
 
-struct m_12_06d_model{TY <: AbstractVector, TX <: AbstractMatrix,
+# Define problem data structure
+
+struct m_12_06d{TY <: AbstractVector, TX <: AbstractMatrix,
   TS <: AbstractVector}
     "Observations (total_tools)."
     y::TY
@@ -23,22 +26,22 @@ struct m_12_06d_model{TY <: AbstractVector, TX <: AbstractMatrix,
     N::Int
     "Number of societies (also 10)"
     N_societies::Int
-end
+end;
 
 # Make the type callable with the parameters *as a single argument*.
 
-function (problem::m_12_06d_model)(θ)
+function (problem::m_12_06d)(θ)
     @unpack y, X, S, N, N_societies = problem   # extract the data
-    @unpack β, α, σ = θ  # β : a, bp, α : a_society
+    @unpack β, α, s = trans(θ)  # β : a, bp, α : a_society, s
+    σ = s[1]^2
     ll = 0.0
-    ll += logpdf(Cauchy(0, 1), σ)
+    ll += logpdf(Cauchy(0, 1), σ) # sigma
     ll += sum(logpdf.(Normal(0, σ), α)) # α[1:10]
-    ll += sum(logpdf.(Normal(0, 10), β[1])) # a
-    ll += sum(logpdf.(Normal(0, 1), β[2])) # a
+    ll += logpdf.(Normal(0, 10), β[1]) # a
+    ll += logpdf.(Normal(0, 1), β[2]) # bp
     ll += sum(
       [loglikelihood(Poisson(exp(α[S[i]] + dot(X[i, :], β))), [y[i]]) for i in 1:N]
     )
-    ll
 end
 
 # Instantiate the model with data and inits.
@@ -46,18 +49,46 @@ end
 N = size(df, 1)
 N_societies = length(unique(df[:society]))
 X = hcat(ones(Int64, N), df[:logpop]);
-S = df[:society]
-y = df[:total_tools]
-p = m_12_06d_model(y, X, S, N, N_societies);
-θ = (β = [1.0, 0.25], α = rand(Normal(0, 1), N_societies), σ = 0.2)
+S = df[:society];
+y = df[:total_tools];
+γ = (β = [1.0, 0.25], α = rand(Normal(0, 1), N_societies), s = [0.2]);
+p = m_12_06d(y, X, S, N, N_societies);
+
+# Function convert from a single vector of parms to parks NamedTuple
+
+trans = as((β = as(Array, 2), α = as(Array, 10), s = as(Array, 1)));
+
+# Define input parameter vector
+
+θ = inverse(trans, γ);
 p(θ)
+
+# Maximum_a_posterior
+
+using Optim
+
+x0 = θ;
+lower = vcat([0.0, 0.0], -3ones(10), [0.0]);
+upper = vcat([2.0, 1.0], 3ones(10), [5.0]);
+ll(x) = -p(x);
+
+inner_optimizer = GradientDescent()
+
+res = optimize(ll, lower, upper, x0, Fminbox(inner_optimizer));
+res |> display
+println()
+
+# Minimum gives MAP estimate:
+
+Optim.minimizer(res) |> display
+println()
 
 # Write a function to return properly dimensioned transformation.
 
-problem_transformation(p::m_12_06d_model) =
-    as( (β = as(Array, size(p.X, 2)), α = as(Array, p.N_societies), σ = asℝ₊) )
+problem_transformation(p::m_12_06d) =
+  as( Vector, length(θ) )
 
-# Wrap the problem with a transformation, then use Flux for the gradient.
+# Wrap the problem with a transformation, then use ForwardDiff for the gradient.
 
 P = TransformedLogDensity(problem_transformation(p), p)
 ∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
@@ -74,9 +105,9 @@ posterior[1:5]
 
 # Extract the parameter posterior means.
 
-posterior_β = mean(posterior[i].β for i in 1:length(posterior))
-posterior_α = mean(posterior[i].α for i in 1:length(posterior))
-posterior_σ = mean(posterior[i].σ for i in 1:length(posterior))
+posterior_β = mean(trans(posterior[i]).β for i in 1:length(posterior))
+posterior_α = mean(trans(posterior[i]).α for i in 1:length(posterior))
+posterior_σ = mean(trans(posterior[i]).s for i in 1:length(posterior))[1]^2
 
 # Effective sample sizes (of untransformed draws)
 
@@ -111,10 +142,10 @@ Empirical Posterior Estimates:
  a_society.10   -0.094149204  0.2846206232 0.00450024719 0.0080735022 1000.000000
 sigma_society    0.310352849  0.1374834682 0.00217380450 0.0057325226  575.187461
 ";
-        
+
 # Show means
 
 [posterior_β, posterior_α, posterior_σ]
 
-# End of m12.6d.jl
+# End of m12.6d1.jl
 

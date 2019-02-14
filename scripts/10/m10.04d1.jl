@@ -15,7 +15,7 @@ df[:pulled_left] = convert(Array{Int64}, df[:pulled_left])
 df[:prosoc_left] = convert(Array{Int64}, df[:prosoc_left])
 df[:condition] = convert(Array{Int64}, df[:condition])
 df[:actor] = convert(Array{Int64}, df[:actor])
-first(df, 5)
+first(df[[:actor, :pulled_left, :prosoc_left, :condition]], 5)
 
 struct m_10_04d_model{TY <: AbstractVector, TX <: AbstractMatrix,
   TA <: AbstractVector}
@@ -64,9 +64,9 @@ problem_transformation(p::m_10_04d_model) =
 # Wrap the problem with a transformation, then use Flux for the gradient.
 
 P = TransformedLogDensity(problem_transformation(p), p)
-#∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
-∇P = ADgradient(:ForwardDiff, P);
-LogDensityProblems.stresstest(P, N=10000, scale=1.0) |> display
+∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
+#∇P = ADgradient(:ForwardDiff, P);
+#LogDensityProblems.stresstest(p, N=1000, scale=1.0)
 
 # Tune and sample.
 
@@ -119,4 +119,4 @@ bpC -0.12913322 0.29935741 0.0047332562 0.0049519863 1000
 
 [posterior_β, posterior_α]
 
-# End of `10/m10.04d.jl`
+# End of `m10.04d1.jl`

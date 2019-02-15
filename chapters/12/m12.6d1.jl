@@ -5,14 +5,10 @@ ProjDir = rel_path_d("..", "scripts", "12")
 df = CSV.read(rel_path( "..", "data",  "Kline.csv"), delim=';');
 size(df) # Should be 10x5
 
-# New col logpop, set log() for population data
-
 df[:society] = 1:10;
 df[:logpop] = map((x) -> log(x), df[:population]);
 df[:total_tools] = convert(Vector{Int64}, df[:total_tools])
 first(df[[:total_tools, :logpop, :society]], 5)
-
-# Define problem data structure
 
 struct m_12_06d{TY <: AbstractVector, TX <: AbstractMatrix,
   TS <: AbstractVector}
@@ -28,8 +24,6 @@ struct m_12_06d{TY <: AbstractVector, TX <: AbstractMatrix,
     N_societies::Int
 end;
 
-# Make the type callable with the parameters *as a single argument*.
-
 function (problem::m_12_06d)(θ)
     @unpack y, X, S, N, N_societies = problem   # extract the data
     @unpack β, α, s = trans(θ)  # β : a, bp, α : a_society, s
@@ -44,8 +38,6 @@ function (problem::m_12_06d)(θ)
     )
 end
 
-# Instantiate the model with data and inits.
-
 N = size(df, 1)
 N_societies = length(unique(df[:society]))
 X = hcat(ones(Int64, N), df[:logpop]);
@@ -54,16 +46,10 @@ y = df[:total_tools];
 γ = (β = [1.0, 0.25], α = rand(Normal(0, 1), N_societies), s = [0.2]);
 p = m_12_06d(y, X, S, N, N_societies);
 
-# Function convert from a single vector of parms to parks NamedTuple
-
 trans = as((β = as(Array, 2), α = as(Array, 10), s = as(Array, 1)));
-
-# Define input parameter vector
 
 θ = inverse(trans, γ);
 p(θ)
-
-# Maximum_a_posterior
 
 using Optim
 
@@ -77,46 +63,28 @@ inner_optimizer = GradientDescent()
 res = optimize(ll, lower, upper, x0, Fminbox(inner_optimizer));
 res
 
-# Minimum gives MAP estimate:
-
 Optim.minimizer(res)
-
-# Write a function to return properly dimensioned transformation.
 
 problem_transformation(p::m_12_06d) =
   as( Vector, length(θ) )
-
-# Wrap the problem with a transformation, then use ForwardDiff for the gradient.
 
 P = TransformedLogDensity(problem_transformation(p), p)
 ∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
 #∇P = ADgradient(:ForwardDiff, P);
 
-# Tune and sample.
-
 chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
-
-# We use the transformation to obtain the posterior from the chain.
 
 posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));
 posterior[1:5]
-
-# Extract the parameter posterior means.
 
 posterior_β = mean(trans(posterior[i]).β for i in 1:length(posterior))
 posterior_α = mean(trans(posterior[i]).α for i in 1:length(posterior))
 posterior_σ = mean(trans(posterior[i]).s for i in 1:length(posterior))[1]^2
 
-# Effective sample sizes (of untransformed draws)
-
 ess = mapslices(effective_sample_size, get_position_matrix(chain); dims = 1)
 ess
 
-# NUTS-specific statistics
-
 NUTS_statistics(chain)
-
-# CmdStan result
 
 m_12_6_result = "
 Iterations = 1:1000
@@ -125,7 +93,7 @@ Chains = 1,2,3,4
 Samples per chain = 1000
 
 Empirical Posterior Estimates:
-                            Mean                SD               Naive SE             MCSE            ESS    
+                            Mean                SD               Naive SE             MCSE            ESS
             a          1.076167468  0.7704872560 0.01218247319 0.0210530022 1000.000000
            bp         0.263056273  0.0823415805 0.00130193470 0.0022645077 1000.000000
   a_society.1   -0.191723568  0.2421382537 0.00382854195 0.0060563054 1000.000000
@@ -141,9 +109,7 @@ Empirical Posterior Estimates:
 sigma_society    0.310352849  0.1374834682 0.00217380450 0.0057325226  575.187461
 ";
 
-# Show means
-
 [posterior_β, posterior_α, posterior_σ]
 
-# End of m12.6d1.jl
+# This file was generated using Literate.jl, https://github.com/fredrikekre/Literate.jl
 

@@ -51,9 +51,6 @@ problem_transformation(p::m_10_04d_model) =
 
 P = TransformedLogDensity(problem_transformation(p), p)
 ∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
-#∇P = LogDensityRejectErrors(ADgradient(:Flux, P));
-#∇P = ADgradient(:ForwardDiff, P);
-#∇P = ADgradient(:Flux, P);
 
 chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
 

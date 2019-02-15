@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>m10.02d1 · DynamicHMCModels.jl</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link href="../../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>DynamicHMCModels.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../../intro/">Home</a></li><li><span class="toctext">Chapter 02</span><ul><li><a class="toctext" href="../../02/m2.1d/">m2.1d</a></li></ul></li><li><span class="toctext">Chapter 04</span><ul><li><a class="toctext" href="../../04/m4.1d/">m4.1d</a></li><li><a class="toctext" href="../../04/m4.2d/">m4.2d</a></li><li><a class="toctext" href="../../04/m4.5d/">m4.5d</a></li></ul></li><li><span class="toctext">Chapter 05</span><ul><li><a class="toctext" href="../../05/m5.1d/">m5.1d</a></li><li><a class="toctext" href="../../05/m5.3d/">m5.3d</a></li><li><a class="toctext" href="../../05/m5.6d/">m5.6d</a></li></ul></li><li><span class="toctext">Chapter 08</span><ul><li><a class="toctext" href="../../08/m8.1d/">m8.1d</a></li></ul></li><li><span class="toctext">Chapter 10</span><ul><li><a class="toctext" href="../m10.02d/">m10.02d</a></li><li class="current"><a class="toctext" href>m10.02d1</a><ul class="internal"></ul></li><li><a class="toctext" href="../m10.04d/">m10.04d</a></li></ul></li><li><span class="toctext">Chapter 12</span><ul><li><a class="toctext" href="../../12/m12.6d/">m12.6d</a></li><li><a class="toctext" href="../../12/m12.6d1/">m12.6d1</a></li></ul></li><li><a class="toctext" href="../../">Functions</a></li></ul></nav><article id="docs"><header><nav><ul><li>Chapter 10</li><li><a href>m10.02d1</a></li></ul><a class="edit-page" href="https://github.com/StatisticalRethinkingJulia/DynamicHMCModels.jl/blob/master/scripts/10/m10.02d1.jl"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>m10.02d1</span><a class="fa fa-bars" href="#"></a></div></header><p>Load Julia packages (libraries) needed  for the snippets in chapter 0</p><div><pre><code class="language-julia">using DynamicHMCModels, Optim</code></pre></div><h3><a class="nav-anchor" id="snippet-10.4-1" href="#snippet-10.4-1">snippet 10.4</a></h3><div><pre><code class="language-julia">d = CSV.read(rel_path(&quot;..&quot;, &quot;data&quot;, &quot;chimpanzees.csv&quot;), delim=&#39;;&#39;);
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>m10.02d1 · DynamicHMCModels.jl</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link href="../../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>DynamicHMCModels.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../../intro/">Home</a></li><li><span class="toctext">Chapter 02</span><ul><li><a class="toctext" href="../../02/m2.1d/">m2.1d</a></li></ul></li><li><span class="toctext">Chapter 04</span><ul><li><a class="toctext" href="../../04/m4.1d/">m4.1d</a></li><li><a class="toctext" href="../../04/m4.2d/">m4.2d</a></li><li><a class="toctext" href="../../04/m4.5d/">m4.5d</a></li></ul></li><li><span class="toctext">Chapter 05</span><ul><li><a class="toctext" href="../../05/m5.1d/">m5.1d</a></li><li><a class="toctext" href="../../05/m5.1d1/">m5.1d1</a></li><li><a class="toctext" href="../../05/m5.3d/">m5.3d</a></li><li><a class="toctext" href="../../05/m5.6d/">m5.6d</a></li></ul></li><li><span class="toctext">Chapter 08</span><ul><li><a class="toctext" href="../../08/m8.1d/">m8.1d</a></li></ul></li><li><span class="toctext">Chapter 10</span><ul><li><a class="toctext" href="../m10.02d/">m10.02d</a></li><li class="current"><a class="toctext" href>m10.02d1</a><ul class="internal"></ul></li><li><a class="toctext" href="../m10.04d/">m10.04d</a></li></ul></li><li><span class="toctext">Chapter 12</span><ul><li><a class="toctext" href="../../12/m12.6d/">m12.6d</a></li><li><a class="toctext" href="../../12/m12.6d1/">m12.6d1</a></li></ul></li><li><a class="toctext" href="../../">Functions</a></li></ul></nav><article id="docs"><header><nav><ul><li>Chapter 10</li><li><a href>m10.02d1</a></li></ul><a class="edit-page" href="https://github.com/StatisticalRethinkingJulia/DynamicHMCModels.jl/blob/master/scripts/10/m10.02d1.jl"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>m10.02d1</span><a class="fa fa-bars" href="#"></a></div></header><p>Load Julia packages (libraries) needed  for the snippets in chapter 0</p><div><pre><code class="language-julia">using DynamicHMCModels, Optim</code></pre></div><h3><a class="nav-anchor" id="snippet-10.4-1" href="#snippet-10.4-1">snippet 10.4</a></h3><div><pre><code class="language-julia">d = CSV.read(rel_path(&quot;..&quot;, &quot;data&quot;, &quot;chimpanzees.csv&quot;), delim=&#39;;&#39;);
 df = convert(DataFrame, d);
 df[:pulled_left] = convert(Array{Int64}, df[:pulled_left])
 df[:prosoc_left] = convert(Array{Int64}, df[:prosoc_left])
@@ -33,37 +33,51 @@ ll(x) = -p(x)
 
 inner_optimizer = GradientDescent()
 
-res = optimize(ll, lower, upper, x0, Fminbox(inner_optimizer))
-res |&gt; display
-println()</code></pre></div><p>Write a function to return properly dimensioned transformation.</p><div><pre><code class="language-julia">problem_transformation(p::m_10_02d) =</code></pre></div><p>as( (β = as(Array, size(p.X, 2)), ) )</p><div><pre><code class="language-julia">      as( Vector, size(p.X, 2))</code></pre></div><p>Wrap the problem with a transformation, then use Flux for the gradient.</p><div><pre><code class="language-julia">P = TransformedLogDensity(problem_transformation(p), p)
+optimize(ll, lower, upper, x0, Fminbox(inner_optimizer))</code></pre><pre><code class="language-none">Results of Optimization Algorithm
+ * Algorithm: Fminbox with Gradient Descent
+ * Starting Point: [0.5,1.0]
+ * Minimizer: [0.047708983716678,0.5573080392418944]
+ * Minimum: 3.446925e+02
+ * Iterations: 4
+ * Convergence: true
+   * |x - x&#39;| ≤ 0.0e+00: false
+     |x - x&#39;| = 5.99e-09
+   * |f(x) - f(x&#39;)| ≤ 0.0e+00 |f(x)|: true
+     |f(x) - f(x&#39;)| = 0.00e+00 |f(x)|
+   * |g(x)| ≤ 1.0e-08: true
+     |g(x)| = 4.69e-09
+   * Stopped by an increasing objective: true
+   * Reached Maximum Number of Iterations: false
+ * Objective Calls: 548
+ * Gradient Calls: 548</code></pre></div><p>Write a function to return properly dimensioned transformation.</p><div><pre><code class="language-julia">problem_transformation(p::m_10_02d) =</code></pre></div><p>as( (β = as(Array, size(p.X, 2)), ) )</p><div><pre><code class="language-julia">      as( Vector, size(p.X, 2))</code></pre></div><p>Wrap the problem with a transformation, then use Flux for the gradient.</p><div><pre><code class="language-julia">P = TransformedLogDensity(problem_transformation(p), p)
 ∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));</code></pre></div><p>Tune and sample.</p><div><pre><code class="language-julia">chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);</code></pre><pre><code class="language-none">MCMC, adapting ϵ (75 steps)
-0.0029 s/step ...done
+0.0033 s/step ...done
 MCMC, adapting ϵ (25 steps)
-0.0014 s/step ...done
+0.0013 s/step ...done
 MCMC, adapting ϵ (50 steps)
-0.0045 s/step ...done
+0.0046 s/step ...done
 MCMC, adapting ϵ (100 steps)
-0.00077 s/step ...done
+0.00078 s/step ...done
 MCMC, adapting ϵ (200 steps)
-0.0007 s/step ...done
+0.00084 s/step ...done
 MCMC, adapting ϵ (400 steps)
-0.00069 s/step ...done
+0.00074 s/step ...done
 MCMC, adapting ϵ (50 steps)
-0.0008 s/step ...done
+0.015 s/step ...done
 MCMC (1000 steps)
-0.00058 s/step ...done</code></pre></div><p>We use the transformation to obtain the posterior from the chain.</p><div><pre><code class="language-julia">posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));
+0.0009 s/step ...done</code></pre></div><p>We use the transformation to obtain the posterior from the chain.</p><div><pre><code class="language-julia">posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));
 posterior[1:5]</code></pre><pre><code class="language-none">5-element Array{Array{Float64,1},1}:
- [-0.138472, 0.677632]
- [0.0354242, 0.540718]
- [-0.0448774, 0.809727]
- [0.234213, 0.34656]
- [0.109755, 0.425158]</code></pre></div><p>Extract the parameter posterior means: <code>β</code>,</p><div><pre><code class="language-julia">posterior_a = mean(first, posterior)
-posterior_bp = mean(last, posterior)</code></pre><pre><code class="language-none">0.5619195336511841</code></pre></div><p>Effective sample sizes (of untransformed draws)</p><div><pre><code class="language-julia">ess = mapslices(effective_sample_size, get_position_matrix(chain); dims = 1)
+ [0.124445, 0.337177]
+ [-0.0580975, 0.62022]
+ [-0.0807821, 0.81203]
+ [0.152766, 0.310022]
+ [0.125684, 0.35503]</code></pre></div><p>Extract the parameter posterior means: <code>β</code>,</p><div><pre><code class="language-julia">posterior_a = mean(first, posterior)
+posterior_bp = mean(last, posterior)</code></pre><pre><code class="language-none">0.5664336431302726</code></pre></div><p>Effective sample sizes (of untransformed draws)</p><div><pre><code class="language-julia">ess = mapslices(effective_sample_size, get_position_matrix(chain); dims = 1)
 ess</code></pre><pre><code class="language-none">1×2 Array{Float64,2}:
- 1000.0  1000.0</code></pre></div><p>NUTS-specific statistics</p><div><pre><code class="language-julia">NUTS_statistics(chain)</code></pre><pre><code class="language-none">Hamiltonian Monte Carlo sample of length 1000
-  acceptance rate mean: 0.9, min/25%/median/75%/max: 0.13 0.85 0.95 1.0 1.0
-  termination: AdjacentTurn =&gt; 14% DoubledTurn =&gt; 86%
-  depth: 1 =&gt; 25% 2 =&gt; 75%</code></pre></div><p>CmdStan result</p><div><pre><code class="language-julia">m_10_2s_result = &quot;
+ 998.166  951.758</code></pre></div><p>NUTS-specific statistics</p><div><pre><code class="language-julia">NUTS_statistics(chain)</code></pre><pre><code class="language-none">Hamiltonian Monte Carlo sample of length 1000
+  acceptance rate mean: 0.92, min/25%/median/75%/max: 0.46 0.87 0.95 0.99 1.0
+  termination: AdjacentTurn =&gt; 34% DoubledTurn =&gt; 66%
+  depth: 1 =&gt; 17% 2 =&gt; 71% 3 =&gt; 9% 4 =&gt; 3%</code></pre></div><p>CmdStan result</p><div><pre><code class="language-julia">m_10_2s_result = &quot;
 Iterations = 1:1000
 Thinning interval = 1
 Chains = 1,2,3,4
@@ -79,5 +93,5 @@ Quantiles:
  a -0.19755400 -0.029431425 0.05024655 0.12978825 0.30087758
 bp  0.20803447  0.433720250 0.55340400 0.67960975 0.91466915
 &quot;;</code></pre></div><p>Extract the parameter posterior means: <code>β</code>,</p><div><pre><code class="language-julia">[posterior_a, posterior_bp]</code></pre><pre><code class="language-none">2-element Array{Float64,1}:
- 0.04629513241719834
- 0.5619195336511841</code></pre></div><p>End of <code>10/m10.02d.jl</code></p><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><footer><hr/><a class="previous" href="../m10.02d/"><span class="direction">Previous</span><span class="title">m10.02d</span></a><a class="next" href="../m10.04d/"><span class="direction">Next</span><span class="title">m10.04d</span></a></footer></article></body></html>
+ 0.04955713527669305
+ 0.5664336431302726</code></pre></div><p>End of <code>10/m10.02d.jl</code></p><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><footer><hr/><a class="previous" href="../m10.02d/"><span class="direction">Previous</span><span class="title">m10.02d</span></a><a class="next" href="../m10.04d/"><span class="direction">Next</span><span class="title">m10.04d</span></a></footer></article></body></html>

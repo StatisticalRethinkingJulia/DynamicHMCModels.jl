@@ -42,17 +42,13 @@ P = TransformedLogDensity(problem_transformation(p), p)
 ∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
 
 a3d = create_a3d(1000, 3, 4);
-trans = as( (β = as(Array, 2), σ = asℝ₊ ));
+trans = as( (β = as(Array, 2), σ = asℝ));
 
-mat = Array{Float64, 2}(undef, 1000, 3)
 for j in 1:4
   chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
   posterior = TransformVariables.transform.(Ref(problem_transformation(p)),
     get_position.(chain));
-  for l in 1:1000
-    mat[l,:] = [posterior[l][1][1], posterior[l][1][2], posterior[l][2][1]]
-  end
-  insert_chain!(a3d, j, mat)
+  insert_chain!(a3d, j, posterior, trans)
 end
 
 chns = create_mcmcchain(a3d, ["a", "bA", "σ"]);

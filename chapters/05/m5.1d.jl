@@ -74,7 +74,7 @@ Quantiles:
 sigma  1.241496  1.4079225  1.504790  1.61630750  1.86642750
 ";
 
-[posterior_β, posterior_σ]
+[posterior_β[1], posterior_β[2], posterior_σ]
 
 # This file was generated using Literate.jl, https://github.com/fredrikekre/Literate.jl
 

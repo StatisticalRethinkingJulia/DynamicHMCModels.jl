@@ -33,8 +33,8 @@ function (problem::m_12_06d_model)(θ)
     ll = 0.0
     ll += logpdf(Cauchy(0, 1), σ)
     ll += sum(logpdf.(Normal(0, σ), α)) # α[1:10]
-    ll += sum(logpdf.(Normal(0, 10), β[1])) # a
-    ll += sum(logpdf.(Normal(0, 1), β[2])) # a
+    ll += logpdf.(Normal(0, 10), β[1]) # a
+    ll += logpdf.(Normal(0, 1), β[2]) # a
     ll += sum(
       [loglikelihood(Poisson(exp(α[S[i]] + dot(X[i, :], β))), [y[i]]) for i in 1:N]
     )

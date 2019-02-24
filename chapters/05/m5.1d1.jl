@@ -44,11 +44,15 @@ P = TransformedLogDensity(problem_transformation(p), p)
 a3d = create_a3d(1000, 3, 4);
 trans = as( (β = as(Array, 2), σ = asℝ₊ ));
 
+mat = Array{Float64, 2}(undef, 1000, 3)
 for j in 1:4
   chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
   posterior = TransformVariables.transform.(Ref(problem_transformation(p)),
     get_position.(chain));
-  insert_chain!(a3d, j, posterior, trans)
+  for l in 1:1000
+    mat[l,:] = [posterior[l][1][1], posterior[l][1][2], posterior[l][2][1]]
+  end
+  insert_chain!(a3d, j, mat)
 end
 
 chns = create_mcmcchain(a3d, ["a", "bA", "σ"]);
@@ -73,6 +77,8 @@ sigma  1.241496  1.4079225  1.504790  1.61630750  1.86642750
 ";
 
 describe(chns)
+
+plot(chns)
 
 # This file was generated using Literate.jl, https://github.com/fredrikekre/Literate.jl
 

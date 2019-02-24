@@ -108,6 +108,6 @@ sigma  1.241496  1.4079225  1.504790  1.61630750  1.86642750
 
 # Extract the parameter posterior means: `β`,
 
-[posterior_β, posterior_σ]
+[posterior_β[1], posterior_β[2], posterior_σ]
 
 # end of m4.5d.jl

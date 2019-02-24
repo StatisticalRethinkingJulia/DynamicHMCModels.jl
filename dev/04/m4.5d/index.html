@@ -3,10 +3,30 @@
 
 ProjDir = rel_path_d(&quot;..&quot;, &quot;scripts&quot;, &quot;04&quot;)
 cd(ProjDir)</code></pre></div><p>Import the dataset.</p><div><pre><code class="language-julia">howell1 = CSV.read(rel_path(&quot;..&quot;, &quot;data&quot;, &quot;Howell1.csv&quot;), delim=&#39;;&#39;)
-df = convert(DataFrame, howell1);</code></pre></div><p>Use only adults and standardize</p><div><pre><code class="language-julia">df2 = filter(row -&gt; row[:age] &gt;= 18, df);
+df = convert(DataFrame, howell1);</code></pre><table class="data-frame"><thead><tr><th></th><th>height</th><th>weight</th><th>age</th><th>male</th></tr><tr><th></th><th>Float64⍰</th><th>Float64⍰</th><th>Float64⍰</th><th>Int64⍰</th></tr></thead><tbody><p>544 rows × 4 columns</p><tr><th>1</th><td>151.765</td><td>47.8256</td><td>63.0</td><td>1</td></tr><tr><th>2</th><td>139.7</td><td>36.4858</td><td>63.0</td><td>0</td></tr><tr><th>3</th><td>136.525</td><td>31.8648</td><td>65.0</td><td>0</td></tr><tr><th>4</th><td>156.845</td><td>53.0419</td><td>41.0</td><td>1</td></tr><tr><th>5</th><td>145.415</td><td>41.2769</td><td>51.0</td><td>0</td></tr><tr><th>6</th><td>163.83</td><td>62.9926</td><td>35.0</td><td>1</td></tr><tr><th>7</th><td>149.225</td><td>38.2435</td><td>32.0</td><td>0</td></tr><tr><th>8</th><td>168.91</td><td>55.48</td><td>27.0</td><td>1</td></tr><tr><th>9</th><td>147.955</td><td>34.8699</td><td>19.0</td><td>0</td></tr><tr><th>10</th><td>165.1</td><td>54.4877</td><td>54.0</td><td>1</td></tr><tr><th>11</th><td>154.305</td><td>49.8951</td><td>47.0</td><td>0</td></tr><tr><th>12</th><td>151.13</td><td>41.2202</td><td>66.0</td><td>1</td></tr><tr><th>13</th><td>144.78</td><td>36.0322</td><td>73.0</td><td>0</td></tr><tr><th>14</th><td>149.9</td><td>47.7</td><td>20.0</td><td>0</td></tr><tr><th>15</th><td>150.495</td><td>33.8493</td><td>65.3</td><td>0</td></tr><tr><th>16</th><td>163.195</td><td>48.5627</td><td>36.0</td><td>1</td></tr><tr><th>17</th><td>157.48</td><td>42.3258</td><td>44.0</td><td>1</td></tr><tr><th>18</th><td>143.942</td><td>38.3569</td><td>31.0</td><td>0</td></tr><tr><th>19</th><td>121.92</td><td>19.6179</td><td>12.0</td><td>1</td></tr><tr><th>20</th><td>105.41</td><td>13.948</td><td>8.0</td><td>0</td></tr><tr><th>21</th><td>86.36</td><td>10.4893</td><td>6.5</td><td>0</td></tr><tr><th>22</th><td>161.29</td><td>48.9879</td><td>39.0</td><td>1</td></tr><tr><th>23</th><td>156.21</td><td>42.7227</td><td>29.0</td><td>0</td></tr><tr><th>24</th><td>129.54</td><td>23.5868</td><td>13.0</td><td>1</td></tr><tr><th>&vellip;</th><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td></tr></tbody></table></div><p>Use only adults and standardize</p><div><pre><code class="language-julia">df2 = filter(row -&gt; row[:age] &gt;= 18, df);
 df2[:weight] = convert(Vector{Float64}, df2[:weight]);
 df2[:weight_s] = (df2[:weight] .- mean(df2[:weight])) / std(df2[:weight]);
-df2[:weight_s2] = df2[:weight_s] .^ 2;</code></pre></div><p>Show the first six rows of the dataset.</p><div><pre><code class="language-julia">first(df2, 6)</code></pre><table class="data-frame"><thead><tr><th></th><th>height</th><th>weight</th><th>age</th><th>male</th><th>weight_s</th><th>weight_s2</th></tr><tr><th></th><th>Float64⍰</th><th>Float64</th><th>Float64⍰</th><th>Int64⍰</th><th>Float64</th><th>Float64</th></tr></thead><tbody><p>6 rows × 6 columns</p><tr><th>1</th><td>151.765</td><td>47.8256</td><td>63.0</td><td>1</td><td>0.439097</td><td>0.192806</td></tr><tr><th>2</th><td>139.7</td><td>36.4858</td><td>63.0</td><td>0</td><td>-1.31718</td><td>1.73498</td></tr><tr><th>3</th><td>136.525</td><td>31.8648</td><td>65.0</td><td>0</td><td>-2.03287</td><td>4.13256</td></tr><tr><th>4</th><td>156.845</td><td>53.0419</td><td>41.0</td><td>1</td><td>1.24699</td><td>1.55498</td></tr><tr><th>5</th><td>145.415</td><td>41.2769</td><td>51.0</td><td>0</td><td>-0.575156</td><td>0.330804</td></tr><tr><th>6</th><td>163.83</td><td>62.9926</td><td>35.0</td><td>1</td><td>2.78812</td><td>7.77364</td></tr></tbody></table></div><p>Then define a structure to hold the data: observables, covariates, and the degrees of freedom for the prior.</p><p>Linear regression model <span>$y ∼ Xβ + ϵ$</span>, where <span>$ϵ ∼ N(0, σ²)$</span> IID.</p><div><pre><code class="language-julia">struct ConstraintHeightProblem{TY &lt;: AbstractVector, TX &lt;: AbstractMatrix}
+df2[:weight_s2] = df2[:weight_s] .^ 2;</code></pre><pre><code class="language-none">352-element Array{Float64,1}:
+ 0.19280615097192907
+ 1.7349763044783346
+ 4.1325600023146265
+ 1.5549757699350777
+ 0.3308042660851645
+ 7.7736359966100865
+ 1.0919440933750901
+ 2.6392838898982456
+ 2.45691571770544
+ 2.163583954566629
+ ⋮
+ 0.2005950450601446
+ 0.748125332136797
+ 0.37244351134337544
+ 0.416550377673148
+ 0.0999553970190397
+ 2.7690646673659187
+ 1.2340428738476732
+ 1.9741712709264059
+ 1.3641165169515888</code></pre></div><p>Show the first six rows of the dataset.</p><div><pre><code class="language-julia">first(df2, 6)</code></pre><table class="data-frame"><thead><tr><th></th><th>height</th><th>weight</th><th>age</th><th>male</th><th>weight_s</th><th>weight_s2</th></tr><tr><th></th><th>Float64⍰</th><th>Float64</th><th>Float64⍰</th><th>Int64⍰</th><th>Float64</th><th>Float64</th></tr></thead><tbody><p>6 rows × 6 columns</p><tr><th>1</th><td>151.765</td><td>47.8256</td><td>63.0</td><td>1</td><td>0.439097</td><td>0.192806</td></tr><tr><th>2</th><td>139.7</td><td>36.4858</td><td>63.0</td><td>0</td><td>-1.31718</td><td>1.73498</td></tr><tr><th>3</th><td>136.525</td><td>31.8648</td><td>65.0</td><td>0</td><td>-2.03287</td><td>4.13256</td></tr><tr><th>4</th><td>156.845</td><td>53.0419</td><td>41.0</td><td>1</td><td>1.24699</td><td>1.55498</td></tr><tr><th>5</th><td>145.415</td><td>41.2769</td><td>51.0</td><td>0</td><td>-0.575156</td><td>0.330804</td></tr><tr><th>6</th><td>163.83</td><td>62.9926</td><td>35.0</td><td>1</td><td>2.78812</td><td>7.77364</td></tr></tbody></table></div><p>Then define a structure to hold the data: observables, covariates, and the degrees of freedom for the prior.</p><p>Linear regression model <span>$y ∼ Xβ + ϵ$</span>, where <span>$ϵ ∼ N(0, σ²)$</span> IID.</p><div><pre><code class="language-julia">struct ConstraintHeightProblem{TY &lt;: AbstractVector, TX &lt;: AbstractMatrix}
     &quot;Observations.&quot;
     y::TY
     &quot;Covariates&quot;
@@ -27,31 +47,36 @@ y = convert(Vector{Float64}, df2[:height])
 p = ConstraintHeightProblem(y, X);
 p((β = [1.0, 2.0, 3.0], σ = 1.0))</code></pre><pre><code class="language-none">-4.0013242576346947e6</code></pre></div><p>Use a function to return the transformation (as it varies with the number of covariates).</p><div><pre><code class="language-julia">problem_transformation(p::ConstraintHeightProblem) =
     as((β = as(Array, size(p.X, 2)), σ = asℝ₊))</code></pre></div><p>Wrap the problem with a transformation, then use Flux for the gradient.</p><div><pre><code class="language-julia">P = TransformedLogDensity(problem_transformation(p), p)
-∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));</code></pre></div><p>Draw samples.</p><div><pre><code class="language-julia">chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);</code></pre><pre><code class="language-none">MCMC, adapting ϵ (75 steps)
-0.0032 s/step ...done
+∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));</code></pre><pre><code class="language-none">LogDensityRejectErrors{LogDensityProblems.ForwardDiffLogDensity{TransformedLogDensity{TransformVariables.TransformNamedTuple{(:β, :σ),Tuple{TransformVariables.ArrayTransform{TransformVariables.Identity,1},TransformVariables.ShiftedExp{true,Float64}}},Main.ex-m4.5d.ConstraintHeightProblem{Array{Float64,1},Array{Float64,2}}},ForwardDiff.GradientConfig{ForwardDiff.Tag{getfield(LogDensityProblems, Symbol(&quot;##3#4&quot;)){TransformedLogDensity{TransformVariables.TransformNamedTuple{(:β, :σ),Tuple{TransformVariables.ArrayTransform{TransformVariables.Identity,1},TransformVariables.ShiftedExp{true,Float64}}},Main.ex-m4.5d.ConstraintHeightProblem{Array{Float64,1},Array{Float64,2}}}},Float64},Float64,4,Array{ForwardDiff.Dual{ForwardDiff.Tag{getfield(LogDensityProblems, Symbol(&quot;##3#4&quot;)){TransformedLogDensity{TransformVariables.TransformNamedTuple{(:β, :σ),Tuple{TransformVariables.ArrayTransform{TransformVariables.Identity,1},TransformVariables.ShiftedExp{true,Float64}}},Main.ex-m4.5d.ConstraintHeightProblem{Array{Float64,1},Array{Float64,2}}}},Float64},Float64,4},1}}}}(ForwardDiff AD wrapper for TransformedLogDensity of dimension 4, w/ chunk size 4)</code></pre></div><p>Draw samples.</p><div><pre><code class="language-julia">chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);</code></pre><pre><code class="language-none">MCMC, adapting ϵ (75 steps)
+0.0031 s/step ...done
 MCMC, adapting ϵ (25 steps)
-0.001 s/step ...done
+0.0015 s/step ...done
 MCMC, adapting ϵ (50 steps)
-0.0032 s/step ...done
+0.003 s/step ...done
 MCMC, adapting ϵ (100 steps)
-0.0004 s/step ...done
+0.00036 s/step ...done
 MCMC, adapting ϵ (200 steps)
-0.00026 s/step ...done
+0.00022 s/step ...done
 MCMC, adapting ϵ (400 steps)
 0.00021 s/step ...done
 MCMC, adapting ϵ (50 steps)
-0.00036 s/step ...done
+0.00029 s/step ...done
 MCMC (1000 steps)
-0.00026 s/step ...done</code></pre></div><p>We use the transformation to obtain the posterior from the chain.</p><div><pre><code class="language-julia">posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));
+0.00023 s/step ...done
+(NUTS_Transition{Array{Float64,1},Float64}[NUTS_Transition{Array{Float64,1},Float64}([154.229, 5.65745, 0.0570742, 1.64843], -1089.07, 3, DoubledTurn, 1.0, 7), NUTS_Transition{Array{Float64,1},Float64}([154.928, 6.02423, -0.233641, 1.62018], -1089.62, 3, DoubledTurn, 0.99134, 7), NUTS_Transition{Array{Float64,1},Float64}([154.389, 5.47284, 0.160193, 1.69742], -1091.27, 2, DoubledTurn, 0.771057, 3), NUTS_Transition{Array{Float64,1},Float64}([154.587, 6.2973, -0.1173, 1.57371], -1092.74, 3, DoubledTurn, 0.940278, 7), NUTS_Transition{Array{Float64,1},Float64}([154.179, 6.39203, 0.0102812, 1.66155], -1092.45, 2, AdjacentTurn, 0.954396, 7), NUTS_Transition{Array{Float64,1},Float64}([153.976, 5.97303, 0.17704, 1.62652], -1093.39, 2, DoubledTurn, 0.908681, 3), NUTS_Transition{Array{Float64,1},Float64}([154.502, 6.00565, 0.266523, 1.71797], -1093.17, 3, DoubledTurn, 0.798469, 7), NUTS_Transition{Array{Float64,1},Float64}([154.228, 5.58305, 0.0565414, 1.73143], -1092.69, 3, DoubledTurn, 0.98054, 7), NUTS_Transition{Array{Float64,1},Float64}([154.948, 6.4759, -0.211626, 1.67637], -1093.64, 3, DoubledTurn, 1.0, 7), NUTS_Transition{Array{Float64,1},Float64}([154.299, 5.5646, 0.0827584, 1.6285], -1092.28, 2, DoubledTurn, 0.968324, 3)  …  NUTS_Transition{Array{Float64,1},Float64}([154.589, 5.90303, 0.201168, 1.62436], -1092.63, 3, DoubledTurn, 0.760804, 7), NUTS_Transition{Array{Float64,1},Float64}([154.606, 5.79188, -0.229712, 1.66524], -1089.47, 3, DoubledTurn, 0.949013, 7), NUTS_Transition{Array{Float64,1},Float64}([154.669, 5.72663, -0.284546, 1.68313], -1089.78, 2, DoubledTurn, 0.966961, 3), NUTS_Transition{Array{Float64,1},Float64}([154.634, 6.0421, -0.242766, 1.57498], -1091.1, 2, AdjacentTurn, 0.970677, 7), NUTS_Transition{Array{Float64,1},Float64}([154.312, 5.86425, 0.0142071, 1.60093], -1089.75, 2, DoubledTurn, 0.993499, 3), NUTS_Transition{Array{Float64,1},Float64}([154.791, 6.02597, -0.350765, 1.63106], -1090.38, 2, DoubledTurn, 0.854103, 3), NUTS_Transition{Array{Float64,1},Float64}([154.538, 6.52976, -0.0397086, 1.66132], -1092.4, 2, AdjacentTurn, 0.878814, 7), NUTS_Transition{Array{Float64,1},Float64}([154.541, 6.29334, -0.10158, 1.67242], -1091.6, 3, DoubledTurn, 0.988401, 7), NUTS_Transition{Array{Float64,1},Float64}([155.062, 5.88954, -0.414813, 1.52828], -1094.61, 2, DoubledTurn, 0.79673, 3), NUTS_Transition{Array{Float64,1},Float64}([155.055, 6.12541, -0.449696, 1.58342], -1093.61, 2, DoubledTurn, 1.0, 3)], NUTS sampler in 4 dimensions
+  stepsize (ϵ) ≈ 0.609
+  maximum depth = 10
+  Gaussian kinetic energy, √diag(M⁻¹): [0.367894, 0.292753, 0.236878, 0.0495113]
+)</code></pre></div><p>We use the transformation to obtain the posterior from the chain.</p><div><pre><code class="language-julia">posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));
 posterior[1:5]</code></pre><pre><code class="language-none">5-element Array{NamedTuple{(:β, :σ),Tuple{Array{Float64,1},Float64}},1}:
- (β = [154.709, 5.50789, -0.260695], σ = 4.928161342641617)
- (β = [154.645, 5.32837, -0.113448], σ = 5.04828539571756)
- (β = [154.337, 5.69777, 0.234054], σ = 5.06620163968662)
- (β = [154.756, 5.64783, -0.474704], σ = 4.996060233967117)
- (β = [155.176, 5.7911, -0.435946], σ = 5.090593657522355)</code></pre></div><p>Extract the parameter posterior means: <code>β</code>,</p><div><pre><code class="language-julia">posterior_β = mean(first, posterior)</code></pre><pre><code class="language-none">3-element Array{Float64,1}:
- 154.60889619757626
-   5.827672019126932
-  -0.008440554666554119</code></pre></div><p>then <code>σ</code>:</p><div><pre><code class="language-julia">posterior_σ = mean(last, posterior)</code></pre><pre><code class="language-none">5.097646729724686</code></pre></div><p>Effective sample sizes (of untransformed draws)</p><div><pre><code class="language-julia">ess = mapslices(effective_sample_size,
+ (β = [154.229, 5.65745, 0.0570742], σ = 5.1988177439098076)
+ (β = [154.928, 6.02423, -0.233641], σ = 5.053993642212259)
+ (β = [154.389, 5.47284, 0.160193], σ = 5.459865532976838)
+ (β = [154.587, 6.2973, -0.1173], σ = 4.824534518965651)
+ (β = [154.179, 6.39203, 0.0102812], σ = 5.267491532216158)</code></pre></div><p>Extract the parameter posterior means: <code>β</code>,</p><div><pre><code class="language-julia">posterior_β = mean(first, posterior)</code></pre><pre><code class="language-none">3-element Array{Float64,1}:
+ 154.61597916000187
+   5.853744192284434
+  -0.01546678226669168</code></pre></div><p>then <code>σ</code>:</p><div><pre><code class="language-julia">posterior_σ = mean(last, posterior)</code></pre><pre><code class="language-none">5.09951422211619</code></pre></div><p>Effective sample sizes (of untransformed draws)</p><div><pre><code class="language-julia">ess = mapslices(effective_sample_size,
                 get_position_matrix(chain); dims = 1)</code></pre></div><p>NUTS-specific statistics</p><div><pre><code class="language-julia">NUTS_statistics(chain)
 
 cmdstan_result = &quot;
@@ -73,6 +98,6 @@ Quantiles:
    b1   5.27846200   5.6493250   5.83991000   6.0276275   6.39728200
    b2  -0.45954687  -0.1668285  -0.01382935   0.1423620   0.43600905
 sigma   4.76114350   4.9816850   5.10326000   5.2300450   5.51500975
-&quot;;</code></pre></div><p>Extract the parameter posterior means: <code>β</code>,</p><div><pre><code class="language-julia">[posterior_β, posterior_σ]</code></pre><pre><code class="language-none">2-element Array{Any,1}:
-  [154.609, 5.82767, -0.00844055]
- 5.097646729724686</code></pre></div><p>end of m4.5d.jl#- <em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><footer><hr/><a class="previous" href="../m4.2d/"><span class="direction">Previous</span><span class="title">m4.2d</span></a><a class="next" href="../../05/m5.1d/"><span class="direction">Next</span><span class="title">m5.1d</span></a></footer></article></body></html>
+&quot;;</code></pre><pre><code class="language-none">&quot;\nIterations = 1:1000\nThinning interval = 1\nChains = 1,2,3,4\nSamples per chain = 1000\n\nEmpirical Posterior Estimates:\n           Mean         SD       Naive SE       MCSE      ESS\n    a 154.609019750 0.36158389 0.0057171433 0.0071845548 1000\n   b1   5.838431778 0.27920926 0.0044146860 0.0048693502 1000\n   b2  -0.009985954 0.22897191 0.0036203637 0.0047224478 1000\nsigma   5.110136300 0.19096315 0.0030193925 0.0030728192 1000\n\nQuantiles:\n          2.5%        25.0%        50.0%       75.0%        97.5%\n    a 153.92392500 154.3567500 154.60700000 154.8502500 155.32100000\n   b1   5.27846200   5.6493250   5.83991000   6.0276275   6.39728200\n   b2  -0.45954687  -0.1668285  -0.01382935   0.1423620   0.43600905\nsigma   4.76114350   4.9816850   5.10326000   5.2300450   5.51500975\n&quot;</code></pre></div><p>Extract the parameter posterior means: <code>β</code>,</p><div><pre><code class="language-julia">[posterior_β, posterior_σ]</code></pre><pre><code class="language-none">2-element Array{Any,1}:
+  [154.616, 5.85374, -0.0154668]
+ 5.09951422211619</code></pre></div><p>end of m4.5d.jl#- <em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><footer><hr/><a class="previous" href="../m4.2d/"><span class="direction">Previous</span><span class="title">m4.2d</span></a><a class="next" href="../../05/m5.1d/"><span class="direction">Next</span><span class="title">m5.1d</span></a></footer></article></body></html>

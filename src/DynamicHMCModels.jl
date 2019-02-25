@@ -34,6 +34,6 @@ export
   generate_d,
   create_a3d,
   insert_chain!,
-  create_mcmcchain
+  create_mcmcchains
 
 end # module

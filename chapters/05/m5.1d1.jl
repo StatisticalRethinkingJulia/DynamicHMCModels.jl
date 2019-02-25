@@ -45,13 +45,13 @@ a3d = create_a3d(1000, 3, 4);
 trans = as( (β = as(Array, 2), σ = asℝ));
 
 for j in 1:4
-  chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
+  chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 3000);
   posterior = TransformVariables.transform.(Ref(problem_transformation(p)),
     get_position.(chain));
-  insert_chain!(a3d, j, posterior, trans)
+  insert_chain!(a3d, j, posterior, trans);
 end
 
-chns = create_mcmcchain(a3d, ["a", "bA", "σ"]);
+chns = create_mcmcchains(a3d, ["a", "bA", "sigma"]);
 
 cmdstan_result = "
 Iterations = 1:1000

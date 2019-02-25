@@ -15,7 +15,7 @@ function create_a3d(noofsamples, noofvariables, noofchains)
    end
  end
 
- function create_mcmcchain(a3d, cnames)
+ function create_mcmcchains(a3d, cnames)
    Chains(a3d, names=cnames)
  end
  

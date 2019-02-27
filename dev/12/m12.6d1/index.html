@@ -38,7 +38,7 @@ S = df[:society];
 y = df[:total_tools];
 γ = (β = [1.0, 0.25], α = rand(Normal(0, 1), N_societies), s = [0.2]);
 p = m_12_06d(y, X, S, N, N_societies);</code></pre><pre><code class="language-none">Main.ex-m12.6d1.m_12_06d{Array{Union{Missing, Int64},1},Array{Float64,2},Array{Int64,1}}(Union{Missing, Int64}[13, 22, 24, 43, 33, 19, 40, 28, 55, 71], [1.0 7.00307; 1.0 7.31322; … ; 1.0 9.76996; 1.0 12.5245], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 10, 10)</code></pre></div><p>Function convert from a single vector of parms to parks NamedTuple</p><div><pre><code class="language-julia">trans = as((β = as(Array, 2), α = as(Array, 10), s = as(Array, 1)));</code></pre><pre><code class="language-none">TransformVariables.TransformNamedTuple{(:β, :α, :s),Tuple{TransformVariables.ArrayTransform{TransformVariables.Identity,1},TransformVariables.ArrayTransform{TransformVariables.Identity,1},TransformVariables.ArrayTransform{TransformVariables.Identity,1}}}((TransformVariables.ArrayTransform{TransformVariables.Identity,1}(TransformVariables.Identity(), (2,)), TransformVariables.ArrayTransform{TransformVariables.Identity,1}(TransformVariables.Identity(), (10,)), TransformVariables.ArrayTransform{TransformVariables.Identity,1}(TransformVariables.Identity(), (1,))), 13)</code></pre></div><p>Define input parameter vector</p><div><pre><code class="language-julia">θ = inverse(trans, γ);
-p(θ)</code></pre><pre><code class="language-none">-4465.757843186431</code></pre></div><p>Maximum<em>a</em>posterior</p><div><pre><code class="language-julia">using Optim
+p(θ)</code></pre><pre><code class="language-none">-2183.123775409762</code></pre></div><p>Maximum<em>a</em>posterior</p><div><pre><code class="language-julia">using Optim
 
 x0 = θ;
 lower = vcat([0.0, 0.0], -3ones(10), [0.0]);
@@ -51,69 +51,69 @@ res = optimize(ll, lower, upper, x0, Fminbox(inner_optimizer));
 res</code></pre><pre><code class="language-none">Results of Optimization Algorithm
  * Algorithm: Fminbox with Gradient Descent
  * Starting Point: [1.0,0.25, ...]
- * Minimizer: [1.0737282680464502,0.2655612662491339, ...]
- * Minimum: -1.313707e+02
+ * Minimizer: [1.0977196626836627,0.2630418179422197, ...]
+ * Minimum: -1.353189e+02
  * Iterations: 1000
  * Convergence: false
    * |x - x&#39;| ≤ 0.0e+00: false
-     |x - x&#39;| = 2.03e-11
+     |x - x&#39;| = 4.16e-11
    * |f(x) - f(x&#39;)| ≤ 0.0e+00 |f(x)|: false
-     |f(x) - f(x&#39;)| = -1.44e-07 |f(x)|
+     |f(x) - f(x&#39;)| = -4.60e-08 |f(x)|
    * |g(x)| ≤ 1.0e-08: false
-     |g(x)| = 7.25e+05
+     |g(x)| = 4.13e+05
    * Stopped by an increasing objective: false
    * Reached Maximum Number of Iterations: false
- * Objective Calls: 521605629
- * Gradient Calls: 521605629</code></pre></div><p>Minimum gives MAP estimate:</p><div><pre><code class="language-julia">Optim.minimizer(res)</code></pre><pre><code class="language-none">13-element Array{Float64,1}:
-  1.0737282680464502
-  0.2655612662491339
-  4.565734198307936e-12
- -1.5894301454747436e-12
-  1.000329043878494e-12
- -1.3129529046747764e-11
- -2.216463565488889e-12
-  9.867914007828907e-12
- -6.588881189558656e-12
-  5.723313671063143e-12
- -1.4433714030773136e-11
- -5.866019772006112e-11
-  9.48303121164297e-5</code></pre></div><p>Write a function to return properly dimensioned transformation.</p><div><pre><code class="language-julia">problem_transformation(p::m_12_06d) =
+ * Objective Calls: 140963593
+ * Gradient Calls: 140963593</code></pre></div><p>Minimum gives MAP estimate:</p><div><pre><code class="language-julia">Optim.minimizer(res)</code></pre><pre><code class="language-none">13-element Array{Float64,1}:
+  1.0977196626836627
+  0.2630418179422197
+ -6.212434136724721e-13
+  2.640195461133974e-13
+ -6.082314756898181e-14
+  1.969854195858811e-12
+  4.64279801283323e-13
+ -1.2426988297592253e-12
+  1.1160589988290879e-12
+ -5.695377464434605e-13
+  2.368337149491513e-12
+  1.534371238462784e-11
+  7.80912529114998e-5</code></pre></div><p>Write a function to return properly dimensioned transformation.</p><div><pre><code class="language-julia">problem_transformation(p::m_12_06d) =
   as( Vector, length(θ) )</code></pre></div><p>Wrap the problem with a transformation, then use ForwardDiff for the gradient.</p><div><pre><code class="language-julia">P = TransformedLogDensity(problem_transformation(p), p)
 ∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
 #∇P = ADgradient(:ForwardDiff, P);</code></pre></div><p>Tune and sample.</p><div><pre><code class="language-julia">chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);</code></pre><pre><code class="language-none">MCMC, adapting ϵ (75 steps)
-0.0066 s/step ...done
+0.0065 s/step ...done
 MCMC, adapting ϵ (25 steps)
-0.0068 s/step ...done
+0.0066 s/step ...done
 MCMC, adapting ϵ (50 steps)
-0.0083 s/step ...done
+0.0081 s/step ...done
 MCMC, adapting ϵ (100 steps)
-0.0031 s/step ...done
+0.0027 s/step ...done
 MCMC, adapting ϵ (200 steps)
 0.0016 s/step ...done
 MCMC, adapting ϵ (400 steps)
-0.0011 s/step ...done
+0.00098 s/step ...done
 MCMC, adapting ϵ (50 steps)
-0.0012 s/step ...done
+0.00078 s/step ...done
 MCMC (1000 steps)
-0.00074 s/step ...done
-(NUTS_Transition{Array{Float64,1},Float64}[NUTS_Transition{Array{Float64,1},Float64}([1.94649, 0.158257, -0.159769, 0.110044, 0.050984, 0.577613, 0.169092, -0.221008, 0.195988, 0.00673574, 0.391257, 0.136789, 0.50482], -40.5765, 3, DoubledTurn, 0.924951, 7), NUTS_Transition{Array{Float64,1},Float64}([0.238534, 0.326187, 0.164205, 0.518332, 0.19767, 0.595424, 0.319954, 0.00871166, 0.3273, 0.14269, 0.462103, -0.0922999, 0.683636], -46.599, 4, DoubledTurn, 0.937934, 15), NUTS_Transition{Array{Float64,1},Float64}([1.12313, 0.227138, -0.253216, 0.294872, 0.177114, 0.690684, 0.443537, -0.135172, 0.587485, -0.0188665, 0.741344, 0.272326, 0.595107], -44.4717, 4, DoubledTurn, 0.973601, 15), NUTS_Transition{Array{Float64,1},Float64}([0.800604, 0.282163, 0.0652, 0.285593, 0.216655, 0.441753, 0.24807, -0.324378, 0.481445, -0.0601491, 0.372154, -0.00825771, 0.556347], -41.8729, 4, DoubledTurn, 0.936263, 15), NUTS_Transition{Array{Float64,1},Float64}([1.24991, 0.218641, 0.175174, 0.158483, 0.212025, 0.387083, 0.295225, -0.343508, 0.617437, 0.0127479, 0.383019, 0.117991, 0.444259], -46.6182, 3, DoubledTurn, 0.874145, 7), NUTS_Transition{Array{Float64,1},Float64}([1.81417, 0.201981, -0.68948, -0.239155, -0.210119, 0.153883, -0.0438358, -0.105449, -0.331427, -0.17577, 0.119137, -0.0357905, 0.479573], -50.7935, 4, DoubledTurn, 0.895523, 15), NUTS_Transition{Array{Float64,1},Float64}([0.788425, 0.325871, -0.572606, -0.00764989, -0.459982, 0.0103946, -0.0623407, -0.625763, 0.114909, -0.414222, 0.172469, -0.638279, 0.778098], -50.0223, 4, DoubledTurn, 0.998304, 15), NUTS_Transition{Array{Float64,1},Float64}([0.357968, 0.359313, -0.274575, 0.406768, -0.0259601, 0.201978, -0.128699, -0.792133, 0.033078, -0.339798, 0.147683, -0.559208, 0.616443], -48.9746, 4, DoubledTurn, 0.958197, 15), NUTS_Transition{Array{Float64,1},Float64}([1.56068, 0.199049, -0.183364, 0.112868, -0.0128415, 0.350545, -0.0761934, 0.207282, 0.167391, -0.154956, 0.33929, 0.18474, 0.403179], -43.7525, 4, DoubledTurn, 0.972413, 15), NUTS_Transition{Array{Float64,1},Float64}([0.620711, 0.304982, -0.292444, 0.21711, -0.10952, 0.475772, 0.237448, -0.453909, -0.0822283, 0.000219261, 0.291914, -0.27337, 0.615906], -44.0653, 4, DoubledTurn, 0.852201, 15)  …  NUTS_Transition{Array{Float64,1},Float64}([1.48255, 0.222783, -0.0651877, 0.163681, -0.332258, 0.166616, 0.0224353, -0.205281, 0.133798, -0.161015, 0.299989, -0.172431, 0.412209], -44.0513, 4, DoubledTurn, 0.911478, 15), NUTS_Transition{Array{Float64,1},Float64}([1.34613, 0.246475, -0.224529, 0.00617767, 0.0573581, 0.21595, -0.129956, -0.335184, -0.0303377, -0.199151, 0.148405, -0.216032, 0.495136], -39.5486, 4, DoubledTurn, 0.911122, 15), NUTS_Transition{Array{Float64,1},Float64}([0.576957, 0.32507, -0.172327, 0.135544, 0.0532316, 0.137012, 0.0350736, -0.525181, -0.0128235, -0.0200937, 0.233764, -0.387288, 0.579451], -45.0163, 4, DoubledTurn, 0.872759, 15), NUTS_Transition{Array{Float64,1},Float64}([1.47837, 0.236428, -0.257407, -0.0203594, -0.0194458, -0.0264518, 0.0169837, -0.457236, -0.0292261, 0.0354087, 0.276067, -0.166779, 0.531896], -42.2345, 4, DoubledTurn, 0.875038, 15), NUTS_Transition{Array{Float64,1},Float64}([0.924686, 0.299429, -0.0564297, -0.14729, -0.188754, 0.182328, -0.168038, -0.335743, -0.181965, -0.17789, 0.275936, -0.336631, 0.498336], -41.4164, 4, DoubledTurn, 1.0, 15), NUTS_Transition{Array{Float64,1},Float64}([0.751779, 0.301224, -0.188264, 0.39548, 0.011693, 0.375744, 0.200093, -0.279362, 0.327051, -0.202618, 0.241722, -0.153355, 0.433357], -42.0118, 4, DoubledTurn, 0.909935, 15), NUTS_Transition{Array{Float64,1},Float64}([0.794682, 0.291636, -0.359384, 0.232576, -0.151694, 0.362881, 0.142422, -0.295223, 0.25963, -0.15437, 0.242364, -0.257291, 0.555202], -38.3392, 3, AdjacentTurn, 1.0, 15), NUTS_Transition{Array{Float64,1},Float64}([1.04583, 0.266811, -0.118384, -0.0960164, 0.0379598, 0.292899, -0.0624098, -0.0873667, -0.0482413, 0.120079, 0.0132216, -0.0221841, 0.319407], -42.3578, 3, AdjacentTurn, 0.97711, 15), NUTS_Transition{Array{Float64,1},Float64}([1.2686, 0.248435, -0.206906, 0.00623081, -0.00843555, 0.196351, -0.034374, -0.134808, 0.0321908, -0.0949887, 0.120613, -0.0490748, 0.360783], -36.0223, 3, DoubledTurn, 1.0, 7), NUTS_Transition{Array{Float64,1},Float64}([0.975882, 0.269045, 0.0470601, 0.021174, -0.063239, 0.13392, 0.0145926, -0.269081, -0.0546718, -0.143341, 0.124409, -0.0316273, 0.375314], -36.2673, 3, DoubledTurn, 0.758707, 7)], NUTS sampler in 13 dimensions
-  stepsize (ϵ) ≈ 0.292
+0.00078 s/step ...done
+(NUTS_Transition{Array{Float64,1},Float64}[NUTS_Transition{Array{Float64,1},Float64}([0.445879, 0.318812, -0.0445322, 0.234673, 0.178343, 0.39582, 0.24185, -0.527, 0.412777, -0.264903, 0.581555, -0.253049, 0.528615], -46.6975, 4, DoubledTurn, 0.974875, 15), NUTS_Transition{Array{Float64,1},Float64}([1.93144, 0.174966, -0.369651, 0.0378739, -0.160755, 0.1855, -0.262008, -0.231455, 0.131897, -0.300171, 0.352977, 0.12025, 0.616292], -47.213, 4, DoubledTurn, 0.867473, 15), NUTS_Transition{Array{Float64,1},Float64}([1.25564, 0.2554, -0.225248, -0.00814139, -0.205874, 0.244247, -0.279703, -0.321932, -0.0575955, -0.450499, 0.139666, -0.147185, 0.507006], -39.9592, 4, DoubledTurn, 0.968557, 15), NUTS_Transition{Array{Float64,1},Float64}([1.32405, 0.239297, -0.323666, -0.0135642, -0.136783, 0.137657, 0.203596, -0.372207, 0.119225, 0.0397367, 0.196076, -0.120208, 0.450828], -39.9664, 4, DoubledTurn, 0.985723, 15), NUTS_Transition{Array{Float64,1},Float64}([1.38427, 0.225506, 0.13657, 0.203424, -0.0397839, 0.314557, 0.0857875, -0.095579, 0.0523083, -0.158748, 0.0647775, 0.107579, 0.413377], -41.4007, 4, DoubledTurn, 0.875138, 15), NUTS_Transition{Array{Float64,1},Float64}([1.26154, 0.257517, -0.114145, -0.0365538, -0.0606179, 0.0337503, -0.0509768, -0.292491, 0.0872409, -0.0997323, 0.0859886, -0.0878991, 0.366315], -39.6984, 4, DoubledTurn, 0.88771, 15), NUTS_Transition{Array{Float64,1},Float64}([0.892011, 0.267364, 0.0423738, 0.19298, 0.00507816, 0.0104282, -0.0412387, -0.0279911, 0.0116518, -0.0121239, 0.213716, 0.0196231, 0.28082], -37.3883, 4, DoubledTurn, 0.830655, 15), NUTS_Transition{Array{Float64,1},Float64}([1.22464, 0.243732, -0.190043, -0.145266, 0.0180873, 0.396496, 0.165813, -0.349578, 0.199084, 0.00527084, 0.243303, 0.00829271, 0.508723], -40.1884, 4, DoubledTurn, 0.947223, 15), NUTS_Transition{Array{Float64,1},Float64}([0.592628, 0.313612, -0.114435, 0.100174, -0.0238633, 0.416994, 0.162198, 0.114049, 0.046433, -0.131285, 0.165559, -0.070283, 0.485229], -42.9674, 4, DoubledTurn, 0.911515, 15), NUTS_Transition{Array{Float64,1},Float64}([1.28184, 0.256199, -0.308621, -0.349901, -0.111397, 0.406668, 0.171665, -0.336914, 0.0937814, -0.257522, -0.184749, -0.215915, 0.530683], -44.672, 4, DoubledTurn, 0.989941, 15)  …  NUTS_Transition{Array{Float64,1},Float64}([1.42446, 0.221322, -0.201128, 0.0894866, -0.168727, 0.224859, 0.111447, -0.256202, 0.213806, -0.169162, 0.120698, -0.0297571, 0.412232], -39.977, 4, DoubledTurn, 0.991932, 15), NUTS_Transition{Array{Float64,1},Float64}([1.56096, 0.20241, -0.281683, 0.0809808, -0.07132, 0.219741, 0.0214982, -0.272949, 0.107659, -0.226558, 0.409214, 0.0737985, 0.5128], -36.9475, 4, DoubledTurn, 0.966103, 15), NUTS_Transition{Array{Float64,1},Float64}([1.54041, 0.238445, -0.262984, -0.175843, 0.0582668, 0.00782949, -0.17196, -0.537173, 0.0573302, -0.30229, 0.138107, -0.129659, 0.502406], -40.0643, 4, DoubledTurn, 0.958129, 15), NUTS_Transition{Array{Float64,1},Float64}([2.05717, 0.158254, -0.897566, 0.0642825, -0.379247, 0.609261, 0.0781985, -0.709864, 0.0544726, 0.152752, 0.407223, 0.143717, 0.657439], -49.2571, 4, DoubledTurn, 0.973242, 15), NUTS_Transition{Array{Float64,1},Float64}([1.49187, 0.213498, 0.0425581, -0.226751, 0.202141, -0.0737994, 0.145365, -0.0689454, -0.0111761, -0.144766, 0.27175, 0.131048, 0.432892], -50.3074, 4, DoubledTurn, 0.988757, 15), NUTS_Transition{Array{Float64,1},Float64}([1.14896, 0.27841, -0.0431745, -0.167446, -0.0884062, 0.181503, -0.0191013, -0.357997, 0.10891, -0.410043, 0.0442871, -0.257296, 0.505814], -44.177, 3, DoubledTurn, 0.891386, 7), NUTS_Transition{Array{Float64,1},Float64}([0.50057, 0.31474, 0.418011, 0.0114981, 0.292466, 0.346909, 0.0312229, -0.164906, 0.275901, -0.265399, 0.150412, -0.271189, 0.477762], -43.6917, 4, DoubledTurn, 0.981407, 15), NUTS_Transition{Array{Float64,1},Float64}([2.15214, 0.165402, -1.0645, -0.0922828, -0.640381, 0.272937, -0.129465, -0.635003, 0.0059381, -0.21156, 0.354909, 0.134535, 0.626369], -46.7163, 4, DoubledTurn, 0.988164, 15), NUTS_Transition{Array{Float64,1},Float64}([0.677269, 0.298012, 0.222852, 0.039932, 0.215073, 0.375094, 0.140303, -0.143175, 0.19743, -0.155631, 0.209511, -0.122469, 0.510592], -45.5821, 4, DoubledTurn, 0.958446, 15), NUTS_Transition{Array{Float64,1},Float64}([1.52265, 0.2154, -0.35454, 0.260623, -0.0528438, 0.346035, 0.042001, -0.358438, 0.20787, -0.0859518, 0.408392, -0.0524281, 0.566227], -41.4507, 4, DoubledTurn, 0.980433, 15)], NUTS sampler in 13 dimensions
+  stepsize (ϵ) ≈ 0.235
   maximum depth = 10
-  Gaussian kinetic energy, √diag(M⁻¹): [0.626054, 0.0693645, 0.198542, 0.182358, 0.162628, 0.179359, 0.14946, 0.200576, 0.165442, 0.172748, 0.15917, 0.213949, 0.12735]
+  Gaussian kinetic energy, √diag(M⁻¹): [0.739309, 0.0816943, 0.252151, 0.21469, 0.219651, 0.201388, 0.18738, 0.210218, 0.195886, 0.192716, 0.18727, 0.290627, 0.10676]
 )</code></pre></div><p>We use the transformation to obtain the posterior from the chain.</p><div><pre><code class="language-julia">posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));
 posterior[1:5]</code></pre><pre><code class="language-none">5-element Array{Array{Float64,1},1}:
- [1.94649, 0.158257, -0.159769, 0.110044, 0.050984, 0.577613, 0.169092, -0.221008, 0.195988, 0.00673574, 0.391257, 0.136789, 0.50482]
- [0.238534, 0.326187, 0.164205, 0.518332, 0.19767, 0.595424, 0.319954, 0.00871166, 0.3273, 0.14269, 0.462103, -0.0922999, 0.683636]
- [1.12313, 0.227138, -0.253216, 0.294872, 0.177114, 0.690684, 0.443537, -0.135172, 0.587485, -0.0188665, 0.741344, 0.272326, 0.595107]
- [0.800604, 0.282163, 0.0652, 0.285593, 0.216655, 0.441753, 0.24807, -0.324378, 0.481445, -0.0601491, 0.372154, -0.00825771, 0.556347]
- [1.24991, 0.218641, 0.175174, 0.158483, 0.212025, 0.387083, 0.295225, -0.343508, 0.617437, 0.0127479, 0.383019, 0.117991, 0.444259]</code></pre></div><p>Extract the parameter posterior means.</p><div><pre><code class="language-julia">posterior_β = mean(trans(posterior[i]).β for i in 1:length(posterior))
+ [0.445879, 0.318812, -0.0445322, 0.234673, 0.178343, 0.39582, 0.24185, -0.527, 0.412777, -0.264903, 0.581555, -0.253049, 0.528615]
+ [1.93144, 0.174966, -0.369651, 0.0378739, -0.160755, 0.1855, -0.262008, -0.231455, 0.131897, -0.300171, 0.352977, 0.12025, 0.616292]
+ [1.25564, 0.2554, -0.225248, -0.00814139, -0.205874, 0.244247, -0.279703, -0.321932, -0.0575955, -0.450499, 0.139666, -0.147185, 0.507006]
+ [1.32405, 0.239297, -0.323666, -0.0135642, -0.136783, 0.137657, 0.203596, -0.372207, 0.119225, 0.0397367, 0.196076, -0.120208, 0.450828]
+ [1.38427, 0.225506, 0.13657, 0.203424, -0.0397839, 0.314557, 0.0857875, -0.095579, 0.0523083, -0.158748, 0.0647775, 0.107579, 0.413377]</code></pre></div><p>Extract the parameter posterior means.</p><div><pre><code class="language-julia">posterior_β = mean(trans(posterior[i]).β for i in 1:length(posterior))
 posterior_α = mean(trans(posterior[i]).α for i in 1:length(posterior))
-posterior_σ = mean(trans(posterior[i]).s for i in 1:length(posterior))[1]^2</code></pre><pre><code class="language-none">0.26793468817139515</code></pre></div><p>Effective sample sizes (of untransformed draws)</p><div><pre><code class="language-julia">ess = mapslices(effective_sample_size, get_position_matrix(chain); dims = 1)
+posterior_σ = mean(trans(posterior[i]).s for i in 1:length(posterior))[1]^2</code></pre><pre><code class="language-none">0.269603230845692</code></pre></div><p>Effective sample sizes (of untransformed draws)</p><div><pre><code class="language-julia">ess = mapslices(effective_sample_size, get_position_matrix(chain); dims = 1)
 ess</code></pre><pre><code class="language-none">1×13 Array{Float64,2}:
- 785.539  316.279  828.369  1000.0  …  924.933  671.658  435.322  533.906</code></pre></div><p>NUTS-specific statistics</p><div><pre><code class="language-julia">NUTS_statistics(chain)</code></pre><pre><code class="language-none">Hamiltonian Monte Carlo sample of length 1000
-  acceptance rate mean: 0.9, min/25%/median/75%/max: 0.0 0.86 0.94 0.98 1.0
-  termination: AdjacentTurn =&gt; 6% DoubledTurn =&gt; 94%
-  depth: 2 =&gt; 0% 3 =&gt; 12% 4 =&gt; 88% 5 =&gt; 0%</code></pre></div><p>CmdStan result</p><div><pre><code class="language-julia">m_12_6_result = &quot;
+ 880.423  870.227  803.99  605.962  …  873.923  828.527  1000.0  356.113</code></pre></div><p>NUTS-specific statistics</p><div><pre><code class="language-julia">NUTS_statistics(chain)</code></pre><pre><code class="language-none">Hamiltonian Monte Carlo sample of length 1000
+  acceptance rate mean: 0.92, min/25%/median/75%/max: 0.14 0.89 0.96 0.99 1.0
+  termination: AdjacentTurn =&gt; 4% DoubledTurn =&gt; 96%
+  depth: 2 =&gt; 0% 3 =&gt; 9% 4 =&gt; 91%</code></pre></div><p>CmdStan result</p><div><pre><code class="language-julia">m_12_6_result = &quot;
 Iterations = 1:1000
 Thinning interval = 1
 Chains = 1,2,3,4
@@ -135,6 +135,6 @@ Empirical Posterior Estimates:
  a_society.10   -0.094149204  0.2846206232 0.00450024719 0.0080735022 1000.000000
 sigma_society    0.310352849  0.1374834682 0.00217380450 0.0057325226  575.187461
 &quot;;</code></pre><pre><code class="language-none">&quot;\nIterations = 1:1000\nThinning interval = 1\nChains = 1,2,3,4\nSamples per chain = 1000\n\nEmpirical Posterior Estimates:\n                            Mean                SD               Naive SE             MCSE            ESS\n            a          1.076167468  0.7704872560 0.01218247319 0.0210530022 1000.000000\n           bp         0.263056273  0.0823415805 0.00130193470 0.0022645077 1000.000000\n  a_society.1   -0.191723568  0.2421382537 0.00382854195 0.0060563054 1000.000000\n  a_society.2    0.054569029  0.2278506876 0.00360263570 0.0051693148 1000.000000\n  a_society.3   -0.035935050  0.1926364647 0.00304584994 0.0039948433 1000.000000\n  a_society.4    0.334355037  0.1929971201 0.00305155241 0.0063871707  913.029080\n  a_society.5    0.049747513  0.1801287716 0.00284808595 0.0043631095 1000.000000\n  a_society.6   -0.311903245  0.2096126337 0.00331426674 0.0053000536 1000.000000\n  a_society.7    0.148637507  0.1744680594 0.00275858223 0.0047660246 1000.000000\n  a_society.8   -0.164567976  0.1821341074 0.00287979309 0.0034297298 1000.000000\n  a_society.9    0.277066965  0.1758237250 0.00278001719 0.0055844175  991.286501\n a_society.10   -0.094149204  0.2846206232 0.00450024719 0.0080735022 1000.000000\nsigma_society    0.310352849  0.1374834682 0.00217380450 0.0057325226  575.187461\n&quot;</code></pre></div><p>Show means</p><div><pre><code class="language-julia">[posterior_β, posterior_α, posterior_σ]</code></pre><pre><code class="language-none">3-element Array{Any,1}:
-  [1.11438, 0.260145]
-  [-0.184143, 0.0300031, -0.0520333, 0.306832, 0.0360698, -0.300665, 0.134543, -0.162002, 0.259909, -0.0943046]
- 0.26793468817139515</code></pre></div><p>End of m12.6d1.jl</p><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><footer><hr/><a class="previous" href="../m12.6d/"><span class="direction">Previous</span><span class="title">m12.6d</span></a><a class="next" href="../../"><span class="direction">Next</span><span class="title">Functions</span></a></footer></article></body></html>
+  [1.10299, 0.261583]
+  [-0.19093, 0.0356628, -0.045205, 0.302812, 0.0466648, -0.306397, 0.133304, -0.164974, 0.252458, -0.0968798]
+ 0.269603230845692</code></pre></div><p>End of m12.6d1.jl</p><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><footer><hr/><a class="previous" href="../m12.6d/"><span class="direction">Previous</span><span class="title">m12.6d</span></a><a class="next" href="../../"><span class="direction">Next</span><span class="title">Functions</span></a></footer></article></body></html>

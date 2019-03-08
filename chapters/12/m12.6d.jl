@@ -30,8 +30,8 @@ function (problem::m_12_06d_model)(θ)
     ll = 0.0
     ll += logpdf(Cauchy(0, 1), σ)
     ll += sum(logpdf.(Normal(0, σ), α)) # α[1:10]
-    ll += sum(logpdf.(Normal(0, 10), β[1])) # a
-    ll += sum(logpdf.(Normal(0, 1), β[2])) # a
+    ll += logpdf.(Normal(0, 10), β[1]) # a
+    ll += logpdf.(Normal(0, 1), β[2]) # a
     ll += sum(
       [loglikelihood(Poisson(exp(α[S[i]] + dot(X[i, :], β))), [y[i]]) for i in 1:N]
     )
@@ -91,7 +91,7 @@ Empirical Posterior Estimates:
 sigma_society    0.310352849  0.1374834682 0.00217380450 0.0057325226  575.187461
 ";
 
-[posterior_β, posterior_α, posterior_σ]
+[posterior_β, posterior_α, [posterior_σ]]
 
 # This file was generated using Literate.jl, https://github.com/fredrikekre/Literate.jl
 

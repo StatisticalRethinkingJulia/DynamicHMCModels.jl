@@ -114,7 +114,7 @@ sigma_society    0.310352849  0.1374834682 0.00217380450 0.0057325226  575.18746
         
 # Show means
 
-[posterior_β, posterior_α, posterior_σ]
+[posterior_β, posterior_α, [posterior_σ]]
 
 # End of m12.6d.jl
 

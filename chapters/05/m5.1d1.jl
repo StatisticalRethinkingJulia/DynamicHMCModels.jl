@@ -1,4 +1,4 @@
-using DynamicHMCModels, MCMCChain
+using DynamicHMCModels, MCMCChains
 
 ProjDir = rel_path_d("..", "scripts", "05")
 cd(ProjDir)
@@ -49,9 +49,10 @@ for j in 1:4
   posterior = TransformVariables.transform.(Ref(problem_transformation(p)),
     get_position.(chain));
   insert_chain!(a3d, j, posterior, trans);
-end
+end;
 
-chns = create_mcmcchains(a3d, ["a", "bA", "sigma"]);
+cnames = ["a", "bA", "sigma"]
+chns = create_mcmcchains(a3d, cnames)
 
 cmdstan_result = "
 Iterations = 1:1000

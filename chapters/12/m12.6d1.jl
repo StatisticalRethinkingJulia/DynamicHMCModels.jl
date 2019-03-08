@@ -7,7 +7,7 @@ size(df) # Should be 10x5
 
 df[:society] = 1:10;
 df[:logpop] = map((x) -> log(x), df[:population]);
-df[:total_tools] = convert(Vector{Int64}, df[:total_tools])
+#df[:total_tools] = convert(Vector{Int64}, df[:total_tools])
 first(df[[:total_tools, :logpop, :society]], 5)
 
 struct m_12_06d{TY <: AbstractVector, TX <: AbstractMatrix,

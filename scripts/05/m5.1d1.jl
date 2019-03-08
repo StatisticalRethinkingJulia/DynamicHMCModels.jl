@@ -1,6 +1,6 @@
 # # Linear regression
 
-using DynamicHMCModels, MCMCChain
+using DynamicHMCModels, MCMCChains
 
 ProjDir = rel_path_d("..", "scripts", "05")
 cd(ProjDir)
@@ -73,9 +73,8 @@ for j in 1:4
   insert_chain!(a3d, j, posterior, trans);
 end;
 
-# Convert to a MCMCChain
-
-chns = create_mcmcchains(a3d, ["a", "bA", "sigma"]);
+cnames = ["a", "bA", "sigma"]
+chns = create_mcmcchains(a3d, cnames)
 
 # cmdstan result
 

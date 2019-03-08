@@ -1,14 +1,8 @@
-# Load Julia packages (libraries) needed  for the snippets in chapter 0
-
 using DynamicHMCModels, ForwardDiff, Flux, ReverseDiff
 gr(size=(400,400))
 
-# CmdStan uses a tmp directory to store the output of cmdstan
-
 ProjDir = rel_path_d("..", "scripts", "10")
 cd(ProjDir)
-
-# ### snippet 10.4
 
 d = CSV.read(rel_path("..", "data", "chimpanzees.csv"), delim=';');
 df = convert(DataFrame, d);
@@ -32,8 +26,6 @@ struct m_10_04d_model{TY <: AbstractVector, TX <: AbstractMatrix,
     N_actors::Int
 end
 
-# Make the type callable with the parameters *as a single argument*.
-
 function (problem::m_10_04d_model)(θ)
     @unpack y, X, A, N, N_actors = problem   # extract the data
     @unpack β, α = θ  # works on the named tuple too
@@ -46,8 +38,6 @@ function (problem::m_10_04d_model)(θ)
     ll
 end
 
-# Instantiate the model with data and inits.
-
 N = size(df, 1)
 N_actors = length(unique(df[:actor]))
 X = hcat(ones(Int64, N), df[:prosoc_left] .* df[:condition]);
@@ -57,16 +47,10 @@ p = m_10_04d_model(y, X, A, N, N_actors);
 θ = (β = [1.0, 0.0], α = [-1.0, 10.0, -1.0, -1.0, -1.0, 0.0, 2.0])
 p(θ)
 
-# Write a function to return properly dimensioned transformation.
-
 problem_transformation(p::m_10_04d_model) =
     as( (β = as(Array, size(p.X, 2)), α = as(Array, p.N_actors), ) )
 
-# Wrap the problem with a transformation, then use Flux for the gradient.
-
 P = TransformedLogDensity(problem_transformation(p), p)
-
-# For stress testing
 
 stresstest = false
 
@@ -79,9 +63,7 @@ if stresstest
   LogDensityProblems.stresstest(p, N=1000, scale=1.0)
 else
   ∇P = LogDensityRejectErrors(ADgradient(ad, P));
-end  
-
-# Run N chains
+end
 
 N = 1
 posterior = Vector{Array{NamedTuple{(:β, :α),Tuple{Array{Float64,1},
@@ -92,8 +74,6 @@ for i in 1:N
   posterior[i] = TransformVariables.transform.(Ref(problem_transformation(p)),
     get_position.(chain));
 end
-
-# Result rethinking
 
 rethinking = "
       mean   sd  5.5% 94.5% n_eff Rhat
@@ -108,12 +88,8 @@ bp    0.83 0.27  0.42  1.27  2070    1
 bpC  -0.13 0.31 -0.62  0.34  3430    1
 ";
 
-# Set varable names
-
 parameter_names = ["bp", "bpC"]
 pooled_parameter_names = ["a_1", "a_2", "a_3", "a_4", "a_5", "a_6", "a_7"]
-
-# Create a3d
 
 a3d = Array{Float64, 3}(undef, 1000, 9, N);
 for j in 1:N
@@ -131,20 +107,13 @@ chns = MCMCChains.Chains(a3d,
   )
 );
 
-# Describe the chain
-
 describe(chns)
-
-# Describe the chain
 
 describe(chns, section=:pooled)
 
-# Plot the chain parameters
-
 plot(chns)
-
-# Plot the chain pooled parameters
 
 plot(chns, section=:pooled)
 
-# End of `m10.04d1.jl`
+# This file was generated using Literate.jl, https://github.com/fredrikekre/Literate.jl
+

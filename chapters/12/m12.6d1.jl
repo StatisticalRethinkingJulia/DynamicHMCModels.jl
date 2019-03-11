@@ -5,12 +5,12 @@ ProjDir = rel_path_d("..", "scripts", "12")
 df = CSV.read(rel_path( "..", "data",  "Kline.csv"), delim=';');
 size(df) # Should be 10x5
 
-df[:society] = 1:10;
 df[:logpop] = map((x) -> log(x), df[:population]);
-#df[:total_tools] = convert(Vector{Int64}, df[:total_tools])
+df[:society] = 1:10;
+
 first(df[[:total_tools, :logpop, :society]], 5)
 
-struct m_12_06d{TY <: AbstractVector, TX <: AbstractMatrix,
+struct m_12_06d_model{TY <: AbstractVector, TX <: AbstractMatrix,
   TS <: AbstractVector}
     "Observations (total_tools)."
     y::TY
@@ -22,69 +22,46 @@ struct m_12_06d{TY <: AbstractVector, TX <: AbstractMatrix,
     N::Int
     "Number of societies (also 10)"
     N_societies::Int
-end;
+end
 
-function (problem::m_12_06d)(θ)
+function (problem::m_12_06d_model)(θ)
     @unpack y, X, S, N, N_societies = problem   # extract the data
-    @unpack β, α, s = trans(θ)  # β : a, bp, α : a_society, s
-    σ = s[1]^2
+    @unpack β, α, σ = θ  # β : a, bp, α : a_society
     ll = 0.0
-    ll += logpdf(Cauchy(0, 1), σ) # sigma
+    ll += logpdf(Cauchy(0, 1), σ)
     ll += sum(logpdf.(Normal(0, σ), α)) # α[1:10]
     ll += logpdf.(Normal(0, 10), β[1]) # a
-    ll += logpdf.(Normal(0, 1), β[2]) # bp
+    ll += logpdf.(Normal(0, 1), β[2]) # a
     ll += sum(
       [loglikelihood(Poisson(exp(α[S[i]] + dot(X[i, :], β))), [y[i]]) for i in 1:N]
     )
+    ll
 end
 
 N = size(df, 1)
 N_societies = length(unique(df[:society]))
 X = hcat(ones(Int64, N), df[:logpop]);
-S = df[:society];
-y = df[:total_tools];
-γ = (β = [1.0, 0.25], α = rand(Normal(0, 1), N_societies), s = [0.2]);
-p = m_12_06d(y, X, S, N, N_societies);
-
-trans = as((β = as(Array, 2), α = as(Array, 10), s = as(Array, 1)));
-
-θ = inverse(trans, γ);
+S = df[:society]
+y = df[:total_tools]
+p = m_12_06d_model(y, X, S, N, N_societies);
+θ = (β = [1.0, 0.25], α = rand(Normal(0, 1), N_societies), σ = 0.2)
 p(θ)
 
-using Optim
-
-x0 = θ;
-lower = vcat([0.0, 0.0], -3ones(10), [0.0]);
-upper = vcat([2.0, 1.0], 3ones(10), [5.0]);
-ll(x) = -p(x);
-
-inner_optimizer = GradientDescent()
-
-res = optimize(ll, lower, upper, x0, Fminbox(inner_optimizer));
-res
-
-Optim.minimizer(res)
-
-problem_transformation(p::m_12_06d) =
-  as( Vector, length(θ) )
+problem_transformation(p::m_12_06d_model) =
+    as( (β = as(Array, size(p.X, 2)), α = as(Array, p.N_societies), σ = asℝ₊) )
 
 P = TransformedLogDensity(problem_transformation(p), p)
 ∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
 #∇P = ADgradient(:ForwardDiff, P);
 
-chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
+posterior = Vector{Array{NamedTuple{(:β, :α, :σ),Tuple{Array{Float64,1},
+  Array{Float64,1},Float64}},1}}(undef, 4)
 
-posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));
-posterior[1:5]
-
-posterior_β = mean(trans(posterior[i]).β for i in 1:length(posterior))
-posterior_α = mean(trans(posterior[i]).α for i in 1:length(posterior))
-posterior_σ = mean(trans(posterior[i]).s for i in 1:length(posterior))[1]^2
-
-ess = mapslices(effective_sample_size, get_position_matrix(chain); dims = 1)
-ess
-
-NUTS_statistics(chain)
+for i in 1:4
+  chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
+  posterior[i] = TransformVariables.transform.(Ref(problem_transformation(p)),
+    get_position.(chain));
+end
 
 m_12_6_result = "
 Iterations = 1:1000
@@ -109,7 +86,33 @@ Empirical Posterior Estimates:
 sigma_society    0.310352849  0.1374834682 0.00217380450 0.0057325226  575.187461
 ";
 
-[posterior_β, posterior_α, posterior_σ]
+parameter_names = ["a", "bp", "sigma_society"]
+pooled_parameter_names = ["a_society[$i]" for i in 1:10]
+
+a3d = Array{Float64, 3}(undef, 1000, 13, 4);
+for j in 1:4
+  for i in 1:1000
+    a3d[i, 1:2, j] = values(posterior[j][i][1])
+    a3d[i, 3, j] = values(posterior[j][i][3])
+    a3d[i, 4:13, j] = values(posterior[j][i][2])
+  end
+end
+
+chns = MCMCChains.Chains(a3d,
+  vcat(parameter_names, pooled_parameter_names),
+  Dict(
+    :parameters => parameter_names,
+    :pooled => pooled_parameter_names)
+  )
+);
+
+describe(chns)
+
+describe(chns, section=:pooled)
+
+plot(chns)
+
+plot(chns, section=:pooled)
 
 # This file was generated using Literate.jl, https://github.com/fredrikekre/Literate.jl
 

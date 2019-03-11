@@ -60,14 +60,19 @@ ad = :ForwardDiff
 
 if stresstest
   ∇P = ADgradient(:ForwardDiff, P);
-  #LogDensityProblems.stresstest(p, N=1000, scale=1.0)
+  LogDensityProblems.stresstest(p, N=1000, scale=1.0)
 else
   ∇P = LogDensityRejectErrors(ADgradient(ad, P));
 end
 
-chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 3000);
-posterior = TransformVariables.transform.(Ref(problem_transformation(p)),
-  get_position.(chain));
+posterior = Vector{Array{NamedTuple{(:β, :α),Tuple{Array{Float64,1},
+  Array{Float64,1}}},1}}(undef, 4)
+
+for i in 1:4
+  chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
+  posterior[i] = TransformVariables.transform.(Ref(problem_transformation(p)),
+    get_position.(chain));
+end
 
 rethinking = "
       mean   sd  5.5% 94.5% n_eff Rhat
@@ -85,10 +90,12 @@ bpC  -0.13 0.31 -0.62  0.34  3430    1
 parameter_names = ["bp", "bpC"]
 pooled_parameter_names = ["a[$i]" for i in 1:7]
 
-a3d = Array{Float64, 3}(undef, 3000, 9, 1);
-for i in 1:3000
-  a3d[i, 1:2, 1] = values(posterior[i][1])
-  a3d[i, 3:9, 1] = values(posterior[i][2])
+a3d = Array{Float64, 3}(undef, 1000, 9, 4);
+for j in 1:4
+  for i in 1:1000
+    a3d[i, 1:2, j] = values(posterior[j][i][1])
+    a3d[i, 3:9, j] = values(posterior[j][i][2])
+  end
 end
 
 chns = MCMCChains.Chains(a3d,

@@ -52,7 +52,7 @@ for j in 1:4
 end;
 
 cnames = ["a", "bA", "sigma"]
-chns = create_mcmcchains(a3d, cnames)
+chns = Chains(a3d, cnames)
 
 cmdstan_result = "
 Iterations = 1:1000

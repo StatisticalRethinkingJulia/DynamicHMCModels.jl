@@ -119,7 +119,7 @@ chns = MCMCChains.Chains(a3d,
   vcat(parameter_names, pooled_parameter_names),
   Dict(
     :parameters => parameter_names,
-    :pooled => pooled_parameter_names)
+    :pooled => pooled_parameter_names
   )
 );
 

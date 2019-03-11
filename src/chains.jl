@@ -19,17 +19,7 @@ function create_a3d(noofsamples, noofvariables, noofchains)
    Chains(a3d, Symbol.(cnames))
  end
  
- function create_mcmcchains(a3d, cnames, sections::Dict{Symbol, Vector{Symbol}})
-   println(sections)
-   Chains(a3d, Symbol.(cnames), sections)
- end
-
  function create_mcmcchains(a3d, cnames, sections::Dict{Symbol, Vector{String}})
-   println(sections)
-   symbol_sections = Dict()
-   for key in keys(sections)
-     symbol_sections[key] = Symbol.(sections[key])
-   end
-   Chains(a3d, Symbol.(cnames), symbol_sections)
+   Chains(a3d, cnames, sections)
  end
  

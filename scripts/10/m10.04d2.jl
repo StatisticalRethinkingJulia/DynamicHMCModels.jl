@@ -123,10 +123,10 @@ for j in 1:4
 end
 
 chns = MCMCChains.Chains(a3d,
-  Symbol.(vcat(parameter_names, pooled_parameter_names)),
+  vcat(parameter_names, pooled_parameter_names),
   Dict(
-    :parameters => Symbol.(parameter_names),
-    :pooled => Symbol.(pooled_parameter_names)
+    :parameters => parameter_names,
+    :pooled => pooled_parameter_names
   )
 );
 

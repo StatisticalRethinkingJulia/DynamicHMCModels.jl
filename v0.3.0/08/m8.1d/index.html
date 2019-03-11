@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>m8.1d · DynamicHMCModels.jl</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link href="../../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>DynamicHMCModels.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../../intro/">Home</a></li><li><span class="toctext">Chapter 02</span><ul><li><a class="toctext" href="../../02/m2.1d/">m2.1d</a></li></ul></li><li><span class="toctext">Chapter 04</span><ul><li><a class="toctext" href="../../04/m4.1d/">m4.1d</a></li><li><a class="toctext" href="../../04/m4.2d/">m4.2d</a></li><li><a class="toctext" href="../../04/m4.5d/">m4.5d</a></li></ul></li><li><span class="toctext">Chapter 05</span><ul><li><a class="toctext" href="../../05/m5.1d/">m5.1d</a></li><li><a class="toctext" href="../../05/m5.1d1/">m5.1d1</a></li><li><a class="toctext" href="../../05/m5.3d/">m5.3d</a></li><li><a class="toctext" href="../../05/m5.6d/">m5.6d</a></li></ul></li><li><span class="toctext">Chapter 08</span><ul><li class="current"><a class="toctext" href>m8.1d</a><ul class="internal"></ul></li></ul></li><li><span class="toctext">Chapter 10</span><ul><li><a class="toctext" href="../../10/m10.02d/">m10.02d</a></li><li><a class="toctext" href="../../10/m10.02d1/">m10.02d1</a></li><li><a class="toctext" href="../../10/m10.04d/">m10.04d</a></li><li><a class="toctext" href="../../10/m10.04d1/">m10.04d1</a></li><li><a class="toctext" href="../../10/m10.04d2/">m10.04d2</a></li></ul></li><li><span class="toctext">Chapter 12</span><ul><li><a class="toctext" href="../../12/m12.6d/">m12.6d</a></li><li><a class="toctext" href="../../12/m12.6d1/">m12.6d1</a></li><li><a class="toctext" href="../../12/m12.6d2/">m12.6d2</a></li></ul></li><li><a class="toctext" href="../../">Functions</a></li></ul></nav><article id="docs"><header><nav><ul><li>Chapter 08</li><li><a href>m8.1d</a></li></ul><a class="edit-page" href="https://github.com/StatisticalRethinkingJulia/DynamicHMCModels.jl/blob/master/scripts/08/m8.1d.jl"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>m8.1d</span><a class="fa fa-bars" href="#"></a></div></header><p>Load Julia packages (libraries) needed  for the snippets in chapter 0</p><div><pre><code class="language-julia">using DynamicHMCModels</code></pre></div><p>CmdStan uses a tmp directory to store the output of cmdstan</p><div><pre><code class="language-julia">ProjDir = rel_path_d(&quot;..&quot;, &quot;scripts&quot;, &quot;08&quot;)
+cd(ProjDir)</code></pre></div><h3><a class="nav-anchor" id="snippet-5.1-1" href="#snippet-5.1-1">snippet 5.1</a></h3><div><pre><code class="language-julia">d = CSV.read(rel_path(&quot;..&quot;, &quot;data&quot;, &quot;rugged.csv&quot;), delim=&#39;;&#39;);
+df = convert(DataFrame, d);
+
+dcc = filter(row -&gt; !(ismissing(row[:rgdppc_2000])), df)
+dcc[:log_gdp] = log.(dcc[:rgdppc_2000])
+dcc[:cont_africa] = Array{Float64}(convert(Array{Int}, dcc[:cont_africa]))</code></pre><pre><code class="language-none">170-element Array{Float64,1}:
+ 1.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 1.0
+ ⋮
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 1.0
+ 1.0
+ 1.0</code></pre></div><p>First 5 rows with data</p><div><pre><code class="language-julia">first(dcc[[:rugged, :cont_africa, :log_gdp]], 5)
+
+struct m_8_1_model{TY &lt;: AbstractVector, TX &lt;: AbstractMatrix}
+    &quot;Observations.&quot;
+    y::TY
+    &quot;Covariates&quot;
+    X::TX
+end</code></pre></div><p>Make the type callable with the parameters <em>as a single argument</em>.</p><div><pre><code class="language-julia">function (problem::m_8_1_model)(θ)
+    @unpack y, X, = problem   # extract the data
+    @unpack β, σ = θ            # works on the named tuple too
+    ll = 0.0
+    ll += logpdf(Normal(0, 100), X[1]) # a = X[1]
+    ll += logpdf(Normal(0, 10), X[2]) # bR = X[2]
+    ll += logpdf(Normal(0, 10), X[3]) # bA = X[3]
+    ll += logpdf(Normal(0, 10), X[4]) # bAR = X[4]
+    ll += logpdf(TDist(1.0), σ)
+    ll += loglikelihood(Normal(0, σ), y .- X*β)
+    ll
+end</code></pre></div><p>Instantiate the model with data and inits.</p><div><pre><code class="language-julia">N = size(dcc, 1)
+X = hcat(ones(N), dcc[:rugged], dcc[:cont_africa], dcc[:rugged].*dcc[:cont_africa]);
+y = convert(Vector{Float64}, dcc[:log_gdp])
+p = m_8_1_model(y, X);
+p((β = [1.0, 2.0, 1.0, 2.0], σ = 1.0))</code></pre><pre><code class="language-none">-2770.7279383721293</code></pre></div><p>Write a function to return properly dimensioned transformation.</p><div><pre><code class="language-julia">problem_transformation(p::m_8_1_model) =
+    as((β = as(Array, size(p.X, 2)), σ = asℝ₊))</code></pre></div><p>Wrap the problem with a transformation, then use Flux for the gradient.</p><div><pre><code class="language-julia">P = TransformedLogDensity(problem_transformation(p), p)
+∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));</code></pre><pre><code class="language-none">LogDensityRejectErrors{InvalidLogDensityException,LogDensityProblems.ForwardDiffLogDensity{TransformedLogDensity{TransformVariables.TransformNamedTuple{(:β, :σ),Tuple{TransformVariables.ArrayTransform{TransformVariables.Identity,1},TransformVariables.ShiftedExp{true,Float64}}},Main.ex-m8.1d.m_8_1_model{Array{Float64,1},Array{Union{Missing, Float64},2}}},ForwardDiff.GradientConfig{ForwardDiff.Tag{getfield(LogDensityProblems, Symbol(&quot;##1#2&quot;)){TransformedLogDensity{TransformVariables.TransformNamedTuple{(:β, :σ),Tuple{TransformVariables.ArrayTransform{TransformVariables.Identity,1},TransformVariables.ShiftedExp{true,Float64}}},Main.ex-m8.1d.m_8_1_model{Array{Float64,1},Array{Union{Missing, Float64},2}}}},Float64},Float64,5,Array{ForwardDiff.Dual{ForwardDiff.Tag{getfield(LogDensityProblems, Symbol(&quot;##1#2&quot;)){TransformedLogDensity{TransformVariables.TransformNamedTuple{(:β, :σ),Tuple{TransformVariables.ArrayTransform{TransformVariables.Identity,1},TransformVariables.ShiftedExp{true,Float64}}},Main.ex-m8.1d.m_8_1_model{Array{Float64,1},Array{Union{Missing, Float64},2}}}},Float64},Float64,5},1}}}}(ForwardDiff AD wrapper for TransformedLogDensity of dimension 5, w/ chunk size 5)</code></pre></div><p>Tune and sample.</p><div><pre><code class="language-julia">chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);</code></pre><pre><code class="language-none">MCMC, adapting ϵ (75 steps)
+0.00049 s/step ...done
+MCMC, adapting ϵ (25 steps)
+0.0004 s/step ...done
+MCMC, adapting ϵ (50 steps)
+0.00034 s/step ...done
+MCMC, adapting ϵ (100 steps)
+0.00041 s/step ...done
+MCMC, adapting ϵ (200 steps)
+0.00028 s/step ...done
+MCMC, adapting ϵ (400 steps)
+0.00025 s/step ...done
+MCMC, adapting ϵ (50 steps)
+0.00026 s/step ...done
+MCMC (1000 steps)
+0.00025 s/step ...done
+(NUTS_Transition{Array{Float64,1},Float64}[NUTS_Transition{Array{Float64,1},Float64}([9.185230392362604, -0.20027929519732746, -2.0369345442997036, 0.42019327633305636, -0.02473981467977663], -248.9694687643527, 2, DynamicHMC.DoubledTurn, 0.9741338221391268, 3), NUTS_Transition{Array{Float64,1},Float64}([9.256387250979284, -0.20300913929954167, -1.8582786650150132, 0.3406576177208514, -0.06056815360767699], -249.36062730602194, 3, DynamicHMC.DoubledTurn, 0.8601252069449122, 7), NUTS_Transition{Array{Float64,1},Float64}([9.041260664982058, -0.15841782412501929, -2.1058609989236863, 0.3490775491357952, -0.055576565312416774], -253.47332040142618, 2, DynamicHMC.DoubledTurn, 0.6042680042791212, 3), NUTS_Transition{Array{Float64,1},Float64}([9.328366769041091, -0.24935228556535372, -2.164135029470815, 0.4514883969255831, 0.022422383689916017], -251.5194247369052, 2, DynamicHMC.DoubledTurn, 1.0, 3), NUTS_Transition{Array{Float64,1},Float64}([9.237235492830793, -0.1692198970416837, -1.5859985780402788, 0.19875270850072946, -0.11284529775083524], -250.86643238762295, 3, DynamicHMC.DoubledTurn, 0.9604230442315763, 7), NUTS_Transition{Array{Float64,1},Float64}([9.055144168493449, -0.02615713091685292, -1.5746089595833803, 0.24132479816197852, -0.0013057021462555482], -253.68101028792972, 3, DynamicHMC.AdjacentTurn, 0.8390186764304971, 15), NUTS_Transition{Array{Float64,1},Float64}([9.061347177616659, -0.021327713793575034, -1.5424304292704205, 0.16710397590147774, -0.016663402594685076], -252.13284594861378, 2, DynamicHMC.AdjacentTurn, 0.9965833464815, 7), NUTS_Transition{Array{Float64,1},Float64}([9.296861688115719, -0.31244000176860903, -1.8235151987023048, 0.389298151359165, -0.07949119692006429], -251.75634480979213, 3, DynamicHMC.DoubledTurn, 1.0, 7), NUTS_Transition{Array{Float64,1},Float64}([9.37564029087324, -0.14715213958458395, -2.1777807874597404, 0.4267021542606603, -0.07770940624537605], -252.47628445173703, 2, DynamicHMC.DoubledTurn, 0.8597466608397445, 3), NUTS_Transition{Array{Float64,1},Float64}([9.595358879090735, -0.33588678167908215, -2.655575202834367, 0.7551737739081359, 0.024195692704213137], -256.46596599951505, 2, DynamicHMC.AdjacentTurn, 0.8998534683752047, 7)  …  NUTS_Transition{Array{Float64,1},Float64}([9.538693838221866, -0.3470913807947467, -2.2282204790389093, 0.3479118898368486, -0.02898605065459687], -252.6982856916479, 2, DynamicHMC.DoubledTurn, 0.7370240031546245, 3), NUTS_Transition{Array{Float64,1},Float64}([9.374152151645474, -0.23732647753252567, -2.1709686282665874, 0.35681291437065565, -0.03771914654751669], -252.49468859548335, 2, DynamicHMC.DoubledTurn, 0.9817784706477095, 3), NUTS_Transition{Array{Float64,1},Float64}([8.902620321566046, -0.08814260355463559, -1.715047669116541, 0.2742065563302713, -0.1184633513236578], -251.66687748516324, 3, DynamicHMC.DoubledTurn, 0.8897475363339981, 7), NUTS_Transition{Array{Float64,1},Float64}([9.044743543820932, -0.14024452943409502, -1.928851933548367, 0.44050844318198074, -0.09270357645544443], -251.1281592440398, 2, DynamicHMC.DoubledTurn, 1.0, 3), NUTS_Transition{Array{Float64,1},Float64}([8.914612862416485, -0.05859135049083304, -1.6942025907772096, 0.4072623463717151, -0.08838360629225042], -251.92235823754967, 2, DynamicHMC.DoubledTurn, 0.7995145443963178, 3), NUTS_Transition{Array{Float64,1},Float64}([9.517020950487419, -0.3268515515491175, -2.1577885665546908, 0.361163680942946, -0.019735298577296917], -253.01164430333426, 3, DynamicHMC.DoubledTurn, 0.9607448742503429, 7), NUTS_Transition{Array{Float64,1},Float64}([8.975579428126581, -0.10654168823721424, -2.0014093952454814, 0.4677999175847489, -0.019498350388407033], -255.4213749735097, 3, DynamicHMC.DoubledTurn, 0.8320691115820212, 7), NUTS_Transition{Array{Float64,1},Float64}([9.232370002622716, -0.2233479533677693, -2.186219538744264, 0.5848847804981872, -0.06852384088194491], -252.60321236091855, 3, DynamicHMC.DoubledTurn, 0.9542356991434916, 7), NUTS_Transition{Array{Float64,1},Float64}([9.203694884518415, -0.17646169130832043, -1.7292670910724415, 0.22195067839719515, -0.06544234918442654], -248.78192390186692, 3, DynamicHMC.DoubledTurn, 0.9975329378172655, 7), NUTS_Transition{Array{Float64,1},Float64}([9.297542251176953, -0.16327971294913407, -2.0326753434240743, 0.21982043201578877, -0.04920927340746051], -251.7858054684876, 2, DynamicHMC.AdjacentTurn, 0.7638022956764399, 7)], NUTS sampler in 5 dimensions
+  stepsize (ϵ) ≈ 0.677
+  maximum depth = 10
+  Gaussian kinetic energy, √diag(M⁻¹): [0.14317797851361627, 0.08409832132628427, 0.21924546339554127, 0.13564595339342078, 0.05827780484799254]
+)</code></pre></div><p>We use the transformation to obtain the posterior from the chain.</p><div><pre><code class="language-julia">posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));
+posterior[1:5]</code></pre><pre><code class="language-none">5-element Array{NamedTuple{(:β, :σ),Tuple{Array{Float64,1},Float64}},1}:
+ (β = [9.185230392362604, -0.20027929519732746, -2.0369345442997036, 0.42019327633305636], σ = 0.9755637063654595)
+ (β = [9.256387250979284, -0.20300913929954167, -1.8582786650150132, 0.3406576177208514], σ = 0.941229618638228)
+ (β = [9.041260664982058, -0.15841782412501929, -2.1058609989236863, 0.3490775491357952], σ = 0.9459395947370997)
+ (β = [9.328366769041091, -0.24935228556535372, -2.164135029470815, 0.4514883969255831], σ = 1.022675654773182)
+ (β = [9.237235492830793, -0.1692198970416837, -1.5859985780402788, 0.19875270850072946], σ = 0.8932888432203214)</code></pre></div><p>Extract the parameter posterior means: <code>β</code>,</p><div><pre><code class="language-julia">posterior_β = mean(first, posterior)</code></pre><pre><code class="language-none">4-element Array{Float64,1}:
+  9.219882681317307
+ -0.20173120076643064
+ -1.9542121988623338
+  0.39561070098038126</code></pre></div><p>then <code>σ</code>:</p><div><pre><code class="language-julia">posterior_σ = mean(last, posterior)</code></pre><pre><code class="language-none">0.9464182883637053</code></pre></div><p>Effective sample sizes (of untransformed draws)</p><div><pre><code class="language-julia">ess = mapslices(effective_sample_size,
+                get_position_matrix(chain); dims = 1)</code></pre></div><p>NUTS-specific statistics</p><div><pre><code class="language-julia">NUTS_statistics(chain)</code></pre><pre><code class="language-none">Hamiltonian Monte Carlo sample of length 1000
+  acceptance rate mean: 0.91, min/25%/median/75%/max: 0.41 0.86 0.94 0.99 1.0
+  termination: AdjacentTurn =&gt; 13% DoubledTurn =&gt; 87%
+  depth: 1 =&gt; 1% 2 =&gt; 41% 3 =&gt; 58% 4 =&gt; 0%</code></pre></div><p>Result rethinking</p><div><pre><code class="language-julia">rethinking = &quot;
+       mean   sd  5.5% 94.5% n_eff Rhat
+a      9.22 0.14  9.00  9.46   282    1
+bR    -0.21 0.08 -0.33 -0.08   275    1
+bA    -1.94 0.24 -2.33 -1.59   268    1
+bAR    0.40 0.14  0.18  0.62   271    1
+sigma  0.96 0.05  0.87  1.04   339    1
+&quot;</code></pre><pre><code class="language-none">&quot;\n       mean   sd  5.5% 94.5% n_eff Rhat\na      9.22 0.14  9.00  9.46   282    1\nbR    -0.21 0.08 -0.33 -0.08   275    1\nbA    -1.94 0.24 -2.33 -1.59   268    1\nbAR    0.40 0.14  0.18  0.62   271    1\nsigma  0.96 0.05  0.87  1.04   339    1\n&quot;</code></pre></div><p>Summary</p><div><pre><code class="language-julia">[posterior_β, posterior_σ]</code></pre><pre><code class="language-none">2-element Array{Any,1}:
+  [9.219882681317307, -0.20173120076643064, -1.9542121988623338, 0.39561070098038126]
+ 0.9464182883637053</code></pre></div><p>End of <code>08/m8.1s.jl</code></p><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><footer><hr/><a class="previous" href="../../05/m5.6d/"><span class="direction">Previous</span><span class="title">m5.6d</span></a><a class="next" href="../../10/m10.02d/"><span class="direction">Next</span><span class="title">m10.02d</span></a></footer></article></body></html>

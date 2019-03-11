@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>m2.1d · DynamicHMCModels.jl</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link href="../../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>DynamicHMCModels.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../../intro/">Home</a></li><li><span class="toctext">Chapter 02</span><ul><li class="current"><a class="toctext" href>m2.1d</a><ul class="internal"></ul></li></ul></li><li><span class="toctext">Chapter 04</span><ul><li><a class="toctext" href="../../04/m4.1d/">m4.1d</a></li><li><a class="toctext" href="../../04/m4.2d/">m4.2d</a></li><li><a class="toctext" href="../../04/m4.5d/">m4.5d</a></li></ul></li><li><span class="toctext">Chapter 05</span><ul><li><a class="toctext" href="../../05/m5.1d/">m5.1d</a></li><li><a class="toctext" href="../../05/m5.1d1/">m5.1d1</a></li><li><a class="toctext" href="../../05/m5.3d/">m5.3d</a></li><li><a class="toctext" href="../../05/m5.6d/">m5.6d</a></li></ul></li><li><span class="toctext">Chapter 08</span><ul><li><a class="toctext" href="../../08/m8.1d/">m8.1d</a></li></ul></li><li><span class="toctext">Chapter 10</span><ul><li><a class="toctext" href="../../10/m10.02d/">m10.02d</a></li><li><a class="toctext" href="../../10/m10.02d1/">m10.02d1</a></li><li><a class="toctext" href="../../10/m10.04d/">m10.04d</a></li><li><a class="toctext" href="../../10/m10.04d1/">m10.04d1</a></li><li><a class="toctext" href="../../10/m10.04d2/">m10.04d2</a></li></ul></li><li><span class="toctext">Chapter 12</span><ul><li><a class="toctext" href="../../12/m12.6d/">m12.6d</a></li><li><a class="toctext" href="../../12/m12.6d1/">m12.6d1</a></li><li><a class="toctext" href="../../12/m12.6d2/">m12.6d2</a></li></ul></li><li><a class="toctext" href="../../">Functions</a></li></ul></nav><article id="docs"><header><nav><ul><li>Chapter 02</li><li><a href>m2.1d</a></li></ul><a class="edit-page" href="https://github.com/StatisticalRethinkingJulia/DynamicHMCModels.jl/blob/master/scripts/02/m2.1d.jl"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>m2.1d</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Estimate-Binomial-draw-probabilility-1" href="#Estimate-Binomial-draw-probabilility-1">Estimate Binomial draw probabilility</a></h1><div><pre><code class="language-julia">using DynamicHMCModels</code></pre></div><p>Define a structure to hold the data.</p><div><pre><code class="language-julia">struct BernoulliProblem
+    &quot;Total number of draws in the data.&quot;
+    n::Int
+    &quot;Number of draws `==1` in the data&quot;
+    s::Vector{Int}
+end;</code></pre></div><p>Make the type callable with the parameters <em>as a single argument</em>.</p><div><pre><code class="language-julia">function (problem::BernoulliProblem)((α, )::NamedTuple{(:α, )})
+    @unpack n, s = problem        # extract the data
+    loglikelihood(Binomial(n, α), s)
+end</code></pre></div><p>Create the data and complete setting up the problem.</p><div><pre><code class="language-julia">obs = rand(Binomial(9, 2/3), 1)
+p = BernoulliProblem(9, obs)
+p((α = 0.5, ))</code></pre><pre><code class="language-none">-4.041100047703289</code></pre></div><p>Write a function to return properly dimensioned transformation.</p><div><pre><code class="language-julia">problem_transformation(p::BernoulliProblem) =
+    as((α = as𝕀, ),  )</code></pre></div><p>Use a flat priors (the default, omitted) for α</p><div><pre><code class="language-julia">P = TransformedLogDensity(problem_transformation(p), p)
+∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));</code></pre><pre><code class="language-none">LogDensityRejectErrors{InvalidLogDensityException,LogDensityProblems.ForwardDiffLogDensity{TransformedLogDensity{TransformVariables.TransformNamedTuple{(:α,),Tuple{TransformVariables.ScaledShiftedLogistic{Float64}}},Main.ex-m2.1d.BernoulliProblem},ForwardDiff.GradientConfig{ForwardDiff.Tag{getfield(LogDensityProblems, Symbol(&quot;##1#2&quot;)){TransformedLogDensity{TransformVariables.TransformNamedTuple{(:α,),Tuple{TransformVariables.ScaledShiftedLogistic{Float64}}},Main.ex-m2.1d.BernoulliProblem}},Float64},Float64,1,Array{ForwardDiff.Dual{ForwardDiff.Tag{getfield(LogDensityProblems, Symbol(&quot;##1#2&quot;)){TransformedLogDensity{TransformVariables.TransformNamedTuple{(:α,),Tuple{TransformVariables.ScaledShiftedLogistic{Float64}}},Main.ex-m2.1d.BernoulliProblem}},Float64},Float64,1},1}}}}(ForwardDiff AD wrapper for TransformedLogDensity of dimension 1, w/ chunk size 1)</code></pre></div><p>Sample</p><div><pre><code class="language-julia">chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000)</code></pre><pre><code class="language-none">MCMC, adapting ϵ (75 steps)
+7.7e-6 s/step ...done
+MCMC, adapting ϵ (25 steps)
+1.1e-5 s/step ...done
+MCMC, adapting ϵ (50 steps)
+1.1e-5 s/step ...done
+MCMC, adapting ϵ (100 steps)
+8.2e-6 s/step ...done
+MCMC, adapting ϵ (200 steps)
+7.4e-6 s/step ...done
+MCMC, adapting ϵ (400 steps)
+7.2e-6 s/step ...done
+MCMC, adapting ϵ (50 steps)
+1.1e-5 s/step ...done
+MCMC (1000 steps)
+2.5e-5 s/step ...done
+(NUTS_Transition{Array{Float64,1},Float64}[NUTS_Transition{Array{Float64,1},Float64}([0.5187651583081581], -6.0039256003423205, 3, DynamicHMC.DoubledTurn, 0.9568639963730302, 7), NUTS_Transition{Array{Float64,1},Float64}([0.4800575569919328], -4.299410194009949, 3, DynamicHMC.DoubledTurn, 0.9896739337965794, 7), NUTS_Transition{Array{Float64,1},Float64}([0.5152698220994292], -7.406571898512166, 2, DynamicHMC.DoubledTurn, 0.568656586077137, 3), NUTS_Transition{Array{Float64,1},Float64}([0.446350604094641], -7.593555845209533, 2, DynamicHMC.DoubledTurn, 0.5373341567359532, 3), NUTS_Transition{Array{Float64,1},Float64}([1.4446384641495005], -4.318026065286275, 3, DynamicHMC.DoubledTurn, 0.98242939923541, 7), NUTS_Transition{Array{Float64,1},Float64}([2.4039008643124866], -4.108823654610657, 1, DynamicHMC.AdjacentTurn, 0.8510336101125864, 3), NUTS_Transition{Array{Float64,1},Float64}([3.0614493770901934], -5.317809276995575, 2, DynamicHMC.DoubledTurn, 0.8861027129909909, 3), NUTS_Transition{Array{Float64,1},Float64}([3.1025888303451175], -4.595889124243939, 1, DynamicHMC.DoubledTurn, 0.9966924978150328, 1), NUTS_Transition{Array{Float64,1},Float64}([1.7368528840209168], -5.336918293360772, 1, DynamicHMC.AdjacentTurn, 0.9699074731627851, 3), NUTS_Transition{Array{Float64,1},Float64}([1.3072294974056502], -3.185215453228261, 1, DynamicHMC.AdjacentTurn, 0.9885717641517943, 3)  …  NUTS_Transition{Array{Float64,1},Float64}([2.225218302320921], -3.507108795630021, 1, DynamicHMC.AdjacentTurn, 0.9434186598338342, 3), NUTS_Transition{Array{Float64,1},Float64}([1.4905633822045956], -3.5971759131287167, 1, DynamicHMC.AdjacentTurn, 0.9846346370030418, 3), NUTS_Transition{Array{Float64,1},Float64}([1.2844215946159028], -3.074692445095468, 1, DynamicHMC.AdjacentTurn, 0.9917777068901036, 3), NUTS_Transition{Array{Float64,1},Float64}([1.308594458277571], -3.062265242752257, 1, DynamicHMC.DoubledTurn, 1.0, 1), NUTS_Transition{Array{Float64,1},Float64}([1.986776015413361], -6.675772712720139, 2, DynamicHMC.DoubledTurn, 0.5788853725967943, 3), NUTS_Transition{Array{Float64,1},Float64}([1.3250316304740573], -3.424694751845297, 1, DynamicHMC.AdjacentTurn, 0.9805257126654666, 3), NUTS_Transition{Array{Float64,1},Float64}([1.602397294812485], -3.0894807315273853, 1, DynamicHMC.AdjacentTurn, 0.9956056110912389, 3), NUTS_Transition{Array{Float64,1},Float64}([1.5930743858643759], -3.085870281254036, 2, DynamicHMC.DoubledTurn, 0.9931355308691909, 3), NUTS_Transition{Array{Float64,1},Float64}([1.3228922032644785], -3.6615677625271403, 2, DynamicHMC.DoubledTurn, 0.9334596403443948, 3), NUTS_Transition{Array{Float64,1},Float64}([2.280744114647607], -4.018201718990587, 1, DynamicHMC.AdjacentTurn, 0.8607707611456691, 3)], NUTS sampler in 1 dimensions
+  stepsize (ϵ) ≈ 0.743
+  maximum depth = 10
+  Gaussian kinetic energy, √diag(M⁻¹): [0.912518904171551]
+)</code></pre></div><p>To get the posterior for <span>$α$</span> use <code>get_position</code> and then transform back.</p><div><pre><code class="language-julia">posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));</code></pre><pre><code class="language-none">1000-element Array{NamedTuple{(:α,),Tuple{Float64}},1}:
+ (α = 0.6268589737198517,)
+ (α = 0.6177614659226344,)
+ (α = 0.6260410289535695,)
+ (α = 0.6097712078580889,)
+ (α = 0.8091719166638041,)
+ (α = 0.9171242806530356,)
+ (α = 0.955274262965425,)
+ (α = 0.956999405552833,)
+ (α = 0.8502868819263306,)
+ (α = 0.7870491812572781,)
+ ⋮
+ (α = 0.8161628181077263,)
+ (α = 0.7832014896261205,)
+ (α = 0.7872778628415527,)
+ (α = 0.8794016378033822,)
+ (α = 0.7900176206469055,)
+ (α = 0.8323531735135069,)
+ (α = 0.8310482080632231,)
+ (α = 0.7896624913261964,)
+ (α = 0.9072696692773354,)</code></pre></div><p>Extract the parameter.</p><div><pre><code class="language-julia">posterior_α = first.(posterior);</code></pre><pre><code class="language-none">1000-element Array{Float64,1}:
+ 0.6268589737198517
+ 0.6177614659226344
+ 0.6260410289535695
+ 0.6097712078580889
+ 0.8091719166638041
+ 0.9171242806530356
+ 0.955274262965425
+ 0.956999405552833
+ 0.8502868819263306
+ 0.7870491812572781
+ ⋮
+ 0.8161628181077263
+ 0.7832014896261205
+ 0.7872778628415527
+ 0.8794016378033822
+ 0.7900176206469055
+ 0.8323531735135069
+ 0.8310482080632231
+ 0.7896624913261964
+ 0.9072696692773354</code></pre></div><p>check the effective sample size</p><div><pre><code class="language-julia">ess_α = effective_sample_size(posterior_α)</code></pre><pre><code class="language-none">314.8400894366724</code></pre></div><p>NUTS-specific statistics</p><div><pre><code class="language-julia">NUTS_statistics(chain)</code></pre><pre><code class="language-none">Hamiltonian Monte Carlo sample of length 1000
+  acceptance rate mean: 0.94, min/25%/median/75%/max: 0.26 0.93 0.98 1.0 1.0
+  termination: AdjacentTurn =&gt; 37% DoubledTurn =&gt; 63%
+  depth: 1 =&gt; 55% 2 =&gt; 36% 3 =&gt; 9%</code></pre></div><p>check the mean</p><div><pre><code class="language-julia">mean(posterior_α)</code></pre><pre><code class="language-none">0.8184135795821647</code></pre></div><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><footer><hr/><a class="previous" href="../../intro/"><span class="direction">Previous</span><span class="title">Home</span></a><a class="next" href="../../04/m4.1d/"><span class="direction">Next</span><span class="title">m4.1d</span></a></footer></article></body></html>

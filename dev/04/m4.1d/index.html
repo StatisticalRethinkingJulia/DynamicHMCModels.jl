@@ -17,46 +17,46 @@ p = HeightsProblem(obs, 1.0);
 p((μ = 178, σ = 5.0,))</code></pre><pre><code class="language-none">-5170.976519811121</code></pre></div><p>Write a function to return properly dimensioned transformation.</p><div><pre><code class="language-julia">problem_transformation(p::HeightsProblem) =
     as((σ = asℝ₊, μ  = as(Real, 100, 250)), )</code></pre></div><p>Wrap the problem with a transformation, then use Flux for the gradient.</p><div><pre><code class="language-julia">P = TransformedLogDensity(problem_transformation(p), p)
 ∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));</code></pre><pre><code class="language-none">LogDensityRejectErrors{InvalidLogDensityException,LogDensityProblems.ForwardDiffLogDensity{TransformedLogDensity{TransformVariables.TransformNamedTuple{(:σ, :μ),Tuple{TransformVariables.ShiftedExp{true,Float64},TransformVariables.ScaledShiftedLogistic{Int64}}},Main.ex-m4.1d.HeightsProblem{Array{Float64,1},Float64}},ForwardDiff.GradientConfig{ForwardDiff.Tag{getfield(LogDensityProblems, Symbol(&quot;##1#2&quot;)){TransformedLogDensity{TransformVariables.TransformNamedTuple{(:σ, :μ),Tuple{TransformVariables.ShiftedExp{true,Float64},TransformVariables.ScaledShiftedLogistic{Int64}}},Main.ex-m4.1d.HeightsProblem{Array{Float64,1},Float64}}},Float64},Float64,2,Array{ForwardDiff.Dual{ForwardDiff.Tag{getfield(LogDensityProblems, Symbol(&quot;##1#2&quot;)){TransformedLogDensity{TransformVariables.TransformNamedTuple{(:σ, :μ),Tuple{TransformVariables.ShiftedExp{true,Float64},TransformVariables.ScaledShiftedLogistic{Int64}}},Main.ex-m4.1d.HeightsProblem{Array{Float64,1},Float64}}},Float64},Float64,2},1}}}}(ForwardDiff AD wrapper for TransformedLogDensity of dimension 2, w/ chunk size 2)</code></pre></div><p>Tune and sample.</p><div><pre><code class="language-julia">chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);</code></pre><pre><code class="language-none">MCMC, adapting ϵ (75 steps)
-0.00014 s/step ...done
+0.00038 s/step ...done
 MCMC, adapting ϵ (25 steps)
-9.0e-5 s/step ...done
+0.0001 s/step ...done
 MCMC, adapting ϵ (50 steps)
-0.00011 s/step ...done
+0.00015 s/step ...done
 MCMC, adapting ϵ (100 steps)
-5.6e-5 s/step ...done
+5.7e-5 s/step ...done
 MCMC, adapting ϵ (200 steps)
-4.8e-5 s/step ...done
+4.5e-5 s/step ...done
 MCMC, adapting ϵ (400 steps)
-9.6e-5 s/step ...done
+4.0e-5 s/step ...done
 MCMC, adapting ϵ (50 steps)
-6.1e-5 s/step ...done
+0.00047 s/step ...done
 MCMC (1000 steps)
-5.3e-5 s/step ...done
-(NUTS_Transition{Array{Float64,1},Float64}[NUTS_Transition{Array{Float64,1},Float64}([1.993273181286091, -0.556361534545693], -1220.2124442964582, 2, DynamicHMC.DoubledTurn, 0.8626063524178016, 3), NUTS_Transition{Array{Float64,1},Float64}([2.0091735789549228, -0.5641049936660358], -1220.1749520677613, 2, DynamicHMC.DoubledTurn, 1.0, 3), NUTS_Transition{Array{Float64,1},Float64}([2.057718618743409, -0.5456899088798003], -1220.0655360459618, 2, DynamicHMC.DoubledTurn, 0.9790500337596119, 3), NUTS_Transition{Array{Float64,1},Float64}([2.0575090173706645, -0.5613230878173674], -1220.3583835151483, 2, DynamicHMC.DoubledTurn, 0.947258233260909, 3), NUTS_Transition{Array{Float64,1},Float64}([2.017915616861195, -0.5581181367675703], -1219.3508685847767, 2, DynamicHMC.AdjacentTurn, 0.9856710754757244, 7), NUTS_Transition{Array{Float64,1},Float64}([2.044580576803973, -0.5437170698789562], -1220.1021405417273, 2, DynamicHMC.DoubledTurn, 0.9196763480367868, 3), NUTS_Transition{Array{Float64,1},Float64}([2.041698598183848, -0.5398763597693961], -1220.2976084779111, 1, DynamicHMC.DoubledTurn, 0.9161840552047014, 1), NUTS_Transition{Array{Float64,1},Float64}([2.0823042898345103, -0.5645794959431102], -1222.4447741496354, 2, DynamicHMC.DoubledTurn, 0.8254360691972336, 3), NUTS_Transition{Array{Float64,1},Float64}([2.0253582066085634, -0.5505693617150076], -1219.9127125691623, 2, DynamicHMC.DoubledTurn, 0.9925777433977307, 3), NUTS_Transition{Array{Float64,1},Float64}([2.035669171224355, -0.5642112951877623], -1222.4776863561735, 2, DynamicHMC.DoubledTurn, 0.7052866281127508, 3)  …  NUTS_Transition{Array{Float64,1},Float64}([2.0680691634479893, -0.5594724647625838], -1220.2124688568952, 1, DynamicHMC.AdjacentTurn, 0.9156974519833415, 3), NUTS_Transition{Array{Float64,1},Float64}([2.044101854859225, -0.5744052935192471], -1220.7067301874652, 2, DynamicHMC.DoubledTurn, 0.8496804585961772, 3), NUTS_Transition{Array{Float64,1},Float64}([2.101292187659723, -0.5690478661538977], -1221.6587109327434, 2, DynamicHMC.DoubledTurn, 0.8757161317615648, 3), NUTS_Transition{Array{Float64,1},Float64}([2.0508324481776063, -0.5622540431304195], -1220.768524604143, 2, DynamicHMC.DoubledTurn, 0.9809647347781731, 3), NUTS_Transition{Array{Float64,1},Float64}([2.0676631163437196, -0.5583665706465163], -1219.3554729121404, 2, DynamicHMC.DoubledTurn, 0.9815304314669158, 3), NUTS_Transition{Array{Float64,1},Float64}([2.0496579824217975, -0.5617863197079365], -1220.1536441491812, 2, DynamicHMC.DoubledTurn, 0.9034696748904919, 3), NUTS_Transition{Array{Float64,1},Float64}([2.0388567427282163, -0.5575351930017791], -1219.1868072866248, 2, DynamicHMC.AdjacentTurn, 0.9928309580256507, 7), NUTS_Transition{Array{Float64,1},Float64}([2.0436211949561067, -0.5619436693350086], -1219.2495306706505, 2, DynamicHMC.DoubledTurn, 0.9796864257390444, 3), NUTS_Transition{Array{Float64,1},Float64}([2.0759088207532956, -0.5543697936814231], -1219.4918068561424, 3, DynamicHMC.AdjacentTurn, 0.9648084929611384, 11), NUTS_Transition{Array{Float64,1},Float64}([2.01906257956353, -0.5582520869744706], -1219.512234751618, 2, DynamicHMC.DoubledTurn, 1.0, 3)], NUTS sampler in 2 dimensions
-  stepsize (ϵ) ≈ 0.819
+5.1e-5 s/step ...done
+(NUTS_Transition{Array{Float64,1},Float64}[NUTS_Transition{Array{Float64,1},Float64}([2.028132280362285, -0.5670217521064693], -1219.9385349286197, 2, DynamicHMC.DoubledTurn, 0.9827479598921484, 3), NUTS_Transition{Array{Float64,1},Float64}([2.002711527665224, -0.5391003682579442], -1222.2513199929404, 2, DynamicHMC.DoubledTurn, 0.8203326366933371, 3), NUTS_Transition{Array{Float64,1},Float64}([2.1479233999104363, -0.5519995307108491], -1224.8804601698382, 3, DynamicHMC.DoubledTurn, 0.8253267834787502, 7), NUTS_Transition{Array{Float64,1},Float64}([2.0185376989504196, -0.5642678292370713], -1222.706487182847, 2, DynamicHMC.DoubledTurn, 1.0, 3), NUTS_Transition{Array{Float64,1},Float64}([2.0237696779233967, -0.5456512343810679], -1220.5899052778352, 2, DynamicHMC.DoubledTurn, 0.9292314886805032, 3), NUTS_Transition{Array{Float64,1},Float64}([2.0538672150721964, -0.5487441917696478], -1220.0123864046482, 2, DynamicHMC.DoubledTurn, 0.993704587676402, 3), NUTS_Transition{Array{Float64,1},Float64}([2.0560806051362825, -0.5607153022019815], -1219.5735625832747, 3, DynamicHMC.DoubledTurn, 0.9926299069319894, 7), NUTS_Transition{Array{Float64,1},Float64}([2.026155730707988, -0.5542125263237453], -1220.6721455770871, 3, DynamicHMC.DoubledTurn, 0.8936687078721176, 7), NUTS_Transition{Array{Float64,1},Float64}([2.0251804028830107, -0.5438253955710487], -1220.2062695821696, 2, DynamicHMC.DoubledTurn, 0.920019872216144, 3), NUTS_Transition{Array{Float64,1},Float64}([2.0344267877338744, -0.5604738159051765], -1220.9064582979156, 1, DynamicHMC.AdjacentTurn, 0.9269428794813118, 3)  …  NUTS_Transition{Array{Float64,1},Float64}([2.0371190246275637, -0.5609529724892505], -1219.750235356808, 2, DynamicHMC.DoubledTurn, 0.9935501997487733, 3), NUTS_Transition{Array{Float64,1},Float64}([2.0874327323923443, -0.567168996658816], -1220.2642078344193, 3, DynamicHMC.DoubledTurn, 0.9310587263057352, 7), NUTS_Transition{Array{Float64,1},Float64}([2.0840267980322364, -0.5655471258948834], -1219.996369284919, 1, DynamicHMC.DoubledTurn, 1.0, 1), NUTS_Transition{Array{Float64,1},Float64}([2.084942643406237, -0.5854304794129401], -1223.1849081933497, 2, DynamicHMC.DoubledTurn, 0.7650665123905928, 3), NUTS_Transition{Array{Float64,1},Float64}([2.0741040615380872, -0.5843594114705444], -1222.2523915026743, 1, DynamicHMC.DoubledTurn, 1.0, 1), NUTS_Transition{Array{Float64,1},Float64}([2.0500485616114688, -0.5649638819368734], -1221.4414145679898, 2, DynamicHMC.DoubledTurn, 1.0, 3), NUTS_Transition{Array{Float64,1},Float64}([1.965557158217374, -0.547828720647232], -1222.0347950571402, 2, DynamicHMC.DoubledTurn, 0.8155164915947292, 3), NUTS_Transition{Array{Float64,1},Float64}([1.9970938363386295, -0.5445441766607012], -1221.8761087699, 2, DynamicHMC.DoubledTurn, 1.0, 3), NUTS_Transition{Array{Float64,1},Float64}([2.034601160893957, -0.5374372743964686], -1221.9487236446869, 3, DynamicHMC.DoubledTurn, 0.9474870264710585, 7), NUTS_Transition{Array{Float64,1},Float64}([2.029418975351358, -0.5365934623194695], -1221.0170703170209, 1, DynamicHMC.DoubledTurn, 0.9714625314551784, 1)], NUTS sampler in 2 dimensions
+  stepsize (ϵ) ≈ 0.678
   maximum depth = 10
-  Gaussian kinetic energy, √diag(M⁻¹): [0.03969276954522256, 0.012309668833107863]
+  Gaussian kinetic energy, √diag(M⁻¹): [0.04083293478744463, 0.013077487655397364]
 )</code></pre></div><p>We use the transformation to obtain the posterior from the chain.</p><div><pre><code class="language-julia">posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));</code></pre><pre><code class="language-none">1000-element Array{NamedTuple{(:σ, :μ),Tuple{Float64,Float64}},1}:
- (σ = 7.3395180615844895, μ = 154.65846214986124)
- (σ = 7.457152052712779, μ = 154.3897264681859)
- (σ = 7.828090564296462, μ = 155.0297439967478)
- (σ = 7.8264499577109214, μ = 154.48620670475572)
- (σ = 7.522628540606823, μ = 154.5974497404545)
- (σ = 7.725917429278894, μ = 155.09849822794646)
- (σ = 7.703683554591783, μ = 155.23245169021146)
- (σ = 8.022934797849327, μ = 154.37327744339737)
- (σ = 7.578825243755341, μ = 154.85984842161528)
- (σ = 7.657374506086226, μ = 154.38604124907883)
+ (σ = 7.599878652300776, μ = 154.28864854375024)
+ (σ = 7.4091189171136085, μ = 155.25953265116019)
+ (σ = 8.56704957676016, μ = 154.81009406890848)
+ (σ = 7.527309688964139, μ = 154.38408139287654)
+ (σ = 7.566795619686876, μ = 155.0310914719192)
+ (σ = 7.797999411342967, μ = 154.92337227185814)
+ (σ = 7.815278541432869, μ = 154.50729531264346)
+ (σ = 7.584871950409206, μ = 154.7331436091945)
+ (σ = 7.577477820183705, μ = 155.09472209898334)
+ (σ = 7.647867017615707, μ = 154.5156752425408)
  ⋮
- (σ = 7.722219748213343, μ = 154.03314235030507)
- (σ = 8.176728957220224, μ = 154.21848306721049)
- (σ = 7.774370173634625, μ = 154.45391173202768)
- (σ = 7.906325350209973, μ = 154.588823188836)
- (σ = 7.765244801859977, μ = 154.47013609563123)
- (σ = 7.681821878029276, μ = 154.61769401269203)
- (σ = 7.718508878721837, μ = 154.4646777287318)
- (σ = 7.97178809432311, μ = 154.72767684515102)
- (σ = 7.531261664955814, μ = 154.59279841682468)</code></pre></div><p>Extract the parameter posterior means: <code>β</code>,</p><div><pre><code class="language-julia">posterior_μ = mean(last, posterior)</code></pre><pre><code class="language-none">154.59640988452998</code></pre></div><p>then <code>σ</code>:</p><div><pre><code class="language-julia">posterior_σ = mean(first, posterior)</code></pre><pre><code class="language-none">7.74220375680842</code></pre></div><p>Effective sample sizes (of untransformed draws)</p><div><pre><code class="language-julia">ess = mapslices(effective_sample_size,
+ (σ = 8.064185643991557, μ = 154.2835480569761)
+ (σ = 8.036766277807379, μ = 154.33974038172653)
+ (σ = 8.044130084564296, μ = 153.65259999913243)
+ (σ = 7.957413911169525, μ = 153.68951668422736)
+ (σ = 7.768278337261622, μ = 154.35995394978832)
+ (σ = 7.13888897297261, μ = 154.95524634331258)
+ (σ = 7.367613465596667, μ = 155.06966883558218)
+ (σ = 7.649200716632738, μ = 155.31759080147717)
+ (σ = 7.609663671898102, μ = 155.34705774549403)</code></pre></div><p>Extract the parameter posterior means: <code>β</code>,</p><div><pre><code class="language-julia">posterior_μ = mean(last, posterior)</code></pre><pre><code class="language-none">154.59272637621552</code></pre></div><p>then <code>σ</code>:</p><div><pre><code class="language-julia">posterior_σ = mean(first, posterior)</code></pre><pre><code class="language-none">7.738273317704842</code></pre></div><p>Effective sample sizes (of untransformed draws)</p><div><pre><code class="language-julia">ess = mapslices(effective_sample_size,
                 get_position_matrix(chain); dims = 1)</code></pre></div><p>NUTS-specific statistics</p><div><pre><code class="language-julia">NUTS_statistics(chain)
 
 cmdstan_result = &quot;
@@ -75,5 +75,5 @@ Quantiles:
 sigma   7.21853   7.5560625   7.751355   7.9566775   8.410391
    mu 153.77992 154.3157500 154.602000 154.8820000 155.431000
 &quot;;</code></pre><pre><code class="language-none">&quot;\nIterations = 1:1000\nThinning interval = 1\nChains = 1,2,3,4\nSamples per chain = 1000\n\nEmpirical Posterior Estimates:\n          Mean        SD       Naive SE      MCSE      ESS\nsigma   7.7641872 0.29928194 0.004732063 0.0055677898 1000\n   mu 154.6055177 0.41989355 0.006639100 0.0085038356 1000\n\nQuantiles:\n         2.5%      25.0%       50.0%      75.0%       97.5%\nsigma   7.21853   7.5560625   7.751355   7.9566775   8.410391\n   mu 153.77992 154.3157500 154.602000 154.8820000 155.431000\n&quot;</code></pre></div><p>Extract the parameter posterior means: <code>β</code>,</p><div><pre><code class="language-julia">[posterior_μ, posterior_σ]</code></pre><pre><code class="language-none">2-element Array{Float64,1}:
- 154.59640988452998
-   7.74220375680842</code></pre></div><p>end of m4.5d.jl#- <em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><footer><hr/><a class="previous" href="../../02/m2.1d/"><span class="direction">Previous</span><span class="title">m2.1d</span></a><a class="next" href="../m4.2d/"><span class="direction">Next</span><span class="title">m4.2d</span></a></footer></article></body></html>
+ 154.59272637621552
+   7.738273317704842</code></pre></div><p>end of m4.5d.jl#- <em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><footer><hr/><a class="previous" href="../../02/m2.1d/"><span class="direction">Previous</span><span class="title">m2.1d</span></a><a class="next" href="../m4.2d/"><span class="direction">Next</span><span class="title">m4.2d</span></a></footer></article></body></html>

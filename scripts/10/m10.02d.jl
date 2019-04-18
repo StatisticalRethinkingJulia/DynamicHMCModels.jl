@@ -48,6 +48,7 @@ problem_transformation(p::m_10_02d_model) =
 
 P = TransformedLogDensity(problem_transformation(p), p)
 ∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
+#∇P = ADgradient(:ForwardDiff, P);
 
 # Tune and sample.
 

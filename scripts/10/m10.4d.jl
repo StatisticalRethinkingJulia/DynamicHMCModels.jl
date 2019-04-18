@@ -1,22 +1,25 @@
-# Load Julia packages (libraries) needed  for the snippets in chapter 0
+using CSV, DataFrames, Random, Distributions, LinearAlgebra
+using StatsBase, StatsFuns
+using DynamicHMC, TransformVariables, LogDensityProblems
+using MCMCDiagnostics, LinearAlgebra, Statistics
+using Parameters, ForwardDiff
 
-using DynamicHMCModels, Random
 Random.seed!(12345)
 
-# CmdStan uses a tmp directory to store the output of cmdstan
+# Change to a local directory where chimpanzees.txt is stored
 
-ProjDir = rel_path_d("..", "scripts", "10")
+ProjDir = @__DIR__
 cd(ProjDir)
 
-# ### snippet 10.4
+# Read in chimpanzees and convert columns to Float68
+# Same result is obtained if left as Int64.
 
-d = CSV.read(rel_path("..", "data", "chimpanzees.csv"), delim=';');
+d = CSV.read("chimpanzees.txt", delim=',');
 df = convert(DataFrame, d);
-df[:pulled_left] = convert(Array{Int64}, df[:pulled_left])
-df[:prosoc_left] = convert(Array{Int64}, df[:prosoc_left])
-df[:condition] = convert(Array{Int64}, df[:condition])
+df[:pulled_left] = convert(Array{Float64}, df[:pulled_left])
+df[:prosoc_left] = convert(Array{Float64}, df[:prosoc_left])
+df[:condition] = convert(Array{Float64}, df[:condition])
 df[:actor] = convert(Array{Int64}, df[:actor])
-first(df, 5)
 
 struct m_10_04d_model{TY <: AbstractVector, TX <: AbstractMatrix,
   TA <: AbstractVector}
@@ -35,13 +38,13 @@ end
 # Make the type callable with the parameters *as a single argument*.
 
 function (problem::m_10_04d_model)(θ)
-    @unpack y, X, A, N, N_actors = problem   # extract the data
-    @unpack β, α = θ  # works on the named tuple too
+    @unpack y, X, A, N, N_actors = problem
+    @unpack β, α = θ
     ll = 0.0
     ll += sum(logpdf.(Normal(0, 10), β)) # bp & bpC
     ll += sum(logpdf.(Normal(0, 10), α)) # alpha[1:7]
     ll += sum(
-      [loglikelihood(Binomial(1, logistic(α[A[i]] + dot(X[i, :], β))), [y[i]]) for i in 1:N]
+      (loglikelihood(Binomial(1, logistic(α[A[i]] + dot(X[i, :], β))), [y[i]]) for i in 1:N)
     )
     ll
 end
@@ -57,43 +60,20 @@ p = m_10_04d_model(y, X, A, N, N_actors);
 θ = (β = [1.0, 0.0], α = [-1.0, 10.0, -1.0, -1.0, -1.0, 0.0, 2.0])
 p(θ)
 
-# Write a function to return properly dimensioned transformation.
-
 problem_transformation(p::m_10_04d_model) =
     as( (β = as(Array, size(p.X, 2)), α = as(Array, p.N_actors), ) )
 
-# Wrap the problem with a transformation, then use Flux for the gradient.
-
 P = TransformedLogDensity(problem_transformation(p), p)
 ∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
-
-# Tune and sample.
+#∇P = ADgradient(:ForwardDiff, P);
+LogDensityProblems.stresstest(P)
 
 chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
-
-# We use the transformation to obtain the posterior from the chain.
-
 posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));
-posterior[1:5]
-
-# Extract the parameter posterior means: `β`,
-
 posterior_β = mean(first, posterior)
-
-# Extract the parameter posterior means: `β`,
-
 posterior_α = mean(last, posterior)
 
-# Effective sample sizes (of untransformed draws)
-
-ess = mapslices(effective_sample_size, get_position_matrix(chain); dims = 1)
-ess
-
-# NUTS-specific statistics
-
-NUTS_statistics(chain)
-
-# Result rethinking
+# Result CmdStan
 
 rethinking = "
 Iterations = 1:1000
@@ -110,6 +90,7 @@ a.4 -1.04898135 0.28129307 0.0044476339 0.0056325117 1000
 a.5 -0.74390933 0.26949936 0.0042611590 0.0052178124 1000
 a.6  0.21599365 0.26307574 0.0041595927 0.0045153523 1000
 a.7  1.81090866 0.39318577 0.0062168129 0.0071483527 1000
+
  bp  0.83979926 0.26284676 0.0041559722 0.0059795826 1000
 bpC -0.12913322 0.29935741 0.0047332562 0.0049519863 1000
 ";
@@ -118,4 +99,4 @@ bpC -0.12913322 0.29935741 0.0047332562 0.0049519863 1000
 
 [posterior_β, posterior_α]
 
-# End of `10/m10.04d.jl`
+

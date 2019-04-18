@@ -68,15 +68,15 @@ P = TransformedLogDensity(problem_transformation(p), p)
 
 # For stress testing
 
-stresstest = false
+stresstest = true
 
 #ad = :Flux
 ad = :ForwardDiff
 #ad = :ReverseDiff
 
 if stresstest
-  ∇P = ADgradient(:ForwardDiff, P);
-  LogDensityProblems.stresstest(p, N=1000, scale=1.0)
+  #∇P = ADgradient(:ForwardDiff, P);
+  LogDensityProblems.stresstest(P, N=1000, scale=1.0)
 else
   ∇P = LogDensityRejectErrors(ADgradient(ad, P));
 end  

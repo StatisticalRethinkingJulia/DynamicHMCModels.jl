@@ -106,7 +106,7 @@ bpC  -0.13 0.31 -0.62  0.34  3430    1
 # Set varable names, this will be automated using θ
 
 parameter_names = ["bp", "bpC"]
-pooled_parameter_names = ["a[$i]" for i in 1:7]
+pooled_parameter_names = ["a[$i]" for i in 1:7];
 
 # Create a3d
 

@@ -1,4 +1,18 @@
-pkgs = [
+pkg_names = [
+  "VectorizationBase",
+  "SIMDPirates",
+  "SLEEFPirates",
+  "VectorizedRNG",
+  "LoopVectorization",
+  "PaddedMatrices",
+  "ScatteredArrays",
+  "StructuredMatrices",
+  "DistributionParameters",
+  "ProbabilityDistributions",
+  "ProbabilityModels"
+]
+
+pkg_specs = [
     PackageSpec(url="https://github.com/chriselrod/VectorizationBase.jl"),
     PackageSpec(url="https://github.com/chriselrod/SIMDPirates.jl"),
     PackageSpec(url="https://github.com/chriselrod/SLEEFPirates.jl"),
@@ -12,11 +26,18 @@ pkgs = [
     PackageSpec(url="https://github.com/chriselrod/ProbabilityModels.jl")
 ]
 
-for pkg in pkgs
-  Pkg.develop(pkg)
+for pkg in pkg_names
+  isdefined(Main, Symbol(pkg)) && Pkg.rm(pkg)
 end
 
-Pkg.build("VectorizationBase")
+for pkg in pkg_names
+  spec = PackageSpec(url="https://github.com/chriselrod/$pkg.jl")
+  Pkg.develop(pkg)
+  if pkg == "VectorizationBase"
+    Pkg.build("VectorizationBase")
+  end
+end
+
 
 using StaticArrays, PaddedMatrices, BenchmarkTools
 

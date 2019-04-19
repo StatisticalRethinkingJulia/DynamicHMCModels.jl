@@ -49,4 +49,4 @@ pm_chns = Chains(pm, pars)
 describe(pm_chns) |> display
 
 println("\nCmdStan result:/n")
-include("LR_CmdStan.jl")
+include("lr_stan.jl")

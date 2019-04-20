@@ -31,7 +31,7 @@ sum(y) |> display # how many ys are true?
 l_logistic = LogisticRegressionModel( μ0=0.0, σ0=10.0, μ1=0.0, σ1=5.0,
   β0 = RealFloat, β1 = RealVector{4}, y = y, X = X );
 
-println("\nProbabilityModels result\n:")
+println("\nProbabilityModels result:\n")
 @time mcmc_chain, tuned_sampler =
   NUTS_init_tune_mcmc_default(l_logistic, 40000);
 
@@ -46,6 +46,7 @@ else
   pars = append!( ["β0"], pars)
 end
 pm_chns = Chains(pm, pars)
+write("lr_pm_01.jls", pm_chns)
 
 describe(pm_chns) |> display
 

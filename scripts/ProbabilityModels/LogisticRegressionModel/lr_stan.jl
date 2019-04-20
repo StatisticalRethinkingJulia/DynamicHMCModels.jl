@@ -41,7 +41,9 @@ stanmodel_logistic_glm = Stanmodel(
   model = bernoulli_logit_glm, nchains = 1);
 =#
    
-@time rc_glm, stan_chns, cnames_glm = stan(stanmodel_logistic_glm,
+@time rc_glm, chns_stan, cnames_glm = stan(stanmodel_logistic_glm,
   logistic_data_dict, summary=false, ProjDir);
 
-describe(stan_chns)
+write("lr_stan_01.jls", chns_stan)
+
+describe(chns_stan)

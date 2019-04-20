@@ -13,7 +13,10 @@ pkg_names = [
 ]
 
 for pkg in pkg_names
-  isdefined(Main, Symbol(pkg)) && Pkg.rm(pkg)
+  try
+    Pkg.rm(pkg)
+  catch
+  end
 end
 
 for pkg in pkg_names

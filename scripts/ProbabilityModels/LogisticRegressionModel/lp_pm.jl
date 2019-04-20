@@ -31,13 +31,14 @@ sum(y) |> display # how many ys are true?
 l_logistic = LogisticRegressionModel( μ0=0.0, σ0=10.0, μ1=0.0, σ1=5.0,
   β0 = RealFloat, β1 = RealVector{4}, y = y, X = X );
 
-println("\nProbabilityModels result/n:")
+println("\nProbabilityModels result\n:")
 @time mcmc_chain, tuned_sampler =
   NUTS_init_tune_mcmc_default(l_logistic, 40000);
 
 pm_sample_matrix = get_position_matrix(mcmc_chain)
 pm = reshape(pm_sample_matrix, 40000, 5, 1)
 
+ns = fieldnames(LogisticRegressionModel)
 pars = ["β1[$i]" for i in 1:length(β1)]
 if findall(x -> x == :β0, ns) > findall(x -> x == :β1, ns)
   pars = append!(pars, ["β0"])
@@ -48,5 +49,5 @@ pm_chns = Chains(pm, pars)
 
 describe(pm_chns) |> display
 
-println("\nCmdStan result:/n")
+println("\nCmdStan result:\n")
 include("lr_stan.jl")

@@ -143,4 +143,8 @@ stanmodel_itp = Stanmodel(
     ), model = itp_stan_model(), nchains = 14, output_format=:mcmcchains
 );
 
-@time rc_itp, chns_itp, cnames_itp = stan(stanmodel_itp, stan_itp_data_dict, ProjDir);
+@time rc_itp, chns_itp, cnames_itp =
+  stan(stanmodel_itp, stan_itp_data_dict, ProjDir);
+
+write("itp_xx.jls", chns_itp)
+

@@ -99,4 +99,13 @@ Y₂ = ChunkedArray(Y₂a) # This often allows for better vectorization.
     σ = PositiveVector{K}
 );
 
-include("itp_stan.jl")
+using CmdStan
+
+if !isfile("itp_01.jls") 
+  include("itp_stan.jl")
+else
+  itp_01 = read("itp_01.jls", Chains)
+end
+
+itp_02 = isfile("itp_02.jls") && read("itp_02.jls", Chains)
+

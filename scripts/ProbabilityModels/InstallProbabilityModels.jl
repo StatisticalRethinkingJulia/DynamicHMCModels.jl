@@ -12,27 +12,13 @@ pkg_names = [
   "ProbabilityModels"
 ]
 
-pkg_specs = [
-    PackageSpec(url="https://github.com/chriselrod/VectorizationBase.jl"),
-    PackageSpec(url="https://github.com/chriselrod/SIMDPirates.jl"),
-    PackageSpec(url="https://github.com/chriselrod/SLEEFPirates.jl"),
-    PackageSpec(url="https://github.com/chriselrod/VectorizedRNG.jl"),
-    PackageSpec(url="https://github.com/chriselrod/LoopVectorization.jl"),
-    PackageSpec(url="https://github.com/chriselrod/PaddedMatrices.jl"),
-    PackageSpec(url="https://github.com/chriselrod/ScatteredArrays.jl"),
-    PackageSpec(url="https://github.com/chriselrod/StructuredMatrices.jl"),
-    PackageSpec(url="https://github.com/chriselrod/DistributionParameters.jl"),
-    PackageSpec(url="https://github.com/chriselrod/ProbabilityDistributions.jl"),
-    PackageSpec(url="https://github.com/chriselrod/ProbabilityModels.jl")
-]
-
 for pkg in pkg_names
   isdefined(Main, Symbol(pkg)) && Pkg.rm(pkg)
 end
 
 for pkg in pkg_names
   spec = PackageSpec(url="https://github.com/chriselrod/$pkg.jl")
-  Pkg.develop(pkg)
+  Pkg.develop(spec)
   if pkg == "VectorizationBase"
     Pkg.build("VectorizationBase")
   end

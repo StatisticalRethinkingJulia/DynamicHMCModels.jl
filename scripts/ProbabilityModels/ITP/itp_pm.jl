@@ -2,6 +2,7 @@ using Distributed
 addprocs(14); # Create 14 children
 
 @everywhere begin # Load the following on master and all children
+using Random
 using DistributionParameters, ProbabilityDistributions
 using LoopVectorization, DynamicHMC, LogDensityProblems, SLEEFPirates, SIMDPirates
 using LinearAlgebra, StructuredMatrices, ScatteredArrays, PaddedMatrices
@@ -51,6 +52,8 @@ end # everywhere
 
 end
 
+Random.seed!(1237999)
+
 domains = Domains(2, 2, 2, 3)
 
 K, D = sum(domains), length(domains)
@@ -96,16 +99,6 @@ Y₂ = ChunkedArray(Y₂a) # This often allows for better vectorization.
     σ = PositiveVector{K}
 );
 
-using CmdStan
-ProjDir = @__DIR__
-cd(ProjDir)
-
-if !isfile("itp_01.jls") 
-  #include("itp_stan.jl")
-else
-  itp_01 = read("itp_01.jls", Chains)
-end
-
 @time chains1, tuned_samplers1 = 
   NUTS_init_tune_distributed(ℓ_itp, 2000, δ = 0.75, 
     report = DynamicHMC.ReportSilent());
@@ -115,3 +108,14 @@ end
   report = DynamicHMC.ReportSilent());
 
 chains = vcat(chains1, chains2)
+
+using CmdStan
+ProjDir = @__DIR__
+cd(ProjDir)
+
+if !isfile("itp_xx.jls") 
+  include("itp_stan.jl")
+else
+  itp_01 = read("itp_xx.jls", Chains)
+end
+

@@ -72,4 +72,4 @@ PA4 = @Constant randn(42,14);
 ProjDir = @__DIR__
 cd(ProjDir)
 
-
+include(joinpath(ProjDir, "..", "LogisticRegressionModel", "lr_pm.jl"))

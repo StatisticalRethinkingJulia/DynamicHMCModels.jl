@@ -2,7 +2,7 @@ using Distributed
 addprocs(Sys.CPU_THREADS ÷ 2); # Create 8 children
 
 @everywhere begin # Load the following on master and all children
-using Random
+using Random, MCMCDiagnostics, CmdStan
 using DistributionParameters, ProbabilityDistributions
 using LoopVectorization, DynamicHMC, LogDensityProblems, SLEEFPirates, SIMDPirates
 using LinearAlgebra, StructuredMatrices, ScatteredArrays, PaddedMatrices
@@ -108,11 +108,8 @@ Y₂ = ChunkedArray(Y₂a) # This often allows for better vectorization.
   report = DynamicHMC.ReportSilent());
 
 chains = vcat(chains1, chains2);
-
 tuned_samplers = vcat(tuned_samplers1, tuned_samplers2)
 itp_samples = [constrain.(Ref(ℓ_itp), get_position.(chain)) for chain ∈ chains];
-
-using MCMCDiagnostics
 
 μh₁_chains = [[s.μh₁ for s ∈ sample] for sample ∈ itp_samples]
 μh₂_chains = [[s.μh₂ for s ∈ sample] for sample ∈ itp_samples]
@@ -121,14 +118,14 @@ using MCMCDiagnostics
 poi_chains = (μh₁_chains, μh₂_chains, ρ_chains)
 
 ess = [effective_sample_size(s[i]) for i ∈ eachindex(itp_samples), s ∈ poi_chains]
-ess[1:14,:]
+display(ess[1:end,:])
 
-println()
 @show converged = vec(sum(ess, dims = 2)) .> 1000
 @show not_converged = .! converged
 @show NUTS_statistics.(chains[not_converged])
 
-@show poi_chain = [vcat((chains[converged])...) for chains ∈ poi_chains]
+poi_chain = [vcat((chains[converged])...) for chains ∈ poi_chains];
+@show size(poi_chain)
 
 using Statistics
 

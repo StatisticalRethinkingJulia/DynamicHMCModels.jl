@@ -1,3 +1,7 @@
+Pkg.add("StaticArrays")
+Pkg.add("BenchmarkTools")
+Pkg.add("MCMCDiagnostics")
+
 pkg_names = [
   "VectorizationBase",
   "SIMDPirates",
@@ -64,3 +68,8 @@ PA4 = @Constant randn(42,14);
 # benchmark matrix multiplication
 
 @benchmark $PA3 * $PA4
+
+ProjDir = @__DIR__
+cd(ProjDir)
+
+

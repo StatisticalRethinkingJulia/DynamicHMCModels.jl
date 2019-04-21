@@ -1,5 +1,5 @@
 using Distributed
-addprocs(14); # Create 14 children
+addprocs(Sys.CPU_THREADS ÷ 2); # Create 8 children
 
 @everywhere begin # Load the following on master and all children
 using Random
@@ -107,7 +107,39 @@ Y₂ = ChunkedArray(Y₂a) # This often allows for better vectorization.
   NUTS_init_tune_distributed(ℓ_itp, 2000, δ = 0.75,
   report = DynamicHMC.ReportSilent());
 
-chains = vcat(chains1, chains2)
+chains = vcat(chains1, chains2);
+
+tuned_samplers = vcat(tuned_samplers1, tuned_samplers2)
+itp_samples = [constrain.(Ref(ℓ_itp), get_position.(chain)) for chain ∈ chains];
+
+using MCMCDiagnostics
+
+μh₁_chains = [[s.μh₁ for s ∈ sample] for sample ∈ itp_samples]
+μh₂_chains = [[s.μh₂ for s ∈ sample] for sample ∈ itp_samples]
+ρ_chains = [[s.ρ for s ∈ sample] for sample ∈ itp_samples]
+
+poi_chains = (μh₁_chains, μh₂_chains, ρ_chains)
+
+ess = [effective_sample_size(s[i]) for i ∈ eachindex(itp_samples), s ∈ poi_chains]
+ess[1:14,:]
+
+println()
+@show converged = vec(sum(ess, dims = 2)) .> 1000
+@show not_converged = .! converged
+@show NUTS_statistics.(chains[not_converged])
+
+@show poi_chain = [vcat((chains[converged])...) for chains ∈ poi_chains]
+
+using Statistics
+
+major_quantiles = [0.05 0.25 0.5 0.75 0.95]
+
+true_values = (μh₁, μh₂, ρ)
+
+for i ∈ eachindex(poi_chain)
+    display("Major Quantiles for paramter with true values: $(true_values[i]):")
+    display(vcat(major_quantiles, quantile(poi_chain[i], major_quantiles)))
+end
 
 using CmdStan
 ProjDir = @__DIR__

@@ -2,13 +2,6 @@
 tuned_samplers = vcat(tuned_samplers1, tuned_samplers2)
 itp_samples = [constrain.(Ref(ℓ_itp), get_position.(chain)) for chain ∈ chains];
 
-println()
-itp_samples[7][end] |> display
-println()
-
-L_7_end * L_7_end'
-println()
-
 using MCMCDiagnostics
 
 μh₁_chains = [[s.μh₁ for s ∈ sample] for sample ∈ itp_samples]

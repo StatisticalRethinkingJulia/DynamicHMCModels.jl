@@ -32,8 +32,8 @@ logistic_data_dict = Dict(
 
 
 stanmodel_logistic_glm = Stanmodel(
-   name = "logistic_glm", Sample(num_samples=10000, num_warmup=900),
-   model = bernoulli_logit_glm, nchains = 4);
+   name = "logistic_glm", Sample(num_samples=40000, num_warmup=900),
+   model = bernoulli_logit_glm, nchains = 1);
 
 #=
 stanmodel_logistic_glm = Stanmodel(

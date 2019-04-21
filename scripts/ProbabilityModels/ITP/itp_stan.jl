@@ -140,7 +140,7 @@ stanmodel_itp = Stanmodel(
     Sample(
         num_samples=2000,num_warmup=900,
         adapt=CmdStan.Adapt(delta=0.99)
-    ), model = itp_stan_model(), nchains = 14, output_format=:mcmcchains
+    ), model = itp_stan_model(), nchains = Sys.CPU_THREADS, output_format=:mcmcchains
 );
 
 @time rc_itp, chns_itp, cnames_itp =

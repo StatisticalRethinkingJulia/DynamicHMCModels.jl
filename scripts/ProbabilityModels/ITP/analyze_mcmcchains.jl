@@ -26,7 +26,7 @@ pooled_parameter_names = ["a[$i]" for i in 1:7]
 # Create a3d
 
 a3d = Array{Float64, 3}(undef, 1000, 9, 4);
-for j in 1:
+for j in 1:4
   for i in 1:1000
     a3d[i, 1:2, j] = values(posterior[j][i][1])
     a3d[i, 3:9, j] = values(posterior[j][i][2])

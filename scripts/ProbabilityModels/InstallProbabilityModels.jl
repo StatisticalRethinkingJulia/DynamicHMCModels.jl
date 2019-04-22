@@ -1,7 +1,3 @@
-Pkg.add("StaticArrays")
-Pkg.add("BenchmarkTools")
-Pkg.add("MCMCDiagnostics")
-
 pkg_names = [
   "VectorizationBase",
   "SIMDPirates",

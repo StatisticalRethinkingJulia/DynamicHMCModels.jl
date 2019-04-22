@@ -143,7 +143,6 @@ for i ∈ eachindex(poi_chain)
     display(vcat(major_quantiles, quantile(poi_chain[i], major_quantiles)))
 end
 
-using CmdStan
 ProjDir = @__DIR__
 cd(ProjDir)
 

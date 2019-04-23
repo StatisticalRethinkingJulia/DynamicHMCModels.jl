@@ -1,8 +1,7 @@
 using Distributed
-addprocs(Sys.CPU_THREADS ÷ 2); # Create 8 children
+addprocs(Sys.CPU_THREADS ÷ 2); # Create children
 
-@everywhere begin # Load the following on master and all children
-using Random, MCMCDiagnostics, CmdStan, Statistics
+@everywhere begin # Load on master and all children
 using DistributionParameters, ProbabilityDistributions
 using LoopVectorization, DynamicHMC, LogDensityProblems, SLEEFPirates, SIMDPirates
 using LinearAlgebra, StructuredMatrices, ScatteredArrays, PaddedMatrices
@@ -51,8 +50,6 @@ end # everywhere
     Y₂ ~ Normal(μ₂, AR, U)
 
 end
-
-Random.seed!(1237999)
 
 domains = Domains(2, 2, 2, 3)
 
@@ -107,6 +104,8 @@ Y₂ = ChunkedArray(Y₂a) # This often allows for better vectorization.
   NUTS_init_tune_distributed(ℓ_itp, 2000, δ = 0.75,
   report = DynamicHMC.ReportSilent());
 
+using MCMCDiagnostics
+
 chains = vcat(chains1, chains2);
 tuned_samplers = vcat(tuned_samplers1, tuned_samplers2)
 itp_samples = [constrain.(Ref(ℓ_itp), get_position.(chain)) for chain ∈ chains];
@@ -147,3 +146,4 @@ ProjDir = @__DIR__
 cd(ProjDir)
 
 include("stan_itp.jl")
+include("analyze_cmdstan.jl")

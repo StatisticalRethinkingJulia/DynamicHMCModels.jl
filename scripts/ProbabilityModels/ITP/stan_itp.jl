@@ -136,7 +136,7 @@ stan_itp_data_dict = Dict(
 )
 
 stanmodel_itp = Stanmodel(
-    name = "itp1",
+    name = "itp",
     Sample(
         num_samples=2000,num_warmup=900,
         adapt=CmdStan.Adapt(delta=0.99)
@@ -144,12 +144,10 @@ stanmodel_itp = Stanmodel(
     output_format=:mcmcchains
 );
 
-@time rc_itp1, chns_itp1, cnames_itp1 =
+@time rc, chns, cnames =
   stan(stanmodel_itp, stan_itp_data_dict, ProjDir);
 
-write("itp1_xx.jls", chns_itp1)
-
-chns_itp1_01 = set_section(chns_itp1, Dict(
+chns_itp = set_section(chns, Dict(
   :parameters => ["muh.1", "muh.2", "rho"],
   :sigma_beta => ["sigma_beta", "sigma_h"],
   :L => reshape(["L.$i.$j" for i in 1:9, j in 1:9], 81),
@@ -163,32 +161,4 @@ chns_itp1_01 = set_section(chns_itp1, Dict(
   )
 )
 
-write("itp2_01_sections.jls", chns_itp1_01)
-pfig1 = plot(chns_itp1_01)
-savefig(pfig1, "chns_itp1_01.pdf")
-
-cp("./tmp", "./tmp1")
-
-@time rc_itp2, chns_itp2, cnames_itp2 =
-  stan(stanmodel_itp, stan_itp_data_dict, ProjDir);
-
-write("itp_xx2.jls", chns_itp)
-
-chns_itp2_01 = set_section(chns_itp2, Dict(
-  :parameters => ["muh.1", "muh.2", "rho"],
-  :sigma_beta => ["sigma_beta", "sigma_h"],
-  :L => reshape(["L.$i.$j" for i in 1:9, j in 1:9], 81),
-  :betaraw => reshape(["betaraw.$i.$j" for i in 1:2, j in 1:9], 18),
-  :kappa => ["kappa.$i" for i in 1:9],
-  :sigma => ["sigma.$i" for i in 1:9],
-  :theta => ["theta.$i" for i in 1:9],
-  :muraw => reshape(["muraw.$i.$j" for i in 1:2, j in 1:4], 8),
-  :internals => ["lp__", "accept_stat__", "stepsize__", "treedepth__", "n_leapfrog__",
-    "divergent__", "energy__"]
-  )
-)
-
-write("itp2_01_sections.jls", chns_itp2_01)
-pfig2 = plot(chns_itp2_01)
-savefig(pfig2, "chns_itp2_01.pdf")
-
+show(chns_itp)

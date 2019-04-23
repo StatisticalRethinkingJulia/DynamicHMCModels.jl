@@ -167,7 +167,7 @@ write("itp2_01_sections.jls", chns_itp1_01)
 pfig1 = plot(chns_itp1_01)
 savefig(pfig1, "chns_itp1_01.pdf")
 
-stanmodel.name= "itp2"
+cp("./tmp", "./tmp1")
 
 @time rc_itp2, chns_itp2, cnames_itp2 =
   stan(stanmodel_itp, stan_itp_data_dict, ProjDir);

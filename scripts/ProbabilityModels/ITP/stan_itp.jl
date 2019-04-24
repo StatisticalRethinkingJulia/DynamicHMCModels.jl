@@ -144,6 +144,7 @@ stanmodel_itp = Stanmodel(
     output_format=:mcmcchains
 );
 
+#=
 @time rc, chns, cnames =
   stan(stanmodel_itp, stan_itp_data_dict, ProjDir);
 
@@ -162,3 +163,4 @@ chns_itp = set_section(chns, Dict(
 )
 
 show(chns_itp)
+=#

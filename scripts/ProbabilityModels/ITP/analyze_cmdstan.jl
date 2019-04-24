@@ -1,26 +1,33 @@
 using CmdStan, StatsPlots
 
 ProjDir = @__DIR__
-cd(joinpath(ProjDir, "tmp"))
 
-chains = [1, 2]
 stansummary = CMDSTAN_HOME*"/bin/stansummary"
+set_tuples = Dict(
+  :tmp1 => Dict(:name = "itp1", :chains => [1:4]], 
+  :tmp1 => Dict(:name = "itp2", :chains => [1:4]], 
+  :tmp1 => Dict(:name = "itp3", :chains => [1:2]], 
+)
 
-# path to where the samples were saved.
-resdir = joinpath(ProjDir, "tmp")
-run(`$stansummary itp1_samples_$[i for i ∈ chains].csv`)
+# Loop over all paths to where the samples were saved.
+for path in String.(keys(filesets))
+  resdir = joinpath(ProjDir, path)
+  cd(resdir) do
+    run(`$stansummary itp_samples_$[i for i ∈ chains].csv`)
+  end
+end
 
+set_tuples = Dict(
+  :tmp1 => Dict(:name = "itp1", :chains => [1:4]], 
+  :tmp1 => Dict(:name = "itp2", :chains => [1:4]], 
+  :tmp1 => Dict(:name = "itp3", :chains => [1:2]], 
+)
+
+#=
 a3d, cnames = CmdStan.read_samples(stanmodel_itp);
-chns_itp1 = Chains(a3d, cnames)
-pfig1 = plot(chns_itp1[["muh.1", "muh.2", "rho"]])
-savefig(pfig1, joinpath(ProjDir, "itp_1.pdf"))
+chns = Chains(a3d, cnames)
 
-cd(joinpath(ProjDir, "tmp2"))
-chns_itp2 = Chains(a3d, cnames)
-pfig2 = plot(chns_itp1[["muh.1", "muh.2", "rho"]])
-savefig(pfig2, joinpath(ProjDir, "itp_2.pdf"))
-
-chns = chainscat(chns_itp1, chns_itp2)
+#chns = chainscat(chns_itp1, chns_itp2)
 
 chns_itp = set_section(chns, Dict(
   :parameters => ["muh.1", "muh.2", "rho"],
@@ -37,5 +44,6 @@ chns_itp = set_section(chns, Dict(
 )
 
 write("itp_sections.jls", chns_itp)
-pfig3 = plot(chns_itp)
-savefig(pfig3, joinpath(ProjDir, "itp.pdf"))
+pfig = plot(chns_itp)
+savefig(pfig, joinpath(ProjDir, "itp.pdf"))
+=#

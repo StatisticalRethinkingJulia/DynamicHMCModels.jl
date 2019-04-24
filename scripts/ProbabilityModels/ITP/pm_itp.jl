@@ -104,7 +104,7 @@ Y₂ = ChunkedArray(Y₂a) # This often allows for better vectorization.
   NUTS_init_tune_distributed(ℓ_itp, 2000, δ = 0.75,
   report = DynamicHMC.ReportSilent());
 
-using MCMCDiagnostics
+using MCMCDiagnostics, Statistics
 
 chains = vcat(chains1, chains2);
 tuned_samplers = vcat(tuned_samplers1, tuned_samplers2)
@@ -125,25 +125,25 @@ println()
 @show not_converged = .! converged
 println()
 
-@show NUTS_statistics.(chains[not_converged])
-println()
-@show NUTS_statistics.(chains[converged])
-println()
+sum(not_converged) > 0 && @show NUTS_statistics.(chains[not_converged])
+sum(not_converged) > 0 && println()
+sum(converged) > 0 && @show NUTS_statistics.(chains[converged])
+sum(converged) > 0 && println()
 
 poi_chain = [vcat((chains[converged])...) for chains ∈ poi_chains];
 @show size(poi_chain)
 
-major_quantiles = [0.05 0.25 0.5 0.75 0.95]
-
-true_values = (μh₁, μh₂, ρ)
-
+major_quantiles = [0.05 0.25 0.5 0.75 0.95];
+true_values = (μh₁, μh₂, ρ);
 for i ∈ eachindex(poi_chain)
     display("Major Quantiles for paramter with true values: $(true_values[i]):")
     display(vcat(major_quantiles, quantile(poi_chain[i], major_quantiles)))
 end
 
 ProjDir = @__DIR__
-cd(ProjDir)
+cd(ProjDir) do
 
-include("stan_itp.jl")
-include("analyze_cmdstan.jl")
+  #include("stan_itp.jl")
+  #include("analyze_cmdstan.jl")
+
+end

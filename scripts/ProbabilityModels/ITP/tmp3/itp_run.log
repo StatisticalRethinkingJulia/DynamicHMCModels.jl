@@ -1,0 +1,154 @@
+method = sample (Default)
+  sample
+    num_samples = 2000
+    num_warmup = 900
+    save_warmup = 0 (Default)
+    thin = 1 (Default)
+    adapt
+      engaged = 1 (Default)
+      gamma = 0.050000000000000003 (Default)
+      delta = 0.98999999999999999
+      kappa = 0.75 (Default)
+      t0 = 10 (Default)
+      init_buffer = 75 (Default)
+      term_buffer = 50 (Default)
+      window = 25 (Default)
+    algorithm = hmc (Default)
+      hmc
+        engine = nuts (Default)
+          nuts
+            max_depth = 10 (Default)
+        metric = diag_e (Default)
+        metric_file =  (Default)
+        stepsize = 1 (Default)
+        stepsize_jitter = 1
+id = 1
+data
+  file = itp_1.data.R
+init = 2 (Default)
+random
+  seed = 1391286719
+output
+  file = itp_samples_1.csv
+  diagnostic_file =  (Default)
+  refresh = 100 (Default)
+
+method = sample (Default)
+  sample
+    num_samples = 2000
+    num_warmup = 900
+    save_warmup = 0 (Default)
+    thin = 1 (Default)
+    adapt
+      engaged = 1 (Default)
+      gamma = 0.050000000000000003 (Default)
+      delta = 0.98999999999999999
+      kappa = 0.75 (Default)
+      t0 = 10 (Default)
+      init_buffer = 75 (Default)
+      term_buffer = 50 (Default)
+      window = 25 (Default)
+    algorithm = hmc (Default)
+      hmc
+        engine = nuts (Default)
+          nuts
+            max_depth = 10 (Default)
+        metric = diag_e (Default)
+        metric_file =  (Default)
+        stepsize = 1 (Default)
+        stepsize_jitter = 1
+id = 2
+data
+  file = itp_2.data.R
+init = 2 (Default)
+random
+  seed = 1391286722
+output
+  file = itp_samples_2.csv
+  diagnostic_file =  (Default)
+  refresh = 100 (Default)
+
+
+
+Gradient evaluation took 0.014975 seconds
+1000 transitions using 10 leapfrog steps per transition would take 149.75 seconds.
+Adjust your expectations accordingly!
+
+
+Gradient evaluation took 0.015061 seconds
+1000 transitions using 10 leapfrog steps per transition would take 150.61 seconds.
+Adjust your expectations accordingly!
+
+
+Iteration:    1 / 2900 [  0%]  (Warmup)
+Iteration:    1 / 2900 [  0%]  (Warmup)
+Iteration:  100 / 2900 [  3%]  (Warmup)
+Iteration:  200 / 2900 [  6%]  (Warmup)
+Iteration:  300 / 2900 [ 10%]  (Warmup)
+Iteration:  100 / 2900 [  3%]  (Warmup)
+Iteration:  400 / 2900 [ 13%]  (Warmup)
+Iteration:  500 / 2900 [ 17%]  (Warmup)
+Iteration:  600 / 2900 [ 20%]  (Warmup)
+Iteration:  700 / 2900 [ 24%]  (Warmup)
+Iteration:  800 / 2900 [ 27%]  (Warmup)
+Iteration:  900 / 2900 [ 31%]  (Warmup)
+Iteration:  901 / 2900 [ 31%]  (Sampling)
+Iteration: 1000 / 2900 [ 34%]  (Sampling)
+Iteration: 1100 / 2900 [ 37%]  (Sampling)
+Iteration: 1200 / 2900 [ 41%]  (Sampling)
+Iteration: 1300 / 2900 [ 44%]  (Sampling)
+Iteration: 1400 / 2900 [ 48%]  (Sampling)
+Iteration: 1500 / 2900 [ 51%]  (Sampling)
+Iteration: 1600 / 2900 [ 55%]  (Sampling)
+Iteration: 1700 / 2900 [ 58%]  (Sampling)
+Iteration: 1800 / 2900 [ 62%]  (Sampling)
+Iteration: 1900 / 2900 [ 65%]  (Sampling)
+Iteration: 2000 / 2900 [ 68%]  (Sampling)
+Iteration: 2100 / 2900 [ 72%]  (Sampling)
+Iteration: 2200 / 2900 [ 75%]  (Sampling)
+Iteration: 2300 / 2900 [ 79%]  (Sampling)
+Iteration: 2400 / 2900 [ 82%]  (Sampling)
+Iteration: 2500 / 2900 [ 86%]  (Sampling)
+Iteration: 2600 / 2900 [ 89%]  (Sampling)
+Iteration: 2700 / 2900 [ 93%]  (Sampling)
+Iteration: 2800 / 2900 [ 96%]  (Sampling)
+Iteration: 2900 / 2900 [ 99%]  (Sampling)
+
+ Elapsed Time: 73.2363 seconds (Warm-up)
+               215.24 seconds (Sampling)
+               288.476 seconds (Total)
+
+Iteration:  200 / 2900 [  6%]  (Warmup)
+Iteration:  300 / 2900 [ 10%]  (Warmup)
+Iteration:  400 / 2900 [ 13%]  (Warmup)
+Iteration:  500 / 2900 [ 17%]  (Warmup)
+Iteration:  600 / 2900 [ 20%]  (Warmup)
+Iteration:  700 / 2900 [ 24%]  (Warmup)
+Iteration:  800 / 2900 [ 27%]  (Warmup)
+Iteration:  900 / 2900 [ 31%]  (Warmup)
+Iteration:  901 / 2900 [ 31%]  (Sampling)
+Iteration: 1000 / 2900 [ 34%]  (Sampling)
+Iteration: 1100 / 2900 [ 37%]  (Sampling)
+Iteration: 1200 / 2900 [ 41%]  (Sampling)
+Iteration: 1300 / 2900 [ 44%]  (Sampling)
+Iteration: 1400 / 2900 [ 48%]  (Sampling)
+Iteration: 1500 / 2900 [ 51%]  (Sampling)
+Iteration: 1600 / 2900 [ 55%]  (Sampling)
+Iteration: 1700 / 2900 [ 58%]  (Sampling)
+Iteration: 1800 / 2900 [ 62%]  (Sampling)
+Iteration: 1900 / 2900 [ 65%]  (Sampling)
+Iteration: 2000 / 2900 [ 68%]  (Sampling)
+Iteration: 2100 / 2900 [ 72%]  (Sampling)
+Iteration: 2200 / 2900 [ 75%]  (Sampling)
+Iteration: 2300 / 2900 [ 79%]  (Sampling)
+Iteration: 2400 / 2900 [ 82%]  (Sampling)
+Iteration: 2500 / 2900 [ 86%]  (Sampling)
+Iteration: 2600 / 2900 [ 89%]  (Sampling)
+Iteration: 2700 / 2900 [ 93%]  (Sampling)
+Iteration: 2800 / 2900 [ 96%]  (Sampling)
+Iteration: 2900 / 2900 [ 99%]  (Sampling)
+
+ Elapsed Time: 2209.75 seconds (Warm-up)
+               6997.61 seconds (Sampling)
+               9207.37 seconds (Total)
+

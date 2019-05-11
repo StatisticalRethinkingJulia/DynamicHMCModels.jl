@@ -20,9 +20,15 @@ for pkg in pkg_names
   end
 end
 
+spec = PackageSpec(url="https://github.com/cscherrer/Soss.jl", rev="master")
+Pkg.add(spec)
+
 ProjDir = @__DIR__
 cd(ProjDir)
 
 include(joinpath(ProjDir, "LogisticRegressionModel", "lr_pm.jl"))
+
+ProjDir = @__DIR__
+cd(ProjDir)
 
 include(joinpath(ProjDir, "LogisticRegressionModel", "lr_pm.jl"))

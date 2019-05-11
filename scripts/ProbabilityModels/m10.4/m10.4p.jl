@@ -1,10 +1,42 @@
+using DynamicHMCModels, Random
 using ProbabilityModels, DistributionParameters, VectorizationBase
 using LoopVectorization
 using LogDensityProblems, DynamicHMC, LinearAlgebra, Random
 using Statistics, MCMCChains
 
+# Load Julia packages (libraries) needed  for the snippets in chapter 0
+
+Random.seed!(12345)
+
+ProjDir = rel_path_d("..", "scripts", "10")
+cd(ProjDir)
+
+# ### snippet 10.4
+
+d = CSV.read(rel_path("..", "data", "chimpanzees.csv"), delim=';');
+df = convert(DataFrame, d);
+df[:pulled_left] = convert(Array{Int64}, df[:pulled_left])
+df[:prosoc_left] = convert(Array{Int64}, df[:prosoc_left])
+df[:condition] = convert(Array{Int64}, df[:condition])
+df[:actor] = convert(Array{Int64}, df[:actor])
+first(df, 5)
+
 ProjDir = @__DIR__
 cd(ProjDir)
+
+#=
+@model m10.4p{
+    vector[N] p;
+    bpC ~ normal( 0 , 10 );
+    bp ~ normal( 0 , 10 );
+    a ~ normal( 0 , 10 );
+    for ( i in 1:504 ) {
+        p[i] = a[actor[i]] + (bp + bpC * condition[i]) * prosoc_left[i];
+        p[i] = inv_logit(p[i]);
+    }
+    pulled_left ~ binomial( 1 , p );
+}
+=#
 
 @model LogisticRegressionModel begin 
   β0 ~ Normal(μ0, σ0)

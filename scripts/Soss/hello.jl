@@ -1,11 +1,10 @@
 using Soss
 
-hello = @model x begin
-  μ ~ Normal(1, 1)
+hello = Soss.@model μ,x begin
   σ ~ HalfCauchy()
   x ~ Normal(μ, σ) |> iid
 end
-
-data = (x=rand(Normal(1, 2), 5),)
+              
+data = (μ=1, x=[2,4,5])
 
 nuts(hello, data=data).samples

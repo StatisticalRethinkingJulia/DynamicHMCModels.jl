@@ -139,11 +139,3 @@ for i ∈ eachindex(poi_chain)
     display("Major Quantiles for paramter with true values: $(true_values[i]):")
     display(vcat(major_quantiles, quantile(poi_chain[i], major_quantiles)))
 end
-
-ProjDir = @__DIR__
-cd(ProjDir) do
-
-  #include("stan_itp.jl")
-  #include("analyze_cmdstan.jl")
-
-end

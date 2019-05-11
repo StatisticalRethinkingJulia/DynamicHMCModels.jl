@@ -1,3 +1,5 @@
+ProjDir = @__DIR__
+cd(ProjDir)
 
 tuned_samplers = vcat(tuned_samplers1, tuned_samplers2)
 itp_samples = [constrain.(Ref(ℓ_itp), get_position.(chain)) for chain ∈ chains];
@@ -11,7 +13,7 @@ using MCMCDiagnostics
 poi_chains = (μh₁_chains, μh₂_chains, ρ_chains)
 
 ess = [effective_sample_size(s[i]) for i ∈ eachindex(itp_samples), s ∈ poi_chains]
-ess[1:14,:]
+ess |> display
 
 println()
 converged = vec(sum(ess, dims = 2)) .> 1000

@@ -3,6 +3,8 @@ using CmdStan, StatsPlots
 ProjDir = @__DIR__
 cd(ProjDir) 
 
+include("pm_itp.jl")
+
 function itp_stan_model(; T = "T", K = "K", D = "D")
     if T isa Number
         T_def = ""

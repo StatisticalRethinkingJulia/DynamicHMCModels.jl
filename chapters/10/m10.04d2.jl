@@ -6,11 +6,11 @@ cd(ProjDir)
 
 d = CSV.read(rel_path("..", "data", "chimpanzees.csv"), delim=';');
 df = convert(DataFrame, d);
-df[:pulled_left] = convert(Array{Int64}, df[:pulled_left])
-df[:prosoc_left] = convert(Array{Int64}, df[:prosoc_left])
-df[:condition] = convert(Array{Int64}, df[:condition])
-df[:actor] = convert(Array{Int64}, df[:actor])
-first(df[[:actor, :pulled_left, :prosoc_left, :condition]], 5)
+df[!, :pulled_left] = convert(Array{Int64}, df[!, :pulled_left])
+df[!, :prosoc_left] = convert(Array{Int64}, df[!, :prosoc_left])
+df[!, :condition] = convert(Array{Int64}, df[!, :condition])
+df[!, :actor] = convert(Array{Int64}, df[!, :actor])
+first(df[!, [:actor, :pulled_left, :prosoc_left, :condition]], 5)
 
 struct m_10_04d_model{TY <: AbstractVector, TX <: AbstractMatrix,
   TA <: AbstractVector}
@@ -39,10 +39,10 @@ function (problem::m_10_04d_model)(θ)
 end
 
 N = size(df, 1)
-N_actors = length(unique(df[:actor]))
-X = hcat(ones(Int64, N), df[:prosoc_left] .* df[:condition]);
-A = df[:actor]
-y = df[:pulled_left]
+N_actors = length(unique(df[!, :actor]))
+X = hcat(ones(Int64, N), df[!, :prosoc_left] .* df[!, :condition]);
+A = df[!, :actor]
+y = df[!, :pulled_left]
 p = m_10_04d_model(y, X, A, N, N_actors);
 θ = (β = [1.0, 0.0], α = [-1.0, 10.0, -1.0, -1.0, -1.0, 0.0, 2.0])
 p(θ)
@@ -59,8 +59,8 @@ ad = :ForwardDiff
 #ad = :ReverseDiff
 
 if stresstest
-  ∇P = ADgradient(:ForwardDiff, P);
-  LogDensityProblems.stresstest(p, N=1000, scale=1.0)
+  ∇P = ADgradient(ad, P);
+  #LogDensityProblems.stresstest(P, N=1000, scale=1.0)
 else
   ∇P = LogDensityRejectErrors(ADgradient(ad, P));
 end
@@ -108,11 +108,9 @@ chns = MCMCChains.Chains(a3d,
 
 describe(chns)
 
-describe(chns, section=:pooled)
+describe(chns, sections=[:pooled])
 
 plot(chns)
-
-plot(chns, section=:pooled)
 
 # This file was generated using Literate.jl, https://github.com/fredrikekre/Literate.jl
 

@@ -7,10 +7,10 @@ d = CSV.read(rel_path("..", "data", "rugged.csv"), delim=';');
 df = convert(DataFrame, d);
 
 dcc = filter(row -> !(ismissing(row[:rgdppc_2000])), df)
-dcc[:log_gdp] = log.(dcc[:rgdppc_2000])
-dcc[:cont_africa] = Array{Float64}(convert(Array{Int}, dcc[:cont_africa]))
+dcc[!, :log_gdp] = log.(dcc[!, :rgdppc_2000])
+dcc[!, :cont_africa] = Array{Float64}(convert(Array{Int}, dcc[!, :cont_africa]))
 
-first(dcc[[:rugged, :cont_africa, :log_gdp]], 5)
+first(dcc[!, [:rugged, :cont_africa, :log_gdp]], 5)
 
 struct m_8_1_model{TY <: AbstractVector, TX <: AbstractMatrix}
     "Observations."
@@ -33,8 +33,8 @@ function (problem::m_8_1_model)(θ)
 end
 
 N = size(dcc, 1)
-X = hcat(ones(N), dcc[:rugged], dcc[:cont_africa], dcc[:rugged].*dcc[:cont_africa]);
-y = convert(Vector{Float64}, dcc[:log_gdp])
+X = hcat(ones(N), dcc[!, :rugged], dcc[!, :cont_africa], dcc[!, :rugged].*dcc[!, :cont_africa]);
+y = convert(Vector{Float64}, dcc[!, :log_gdp])
 p = m_8_1_model(y, X);
 p((β = [1.0, 2.0, 1.0, 2.0], σ = 1.0))
 
@@ -42,7 +42,9 @@ problem_transformation(p::m_8_1_model) =
     as((β = as(Array, size(p.X, 2)), σ = asℝ₊))
 
 P = TransformedLogDensity(problem_transformation(p), p)
-∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
+#∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
+∇P = ADgradient(:ForwardDiff, P);
+LogDensityProblems.stresstest(P)
 
 chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
 

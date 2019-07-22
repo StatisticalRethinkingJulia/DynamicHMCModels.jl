@@ -6,15 +6,15 @@ cd(ProjDir)
 wd = CSV.read(rel_path("..", "data", "WaffleDivorce.csv"), delim=';')
 df = convert(DataFrame, wd);
 
-mean_ma = mean(df[:Marriage])
-df[:Marriage_s] = convert(Vector{Float64},
-  (df[:Marriage]) .- mean_ma)/std(df[:Marriage]);
+mean_ma = mean(df[!, :Marriage])
+df[!, :Marriage_s] = convert(Vector{Float64},
+  (df[!, :Marriage]) .- mean_ma)/std(df[!, :Marriage]);
 
-mean_mam = mean(df[:MedianAgeMarriage])
-df[:MedianAgeMarriage_s] = convert(Vector{Float64},
-  (df[:MedianAgeMarriage]) .- mean_mam)/std(df[:MedianAgeMarriage]);
+mean_mam = mean(df[!, :MedianAgeMarriage])
+df[!, :MedianAgeMarriage_s] = convert(Vector{Float64},
+  (df[!, :MedianAgeMarriage]) .- mean_mam)/std(df[!, :MedianAgeMarriage]);
 
-first(df[[1, 7, 14,15]], 6)
+first(df[!, [1, 7, 14,15]], 6)
 
 struct m_5_3{TY <: AbstractVector, TX <: AbstractMatrix}
     "Observations."
@@ -36,8 +36,8 @@ function (problem::m_5_3)(θ)
 end
 
 N = size(df, 1)
-X = hcat(ones(N), df[:Marriage_s], df[:MedianAgeMarriage_s]);
-y = convert(Vector{Float64}, df[:Divorce])
+X = hcat(ones(N), df[!, :Marriage_s], df[!, :MedianAgeMarriage_s]);
+y = convert(Vector{Float64}, df[!, :Divorce])
 p = m_5_3(y, X);
 p((β = [1.0, 2.0, 3.0], σ = 1.0))
 

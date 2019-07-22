@@ -11,10 +11,10 @@ cd(ProjDir)
 
 d = CSV.read(rel_path("..", "data", "chimpanzees.csv"), delim=';');
 df = convert(DataFrame, d);
-df[:pulled_left] = convert(Array{Int64}, df[:pulled_left])
-df[:prosoc_left] = convert(Array{Int64}, df[:prosoc_left])
-df[:condition] = convert(Array{Int64}, df[:condition])
-df[:actor] = convert(Array{Int64}, df[:actor])
+df[!, :pulled_left] = convert(Array{Int64}, df[!, :pulled_left])
+df[!, :prosoc_left] = convert(Array{Int64}, df[!, :prosoc_left])
+df[!, :condition] = convert(Array{Int64}, df[!, :condition])
+df[!, :actor] = convert(Array{Int64}, df[!, :actor])
 first(df, 5)
 
 struct m_10_04d_model{TY <: AbstractVector, TX <: AbstractMatrix,
@@ -48,10 +48,10 @@ end
 # Instantiate the model with data and inits.
 
 N = size(df, 1)
-N_actors = length(unique(df[:actor]))
-X = hcat(ones(Int64, N), df[:prosoc_left] .* df[:condition]);
-A = df[:actor]
-y = df[:pulled_left]
+N_actors = length(unique(df[!, :actor]))
+X = hcat(ones(Int64, N), df[!, :prosoc_left] .* df[!, :condition]);
+A = df[!, :actor]
+y = df[!, :pulled_left]
 p = m_10_04d_model(y, X, A, N, N_actors);
 θ = (β = [1.0, 0.0], α = [-1.0, 10.0, -1.0, -1.0, -1.0, 0.0, 2.0])
 p(θ)
@@ -92,11 +92,11 @@ end
 parameter_names = ["bp", "bpC"]
 pooled_parameter_names = ["a[$i]" for i in 1:7]
 sections =   Dict(
-  :parameters => Symbol.(parameter_names),
-  :pooled => Symbol.(pooled_parameter_names)
+  :parameters => parameter_names,
+  :pooled => pooled_parameter_names
 )
 cnames = vcat(parameter_names, pooled_parameter_names)
-chns = create_mcmcchains(a3d, cnames, sections)
+chns = create_mcmcchains(a3d, cnames, sections, start=1001)
 
 # Result rethinking
 
@@ -125,14 +125,16 @@ describe(chns)
 
 # Describe pooled draws
 
-describe(chns, section = :pooled)
+describe(chns, sections=[:pooled])
 
 # Plot draws
 
-plot(chns)
+p1 = plot(chns)
+savefig(p1, "m10.04d3_parms.pdf")
 
 # Plot pooled draws
 
-plot(chns, section=:pooled)
+p2 = plot(chns, section=:pooled)
+savefig(p2, "m10.04d3_pooled.pdf")
 
 # End of `10/m10.04d.jl`

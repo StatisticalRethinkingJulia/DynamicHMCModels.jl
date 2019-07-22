@@ -5,10 +5,10 @@ ProjDir = rel_path_d("..", "scripts", "12")
 df = CSV.read(rel_path( "..", "data",  "Kline.csv"), delim=';');
 size(df) # Should be 10x5
 
-df[:logpop] = map((x) -> log(x), df[:population]);
-df[:society] = 1:10;
+df[!, :logpop] = map((x) -> log(x), df[!, :population]);
+df[!, :society] = 1:10;
 
-first(df[[:total_tools, :logpop, :society]], 5)
+first(df[!, [:total_tools, :logpop, :society]], 5)
 
 struct m_12_06d_model{TY <: AbstractVector, TX <: AbstractMatrix,
   TS <: AbstractVector}
@@ -39,10 +39,10 @@ function (problem::m_12_06d_model)(θ)
 end
 
 N = size(df, 1)
-N_societies = length(unique(df[:society]))
-X = hcat(ones(Int64, N), df[:logpop]);
-S = df[:society]
-y = df[:total_tools]
+N_societies = length(unique(df[!, :society]))
+X = hcat(ones(Int64, N), df[!, :logpop]);
+S = df[!, :society]
+y = df[!, :total_tools]
 p = m_12_06d_model(y, X, S, N, N_societies);
 θ = (β = [1.0, 0.25], α = rand(Normal(0, 1), N_societies), σ = 0.2)
 p(θ)
@@ -102,13 +102,13 @@ chns = MCMCChains.Chains(a3d,
   vcat(parameter_names, pooled_parameter_names),
   Dict(
     :parameters => parameter_names,
-    :pooled => pooled_parameter_names)
+    :pooled => pooled_parameter_names
   )
 );
 
 describe(chns)
 
-describe(chns, section=:pooled)
+describe(chns, sections=[:pooled])
 
 plot(chns)
 

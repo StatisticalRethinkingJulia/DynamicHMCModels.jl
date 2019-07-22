@@ -6,8 +6,8 @@ using DynamicHMCModels, Optim
 
 d = CSV.read(rel_path("..", "data", "chimpanzees.csv"), delim=';');
 df = convert(DataFrame, d);
-df[:pulled_left] = convert(Array{Int64}, df[:pulled_left])
-df[:prosoc_left] = convert(Array{Int64}, df[:prosoc_left])
+df[!, :pulled_left] = convert(Array{Int64}, df[!, :pulled_left])
+df[!, :prosoc_left] = convert(Array{Int64}, df[!, :prosoc_left])
 first(df, 5)
 
 struct m_10_02d{TY <: AbstractVector, TX <: AbstractMatrix}
@@ -33,8 +33,8 @@ end
 # Instantiate the model with data and inits.
 
 N = size(df, 1)
-X = hcat(ones(Int64, N), df[:prosoc_left]);
-y = df[:pulled_left]
+X = hcat(ones(Int64, N), df[!, :prosoc_left]);
+y = df[!, :pulled_left]
 p = m_10_02d(y, X, N);
 
 # Function convert from a single vector of parms to parks NamedTuple
@@ -59,8 +59,7 @@ optimize(ll, lower, upper, x0, Fminbox(inner_optimizer))
 # Write a function to return properly dimensioned transformation.
 
 problem_transformation(p::m_10_02d) =
-#    as( (β = as(Array, size(p.X, 2)), ) )
-      as( Vector, size(p.X, 2))
+  as( Vector, size(p.X, 2)) #    as( (β = as(Array, size(p.X, 2)), ) )
 
 # Wrap the problem with a transformation, then use Flux for the gradient.
 

@@ -15,11 +15,12 @@ function create_a3d(noofsamples, noofvariables, noofchains)
    end
  end
 
- function create_mcmcchains(a3d, cnames)
-   Chains(a3d, Symbol.(cnames))
+ function create_mcmcchains(a3d, cnames;start=1)
+   Chains(a3d, cnames; start=start)
  end
  
- function create_mcmcchains(a3d, cnames, sections::Dict{Symbol, Vector{String}})
-   Chains(a3d, cnames, sections)
+ function create_mcmcchains(a3d, cnames, sections::Dict{Symbol, Vector{String}};
+   start=1)
+   Chains(a3d, cnames, sections; start=start)
  end
  

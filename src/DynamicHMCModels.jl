@@ -2,10 +2,8 @@ module DynamicHMCModels
 
 using Reexport 
 
-@reexport using StatisticalRethinking, CSV
-@reexport using DynamicHMC, TransformVariables, LogDensityProblems
-@reexport using MCMCDiagnostics, LinearAlgebra
-@reexport using Parameters, ForwardDiff
+@reexport using StatisticalRethinking, CSV, LinearAlgebra
+@reexport using ForwardDiff
 
 using DataStructures
 

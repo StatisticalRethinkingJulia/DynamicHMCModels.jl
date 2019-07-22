@@ -2,8 +2,8 @@ using DynamicHMCModels
 
 d = CSV.read(rel_path("..", "data", "chimpanzees.csv"), delim=';');
 df = convert(DataFrame, d);
-df[:pulled_left] = convert(Array{Int64}, df[:pulled_left])
-df[:prosoc_left] = convert(Array{Int64}, df[:prosoc_left])
+df[!, :pulled_left] = convert(Array{Int64}, df[!, :pulled_left])
+df[!, :prosoc_left] = convert(Array{Int64}, df[!, :prosoc_left])
 first(df, 5)
 
 struct m_10_02d_model{TY <: AbstractVector, TX <: AbstractMatrix}
@@ -25,17 +25,18 @@ function (problem::m_10_02d_model)(θ)
 end
 
 N = size(df, 1)
-X = hcat(ones(Int64, N), df[:prosoc_left]);
-y = df[:pulled_left]
+X = hcat(ones(Int64, N), df[!, :prosoc_left]);
+y = df[!, :pulled_left]
 p = m_10_02d_model(y, X, N);
 θ = (β = [1.0, 2.0],)
 p(θ)
 
 problem_transformation(p::m_10_02d_model) =
-    as( (β = as(Array, size(p.X, 2)), ) )
+  as( (β = as(Array, size(p.X, 2)), ) )
 
 P = TransformedLogDensity(problem_transformation(p), p)
 ∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
+#∇P = ADgradient(:ForwardDiff, P);
 
 chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
 

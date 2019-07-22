@@ -5,9 +5,9 @@ cd(ProjDir)
 
 wd = CSV.read(rel_path("..", "data", "WaffleDivorce.csv"), delim=';')
 df = convert(DataFrame, wd);
-mean_ma = mean(df[:MedianAgeMarriage])
-df[:MedianAgeMarriage_s] = convert(Vector{Float64},
-  (df[:MedianAgeMarriage]) .- mean_ma)/std(df[:MedianAgeMarriage]);
+mean_ma = mean(df[!, :MedianAgeMarriage])
+df[!, :MedianAgeMarriage_s] = convert(Vector{Float64},
+  (df[!, :MedianAgeMarriage]) .- mean_ma)/std(df[!, :MedianAgeMarriage]);
 
 first(df, 6)
 
@@ -30,8 +30,8 @@ function (problem::WaffleDivorceProblem)(θ)
 end
 
 N = size(df, 1)
-X = hcat(ones(N), df[:MedianAgeMarriage_s]);
-y = convert(Vector{Float64}, df[:Divorce])
+X = hcat(ones(N), df[!, :MedianAgeMarriage_s]);
+y = convert(Vector{Float64}, df[!, :Divorce])
 p = WaffleDivorceProblem(y, X);
 p((β = [1.0, 2.0], σ = 1.0))
 

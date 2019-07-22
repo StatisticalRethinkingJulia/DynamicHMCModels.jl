@@ -1,14 +1,15 @@
-using DynamicHMCModels
+using DynamicHMCModels, Random
+Random.seed!(12345)
 
 ProjDir = rel_path_d("..", "scripts", "10")
 cd(ProjDir)
 
 d = CSV.read(rel_path("..", "data", "chimpanzees.csv"), delim=';');
 df = convert(DataFrame, d);
-df[:pulled_left] = convert(Array{Int64}, df[:pulled_left])
-df[:prosoc_left] = convert(Array{Int64}, df[:prosoc_left])
-df[:condition] = convert(Array{Int64}, df[:condition])
-df[:actor] = convert(Array{Int64}, df[:actor])
+df[!, :pulled_left] = convert(Array{Int64}, df[!, :pulled_left])
+df[!, :prosoc_left] = convert(Array{Int64}, df[!, :prosoc_left])
+df[!, :condition] = convert(Array{Int64}, df[!, :condition])
+df[!, :actor] = convert(Array{Int64}, df[!, :actor])
 first(df, 5)
 
 struct m_10_04d_model{TY <: AbstractVector, TX <: AbstractMatrix,
@@ -38,10 +39,10 @@ function (problem::m_10_04d_model)(θ)
 end
 
 N = size(df, 1)
-N_actors = length(unique(df[:actor]))
-X = hcat(ones(Int64, N), df[:prosoc_left] .* df[:condition]);
-A = df[:actor]
-y = df[:pulled_left]
+N_actors = length(unique(df[!, :actor]))
+X = hcat(ones(Int64, N), df[!, :prosoc_left] .* df[!, :condition]);
+A = df[!, :actor]
+y = df[!, :pulled_left]
 p = m_10_04d_model(y, X, A, N, N_actors);
 θ = (β = [1.0, 0.0], α = [-1.0, 10.0, -1.0, -1.0, -1.0, 0.0, 2.0])
 p(θ)
@@ -51,6 +52,7 @@ problem_transformation(p::m_10_04d_model) =
 
 P = TransformedLogDensity(problem_transformation(p), p)
 ∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
+#∇P = ADgradient(:ForwardDiff, P);
 
 chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
 

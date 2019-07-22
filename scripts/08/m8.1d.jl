@@ -13,12 +13,12 @@ d = CSV.read(rel_path("..", "data", "rugged.csv"), delim=';');
 df = convert(DataFrame, d);
 
 dcc = filter(row -> !(ismissing(row[:rgdppc_2000])), df)
-dcc[:log_gdp] = log.(dcc[:rgdppc_2000])
-dcc[:cont_africa] = Array{Float64}(convert(Array{Int}, dcc[:cont_africa]))
+dcc[!, :log_gdp] = log.(dcc[!, :rgdppc_2000])
+dcc[!, :cont_africa] = Array{Float64}(convert(Array{Int}, dcc[!, :cont_africa]))
 
 # First 5 rows with data
 
-first(dcc[[:rugged, :cont_africa, :log_gdp]], 5)
+first(dcc[!, [:rugged, :cont_africa, :log_gdp]], 5)
 
 struct m_8_1_model{TY <: AbstractVector, TX <: AbstractMatrix}
     "Observations."
@@ -45,8 +45,8 @@ end
 # Instantiate the model with data and inits.
 
 N = size(dcc, 1)
-X = hcat(ones(N), dcc[:rugged], dcc[:cont_africa], dcc[:rugged].*dcc[:cont_africa]);
-y = convert(Vector{Float64}, dcc[:log_gdp])
+X = hcat(ones(N), dcc[!, :rugged], dcc[!, :cont_africa], dcc[!, :rugged].*dcc[!, :cont_africa]);
+y = convert(Vector{Float64}, dcc[!, :log_gdp])
 p = m_8_1_model(y, X);
 p((β = [1.0, 2.0, 1.0, 2.0], σ = 1.0))
 

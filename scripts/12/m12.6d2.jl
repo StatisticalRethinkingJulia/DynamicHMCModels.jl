@@ -7,10 +7,10 @@ size(df) # Should be 10x5
 
 # New col logpop, set log() for population data
 
-df[:society] = 1:10;
-df[:logpop] = map((x) -> log(x), df[:population]);
-#df[:total_tools] = convert(Vector{Int64}, df[:total_tools])
-first(df[[:total_tools, :logpop, :society]], 5)
+df[!, :society] = 1:10;
+df[!, :logpop] = map((x) -> log(x), df[!, :population]);
+#df[!, :total_tools] = convert(Vector{Int64}, df[!, :total_tools])
+first(df[!, [:total_tools, :logpop, :society]], 5)
 
 # Define problem data structure
 
@@ -47,10 +47,10 @@ end
 # Instantiate the model with data and inits.
 
 N = size(df, 1)
-N_societies = length(unique(df[:society]))
-X = hcat(ones(Int64, N), df[:logpop]);
-S = df[:society];
-y = df[:total_tools];
+N_societies = length(unique(df[!, :society]))
+X = hcat(ones(Int64, N), df[!, :logpop]);
+S = df[!, :society];
+y = df[!, :total_tools];
 γ = (β = [1.0, 0.25], α = rand(Normal(0, 1), N_societies), s = [0.2]);
 p = m_12_06d(y, X, S, N, N_societies);
 

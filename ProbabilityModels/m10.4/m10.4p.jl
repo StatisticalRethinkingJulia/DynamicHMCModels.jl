@@ -15,10 +15,10 @@ cd(ProjDir)
 
 d = CSV.read(rel_path("..", "data", "chimpanzees.csv"), delim=';');
 df = convert(DataFrame, d);
-df[:pulled_left] = convert(Array{Int64}, df[:pulled_left])
-df[:prosoc_left] = convert(Array{Int64}, df[:prosoc_left])
-df[:condition] = convert(Array{Int64}, df[:condition])
-df[:actor] = convert(Array{Int64}, df[:actor])
+df[!, :pulled_left] = convert(Array{Int64}, df[!, :pulled_left])
+df[!, :prosoc_left] = convert(Array{Int64}, df[!, :prosoc_left])
+df[!, :condition] = convert(Array{Int64}, df[!, :condition])
+df[!, :actor] = convert(Array{Int64}, df[!, :actor])
 first(df, 5)
 
 ProjDir = @__DIR__
@@ -83,7 +83,7 @@ write("lr_pm_01.jls", pm_chns)
 using MCMCDiagnostics
 
 df = describe(pm_chns)
-df[1].df[:ess] = [effective_sample_size(pm[:, i]) for i ∈ 1:size(pm, 2)]
+df[!, 1].df[!, :ess] = [effective_sample_size(pm[:, i]) for i ∈ 1:size(pm, 2)]
 df |> display
 println()
 

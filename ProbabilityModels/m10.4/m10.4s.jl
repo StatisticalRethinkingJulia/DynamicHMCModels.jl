@@ -48,9 +48,9 @@ model=m_10_04, output_format=:mcmcchains);
 
 # Input data for cmdstan
 
-m_10_04_data = Dict("N" => size(df, 1), "N_actors" => length(unique(df[:actor])), 
-"actor" => df[:actor], "pulled_left" => df[:pulled_left],
-"prosoc_left" => df[:prosoc_left], "condition" => df[:condition]);
+m_10_04_data = Dict("N" => size(df, 1), "N_actors" => length(unique(df[!, :actor])), 
+"actor" => df[!, :actor], "pulled_left" => df[!, :pulled_left],
+"prosoc_left" => df[!, :prosoc_left], "condition" => df[!, :condition]);
 
 # Sample using cmdstan
 

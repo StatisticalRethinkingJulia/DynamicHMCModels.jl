@@ -32,6 +32,7 @@ problem_transformation(p::BernoulliProblem) =
 # Use a flat priors (the default, omitted) for α
 
 P = TransformedLogDensity(problem_transformation(p), p)
+#∇P = LogDensityRejectErrors(ADgradient(:Zygote, P));
 ∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
 
 # Sample

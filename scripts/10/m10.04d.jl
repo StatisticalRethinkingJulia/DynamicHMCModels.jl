@@ -66,11 +66,13 @@ problem_transformation(p::m_10_04d_model) =
 
 P = TransformedLogDensity(problem_transformation(p), p)
 ∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
-#∇P = ADgradient(:ForwardDiff, P);
+#import Zygote
+#∇P = LogDensityRejectErrors(ADgradient(:Zygote, P));
+#∇P = ADgradient(:Zygote, P);
 
 # Tune and sample.
 
-chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
+@time chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
 
 # We use the transformation to obtain the posterior from the chain.
 

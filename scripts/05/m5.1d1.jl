@@ -57,7 +57,7 @@ problem_transformation(p::WaffleDivorceProblem) =
 # Wrap the problem with a transformation, then use Flux for the gradient.
 
 P = TransformedLogDensity(problem_transformation(p), p)
-∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
+∇P = ADgradient(:ForwardDiff, P);
 
 # Create an array to hold 1000 samples of 3 parameters in 4 chains
 

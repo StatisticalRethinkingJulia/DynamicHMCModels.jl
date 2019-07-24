@@ -94,11 +94,12 @@ P = TransformedLogDensity(problem_transformation(p), p)
 
 # Tune and sample.
 
-chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
+chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 4000);
 
 # We use the transformation to obtain the posterior from the chain.
 
-posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));
+posterior = TransformVariables.transform.(Ref(problem_transformation(p)),
+  get_position.(chain));
 posterior[1:5]
 
 # Extract the parameter posterior means.

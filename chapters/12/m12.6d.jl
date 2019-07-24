@@ -51,8 +51,8 @@ problem_transformation(p::m_12_06d_model) =
     as( (β = as(Array, size(p.X, 2)), α = as(Array, p.N_societies), σ = asℝ₊) )
 
 P = TransformedLogDensity(problem_transformation(p), p)
-∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
-#∇P = ADgradient(:ForwardDiff, P);
+#∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
+∇P = ADgradient(:ForwardDiff, P);
 
 chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
 

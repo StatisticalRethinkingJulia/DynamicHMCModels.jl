@@ -42,9 +42,7 @@ problem_transformation(p::m_8_1_model) =
     as((β = as(Array, size(p.X, 2)), σ = asℝ₊))
 
 P = TransformedLogDensity(problem_transformation(p), p)
-#∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
 ∇P = ADgradient(:ForwardDiff, P);
-LogDensityProblems.stresstest(P)
 
 chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
 

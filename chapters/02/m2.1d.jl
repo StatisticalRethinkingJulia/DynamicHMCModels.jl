@@ -20,7 +20,10 @@ problem_transformation(p::BernoulliProblem) =
     as((α = as𝕀, ),  )
 
 P = TransformedLogDensity(problem_transformation(p), p)
-∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
+∇P = ADgradient(:ForwardDiff, P);
+
+#import Zygote
+#∇P = ADgradient(:Zygote, P);
 
 chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000)
 

@@ -25,6 +25,7 @@ rel_path_d(parts...) = normpath(joinpath(src_path_d, parts...))
 include("scriptdict_d.jl")
 include("generate_d.jl")
 include("chains.jl")
+include("nptochain.jl")
 
 export
   rel_path_d,
@@ -32,6 +33,7 @@ export
   generate_d,
   create_a3d,
   insert_chain!,
+  nptochain,
   create_mcmcchains
 
 end # module

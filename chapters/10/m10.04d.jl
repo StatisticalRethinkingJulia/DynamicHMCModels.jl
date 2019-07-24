@@ -54,7 +54,11 @@ P = TransformedLogDensity(problem_transformation(p), p)
 ∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
 #∇P = ADgradient(:ForwardDiff, P);
 
-chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
+#import Zygote
+#∇P = LogDensityRejectErrors(ADgradient(:Zygote, P));
+#∇P = ADgradient(:Zygote, P);
+
+@time chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
 
 posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));
 posterior[1:5]

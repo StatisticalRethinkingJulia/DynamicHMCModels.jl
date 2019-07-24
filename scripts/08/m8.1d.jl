@@ -58,9 +58,7 @@ problem_transformation(p::m_8_1_model) =
 # Wrap the problem with a transformation, then use Flux for the gradient.
 
 P = TransformedLogDensity(problem_transformation(p), p)
-#∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
 ∇P = ADgradient(:ForwardDiff, P);
-LogDensityProblems.stresstest(P)
 
 # Tune and sample.
 

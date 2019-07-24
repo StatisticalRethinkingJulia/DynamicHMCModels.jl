@@ -72,9 +72,10 @@ P = TransformedLogDensity(problem_transformation(p), p)
 ∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
 #∇P = ADgradient(:ForwardDiff, P);
 
-chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
+chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 4000);
 
-posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));
+posterior = TransformVariables.transform.(Ref(problem_transformation(p)),
+  get_position.(chain));
 posterior[1:5]
 
 posterior_β = mean(trans(posterior[i]).β for i in 1:length(posterior))

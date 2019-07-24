@@ -39,7 +39,8 @@ problem_transformation(p::WaffleDivorceProblem) =
     as((β = as(Array, size(p.X, 2)), σ = asℝ₊))
 
 P = TransformedLogDensity(problem_transformation(p), p)
-∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
+#∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
+∇P = ADgradient(:ForwardDiff, P);
 
 chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
 

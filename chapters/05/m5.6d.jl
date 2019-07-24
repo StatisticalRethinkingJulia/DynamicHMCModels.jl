@@ -6,10 +6,10 @@ cd(ProjDir)
 wd = CSV.read(rel_path("..", "data", "milk.csv"), delim=';')
 df = convert(DataFrame, wd);
 dcc = filter(row -> !(row[:neocortex_perc] == "NA"), df)
-dcc[:kcal_per_g] = convert(Vector{Float64}, dcc[:kcal_per_g])
-dcc[:log_mass] = log.(convert(Vector{Float64}, dcc[:mass]))
+dcc[!, :kcal_per_g] = convert(Vector{Float64}, dcc[!, :kcal_per_g])
+dcc[!, :log_mass] = log.(convert(Vector{Float64}, dcc[!, :mass]))
 
-first(dcc[[3, 7, 9]], 5)
+first(dcc[!, [3, 7, 9]], 5)
 
 struct m_5_6{TY <: AbstractVector, TX <: AbstractMatrix}
     "Observations."
@@ -30,8 +30,8 @@ function (problem::m_5_6)(θ)
 end
 
 N = size(dcc, 1)
-X = hcat(ones(N), dcc[:log_mass]);
-y = dcc[:kcal_per_g]
+X = hcat(ones(N), dcc[!, :log_mass]);
+y = dcc[!, :kcal_per_g]
 p = m_5_6(y, X);
 p((β = [1.0, 2.0], σ = 1.0))
 
@@ -39,7 +39,7 @@ problem_transformation(p::m_5_6) =
     as((β = as(Array, size(p.X, 2)), σ = asℝ₊))
 
 P = TransformedLogDensity(problem_transformation(p), p)
-∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
+∇P = ADgradient(:ForwardDiff, P);
 
 chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
 

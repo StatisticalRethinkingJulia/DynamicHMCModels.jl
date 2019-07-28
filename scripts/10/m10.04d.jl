@@ -1,6 +1,6 @@
 # Load Julia packages (libraries) needed  for the snippets in chapter 0
 
-using DynamicHMCModels, Random
+using DynamicHMCModels, Zygote, Random
 Random.seed!(12345)
 
 # CmdStan uses a tmp directory to store the output of cmdstan
@@ -65,8 +65,8 @@ problem_transformation(p::m_10_04d_model) =
 # Wrap the problem with a transformation, then use Flux for the gradient.
 
 P = TransformedLogDensity(problem_transformation(p), p)
-∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
-#∇P = ADgradient(:ForwardDiff, P);
+#∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
+∇P = ADgradient(:ForwardDiff, P);
 
 #import Zygote
 #∇P = LogDensityRejectErrors(ADgradient(:Zygote, P));

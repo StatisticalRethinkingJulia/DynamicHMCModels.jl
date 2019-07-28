@@ -1,7 +1,6 @@
 using Distributions, Random
 
-function GaussianGen(;μ=0,σ=1,Nd,kwargs...)
- data=(y=rand(Normal(μ,σ),Nd),N=Nd)
-   return data
+function simulateGaussian(;μ=0, σ=1, Nd, kwargs...)
+ (y = rand(Normal(μ,σ), Nd), N = Nd)
 end
 

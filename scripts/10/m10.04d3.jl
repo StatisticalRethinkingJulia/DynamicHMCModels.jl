@@ -49,7 +49,7 @@ end
 
 N = size(df, 1)
 N_actors = length(unique(df[!, :actor]))
-X = hcat(ones(Int64, N), df[!, :prosoc_left] .* df[!, :condition]);
+X = hcat(ones(Int64, N) .* df[!, :prosoc_left], df[!, :prosoc_left] .* df[!, :condition]);
 A = df[!, :actor]
 y = df[!, :pulled_left]
 p = m_10_04d_model(y, X, A, N, N_actors);

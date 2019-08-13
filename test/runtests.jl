@@ -1,6 +1,6 @@
 using DynamicHMCModels
 using Test
 
-println("Tests are executed in docs job.")
-
-@test 1 == 1
+include("../scripts/02/m2.1d.jl")
+#include("../scripts/04/m4.1d.jl")
+include("../scripts/10/m10.4d.jl")

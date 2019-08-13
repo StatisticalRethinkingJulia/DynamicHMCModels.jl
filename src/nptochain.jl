@@ -1,6 +1,6 @@
 """
 Convert DynamcHMC samples to a chain
-* `posterior`: an array of NamedTuple consisting of mcmcm samples
+* `posterior`: an array of NamedTuple consisting of mcmc samples
 """
 function nptochain(posterior,tune)
     Np = length(vcat(posterior[1]...))+1 #include lf_eps

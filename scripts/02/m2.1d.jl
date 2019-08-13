@@ -1,62 +1,63 @@
 # # Estimate Binomial draw probabilility
 
 using DynamicHMCModels
+import Flux
 
 # Define a structure to hold the data.
 
-struct BernoulliProblem
+Base.@kwdef struct BernoulliProblem
     "Total number of draws in the data."
     n::Int
-    "Number of draws `==1` in the data"
-    s::Vector{Int}
+    "Number of draws ' == 1' "
+    obs::Vector{Int}
 end;
-
-# Make the type callable with the parameters *as a single argument*. 
-
-function (problem::BernoulliProblem)((α, )::NamedTuple{(:α, )})
-    @unpack n, s = problem        # extract the data
-    loglikelihood(Binomial(n, α), s)
-end
-
-# Create the data and complete setting up the problem.
-
-obs = rand(Binomial(9, 2/3), 1)
-p = BernoulliProblem(9, obs)
-p((α = 0.5, ))
 
 # Write a function to return properly dimensioned transformation.
 
-problem_transformation(p::BernoulliProblem) =
-    as((α = as𝕀, ),  )
+make_transformation(model::BernoulliProblem) =
+    as((p = as𝕀, ))
+
+# Add data
+
+model = BernoulliProblem(; n = 9, obs = rand(Binomial(9, 2/3), 3))
+
+# Make the type callable with the parameters *as a single argument*. 
+
+function (model::BernoulliProblem)(θ)
+    @unpack n, obs = model        # extract the data
+    @unpack p = θ
+    loglikelihood(Binomial(n, p), obs)
+end
 
 # Use a flat priors (the default, omitted) for α
 
-P = TransformedLogDensity(problem_transformation(p), p)
-∇P = ADgradient(:ForwardDiff, P);
+P = TransformedLogDensity(make_transformation(model), model)
+∇P = ADgradient(:Flux, P);
 
-#import Zygote
-#∇P = ADgradient(:Zygote, P);
+# Sample 4 chains
 
-# Sample
+a3d = Array{Float64, 3}(undef, 1000, 1, 4);
+for j in 1:4
+  global results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000)
+  posterior = P.transformation.(results.chain)
 
-chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000)
+  for i in 1:1000
+    a3d[i, 1, j] = values(posterior[i].p)
+  end
+end
 
-# To get the posterior for ``α`` use `get_position` and then transform back.
+# Create MCMCChains object
 
-posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));
+parameter_names = ["p"]
+sections =   Dict(
+  :parameters => parameter_names,
+)
+chns = create_mcmcchains(a3d, parameter_names, sections, start=1)
+show(chns)
 
-# Extract the parameter.
+println()
+DynamicHMC.Diagnostics.EBFMI(results.tree_statistics) |> display
 
-posterior_α = first.(posterior);
-
-# check the effective sample size
-
-ess_α = effective_sample_size(posterior_α)
-
-# NUTS-specific statistics
-
-NUTS_statistics(chain)
-# check the mean
-
-mean(posterior_α)
+println()
+DynamicHMC.Diagnostics.summarize_tree_statistics(results.tree_statistics)
 

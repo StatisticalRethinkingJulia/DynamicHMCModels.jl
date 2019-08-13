@@ -1,79 +1,73 @@
-using CSV, DataFrames, Random, Distributions, LinearAlgebra
-using StatsBase, StatsFuns
-using DynamicHMC, TransformVariables, LogDensityProblems
-using MCMCDiagnostics, LinearAlgebra, Statistics
-using Parameters, ForwardDiff
-
-Random.seed!(12345)
-
-# Change to a local directory where chimpanzees.txt is stored
+using DynamicHMCModels
+using Flux
 
 ProjDir = @__DIR__
 cd(ProjDir)
 
-# Read in chimpanzees and convert columns to Float68
-# Same result is obtained if left as Int64.
+# ### snippet 10.4
 
-d = CSV.read("chimpanzees.txt", delim=',');
-df = convert(DataFrame, d);
-df[!, :pulled_left] = convert(Array{Float64}, df[!, :pulled_left])
-df[!, :prosoc_left] = convert(Array{Float64}, df[!, :prosoc_left])
-df[!, :condition] = convert(Array{Float64}, df[!, :condition])
-df[!, :actor] = convert(Array{Int64}, df[!, :actor])
+data = DataFrame(CSV.read(joinpath(ProjDir, "..", "..", "data", "chimpanzees.csv"), delim=';'))
 
-struct m_10_04d_model{TY <: AbstractVector, TX <: AbstractMatrix,
-  TA <: AbstractVector}
-    "Observations."
-    y::TY
-    "Covariates"
-    X::TX
-    "Actors"
-    A::TA
-    "Number of observations"
-    N::Int
-    "Number of unique actors"
+Base.@kwdef struct Chimpanzees
+    "Number of actors"
     N_actors::Int
+    pulled_left::Vector{Int}
+    prosoc_left::Vector{Int}
+    condition::Vector{Int}
+    actor::Vector{Int}
 end
 
-# Make the type callable with the parameters *as a single argument*.
-
-function (problem::m_10_04d_model)(θ)
-    @unpack y, X, A, N, N_actors = problem
-    @unpack β, α = θ
-    ll = 0.0
-    ll += sum(logpdf.(Normal(0, 10), β)) # bp & bpC
-    ll += sum(logpdf.(Normal(0, 10), α)) # alpha[1:7]
-    ll += sum(
-      (loglikelihood(Binomial(1, logistic(α[A[i]] + dot(X[i, :], β))), [y[i]]) for i in 1:N)
-    )
-    ll
+function make_transformation(model::Chimpanzees)
+    as((a = as(Vector, model.N_actors), bp = asℝ, bpC = asℝ))
 end
 
-# Instantiate the model with data and inits.
+model = Chimpanzees(; N_actors = maximum(data.actor), pulled_left = data.pulled_left,
+                    prosoc_left = data.prosoc_left, condition = data.condition,
+                    actor = data.actor)
 
-N = size(df, 1)
-N_actors = length(unique(df[!, :actor]))
-X = hcat(ones(Int64, N) .* df[!, :prosoc_left], df[!, :prosoc_left] .* df[!, :condition]);
-A = df[!, :actor]
-y = df[!, :pulled_left]
-p = m_10_04d_model(y, X, A, N, N_actors);
-θ = (β = [1.0, 0.0], α = [-1.0, 10.0, -1.0, -1.0, -1.0, 0.0, 2.0])
-p(θ)
+function (model::Chimpanzees)(θ)
+    @unpack a, bp, bpC = θ
+    @unpack pulled_left, prosoc_left, condition, actor = model
+    ℓ_likelihood = mapreduce(+, actor, condition, prosoc_left,
+       pulled_left) do actor, condition, prosoc_left, pulled_left
+           p = logistic(a[actor] + (bp + bpC * condition) * prosoc_left)
+           logpdf(Bernoulli(p), pulled_left)
+       end
+    P = Normal(0, 10)
+    ℓ_prior = logpdf(P, bpC) + logpdf(P, bp) + sum(a -> logpdf(P, a), a)
+    ℓ_prior + ℓ_likelihood
+end
 
-problem_transformation(p::m_10_04d_model) =
-    as( (β = as(Array, size(p.X, 2)), α = as(Array, p.N_actors), ) )
+P = TransformedLogDensity(make_transformation(model), model)
+∇P = ADgradient(:Flux, P)
+results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000)
+posterior = P.transformation.(results.chain)
 
-P = TransformedLogDensity(problem_transformation(p), p)
-∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
-#∇P = ADgradient(:ForwardDiff, P);
-LogDensityProblems.stresstest(P)
+DynamicHMC.Diagnostics.EBFMI(results.tree_statistics)
 
-chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
-posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));
-posterior_β = mean(first, posterior)
-posterior_α = mean(last, posterior)
+DynamicHMC.Diagnostics.summarize_tree_statistics(results.tree_statistics)
 
-# Result CmdStan
+a3d = Array{Float64, 3}(undef, 1000, 9, 1);
+for j in 1:1
+  for i in 1:1000
+    a3d[i, 1, j] = values(posterior[i].bp)
+    a3d[i, 2, j] = values(posterior[i].bpC)
+    a3d[i, 3:9, j] = values(posterior[i].a)
+  end
+end
+
+# Create MCMCChains object
+
+parameter_names = ["bp", "bpC"]
+pooled_parameter_names = ["a[$i]" for i in 1:7]
+sections =   Dict(
+  :parameters => parameter_names,
+  :pooled => pooled_parameter_names
+)
+cnames = vcat(parameter_names, pooled_parameter_names)
+chns = create_mcmcchains(a3d, cnames, sections, start=1)
+
+# Result rethinking
 
 rethinking = "
 Iterations = 1:1000
@@ -90,13 +84,14 @@ a.4 -1.04898135 0.28129307 0.0044476339 0.0056325117 1000
 a.5 -0.74390933 0.26949936 0.0042611590 0.0052178124 1000
 a.6  0.21599365 0.26307574 0.0041595927 0.0045153523 1000
 a.7  1.81090866 0.39318577 0.0062168129 0.0071483527 1000
-
  bp  0.83979926 0.26284676 0.0041559722 0.0059795826 1000
 bpC -0.12913322 0.29935741 0.0047332562 0.0049519863 1000
 ";
 
-# Means of draws
+# Describe draws
 
-[posterior_β, posterior_α]
+describe(chns) |> display
 
+# Describe pooled draws
 
+describe(chns, sections=[:pooled])

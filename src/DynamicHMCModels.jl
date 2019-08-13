@@ -2,28 +2,14 @@ module DynamicHMCModels
 
 using Reexport 
 
-@reexport using StatisticalRethinking, CSV, LinearAlgebra
-@reexport using ForwardDiff
+@reexport using CSV, LinearAlgebra
+@reexport using ForwardDiff, Flux
+@reexport using DynamicHMC, LogDensityProblems, TransformVariables
+@reexport using StatsFuns, Distributions, Random, StatsBase
+@reexport using Parameters, CSV, DataFrames
 
 using DataStructures
 
-const src_path_d = @__DIR__
-
-"""
-
-# rel_path_d
-
-Relative path using the DynamicHMCModels src/ directory. 
-
-### Example to get access to the data subdirectory
-```julia
-rel_path_d("..", "data")
-```
-"""
-rel_path_d(parts...) = normpath(joinpath(src_path_d, parts...))
-
-include("scriptdict_d.jl")
-include("generate_d.jl")
 include("chains.jl")
 include("nptochain.jl")
 

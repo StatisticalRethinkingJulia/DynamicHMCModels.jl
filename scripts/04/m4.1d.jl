@@ -1,4 +1,4 @@
-# # Heights problem
+# # Heights_1 problem
 
 # We estimate simple linear regression model with a half-T prior.
 
@@ -17,7 +17,7 @@ df = filter(row -> row[:age] >= 18, data);
 
 # Half-T for `σ`, see below.
 
-Base.@kwdef mutable struct Heights{Ty <: AbstractVector, Tν <: Real}
+Base.@kwdef mutable struct Heights_1{Ty <: AbstractVector, Tν <: Real}
     "Observations."
     y::Ty
     "Degrees of freedom for prior on sigma."
@@ -26,15 +26,15 @@ end;
 
 # Write a function to return properly dimensioned transformation.
 
-function make_transformation(model::Heights)
+function make_transformation(model::Heights_1)
     as((σ = asℝ₊, μ  = as(Real, 100, 250)), )
 end
 
-model = Heights(;y = df[!, :height], v=1.0)
+model = Heights_1(;y = df[!, :height], v=1.0)
   
 # Then make the type callable with the parameters *as a single argument*.
 
-function (model::Heights)(θ)
+function (model::Heights_1)(θ)
     @unpack y, v = model   # extract the data
     @unpack μ, σ = θ
     loglikelihood(Normal(μ, σ), y) + logpdf(TDist(v), σ)

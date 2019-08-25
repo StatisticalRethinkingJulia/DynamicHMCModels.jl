@@ -1,4 +1,4 @@
-# # Heights problem with restricted prior on mu.
+# # Heights_2 problem with restricted prior on mu.
 
 using DynamicHMCModels
 
@@ -15,22 +15,22 @@ df = filter(row -> row[:age] >= 18, data);
 
 # Flat `σ`, see below.
 
-Base.@kwdef mutable struct Heights{Ty <: AbstractVector}
+Base.@kwdef mutable struct Heights_2{Ty <: AbstractVector}
     "Observations."
     y::Ty
 end;
 
 # Write a function to return properly dimensioned transformation.
 
-function make_transformation(model::Heights)
+function make_transformation(model::Heights_2)
     as((σ = asℝ₊, μ  = as(Real, 100, 250)), )
 end
 
-model = Heights(;y = df[!, :height])
+model = Heights_2(;y = df[!, :height])
   
 # Then make the type callable with the parameters *as a single argument*. Very constraint prior on μ. Flat σ.
 
-function (model::Heights)(θ)
+function (model::Heights_2)(θ)
     @unpack y = model   # extract the data
     @unpack μ, σ = θ
     loglikelihood(Normal(μ, σ), y) + logpdf(Normal(178, 0.1), μ) + 

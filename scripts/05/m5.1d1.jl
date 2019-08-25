@@ -21,7 +21,7 @@ first(df, 6)
 
 # Model ``y ∼ Normal(y - Xβ, σ)``. Flat prior for `β`, half-T for `σ`.
 
-struct WaffleDivorceProblem{TY <: AbstractVector, TX <: AbstractMatrix}
+mutable struct WaffleDivorceProblem{TY <: AbstractVector, TX <: AbstractMatrix}
     "Observations."
     y::TY
     "Covariates"

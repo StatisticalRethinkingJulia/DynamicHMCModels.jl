@@ -15,7 +15,7 @@ df = filter(row -> row[:age] >= 18, data);
 
 # Flat `σ`, see below.
 
-Base.@kwdef struct Heights{Ty <: AbstractVector}
+Base.@kwdef mutable struct Heights{Ty <: AbstractVector}
     "Observations."
     y::Ty
 end;

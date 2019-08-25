@@ -1,7 +1,7 @@
 name = "DynamicHMCModels"
 uuid = "6266e5bf-9887-5dfa-a522-2c46ecdcf14a"
 authors = ["Rob J Goedman <goedman@icloud.com"]
-version = "0.4.0"
+version = "1.0.0"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
@@ -29,4 +29,4 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 TransformVariables = "84d833dd-6860-57f9-a1a7-6da5db126cff"
 
 [compat]
-julia = "1"
+julia = "1.3"

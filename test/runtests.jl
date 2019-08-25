@@ -3,7 +3,11 @@ using Test
 
 scripts = [
   "../scripts/02/m2.1d.jl",
-  #"../scripts/04/m4.1d.jl")
+  "../scripts/04/m4.1d.jl",
+  "../scripts/04/m4.2d.jl",
+  "../scripts/04/m4.5d.jl",
+  "../scripts/04/m4.5d1].jl",
+  "../scripts/05/m5.1d.jl",
   "../scripts/10/m10.4d.jl"
 ]
 

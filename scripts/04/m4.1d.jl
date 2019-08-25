@@ -17,7 +17,7 @@ df = filter(row -> row[:age] >= 18, data);
 
 # Half-T for `σ`, see below.
 
-Base.@kwdef struct Heights{Ty <: AbstractVector, Tν <: Real}
+Base.@kwdef mutable struct Heights{Ty <: AbstractVector, Tν <: Real}
     "Observations."
     y::Ty
     "Degrees of freedom for prior on sigma."

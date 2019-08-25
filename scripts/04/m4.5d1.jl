@@ -1,101 +1,96 @@
-# # Linear regression
-
-# We estimate simple linear regression model with a half-T prior.
-# First, we load the packages we use.
+# Estimate polynomial linear regression model with a half-T prior.
 
 using DynamicHMCModels
 
-ProjDir = rel_path_d("..", "scripts", "04")
+ProjDir = @__DIR__
 cd(ProjDir)
 
 # Import the dataset.
 
-howell1 = CSV.read(rel_path("..", "data", "Howell1.csv"), delim=';')
-df = convert(DataFrame, howell1);
+data = DataFrame(CSV.read(joinpath("..", "..", "data", "Howell1.csv"), delim=';'));
 
 # Use only adults and standardize
 
-df2 = filter(row -> row[:age] >= 18, df)
-df2[:weight] = convert(Vector{Float64}, df2[:weight]);
-df2[:weight_s] = (df2[:weight] .- mean(df2[:weight])) / std(df2[:weight]);
-df2[:weight_s2] = df2[:weight_s] .^ 2;
+df = filter(row -> row[:age] >= 18, data);
+df[!, :weight] = convert(Vector{Float64}, df[!, :weight]);
+df[!, :weight_s] = (df[!, :weight] .- mean(df[!, :weight])) / std(df[!, :weight]);
+df[!, :weight_s2] = df[!, :weight_s] .^ 2;
 
-# Show the first six rows of the dataset.
 
-first(df2, 6)
-
-# Then define a structure to hold the data: observables, covariates, and the degrees of freedom for the prior.
+# Define a structure to hold the data: observables, covariates,
+# and the degrees of freedom for the prior.
 
 """
 Linear regression model ``y ∼ Xβ + ϵ``, where ``ϵ ∼ N(0, σ²)`` IID.
 Flat prior for `β`, half-T for `σ`.
 """
-struct LinearRegressionProblem{TY <: AbstractVector, TX <: AbstractMatrix,
-Tν <: Real}
+Base.@kwdef mutable struct LinearRegressionModel{Ty <: AbstractVector, Tx <: AbstractMatrix,
+Tv <: Real}
     "Observations."
-    y::TY
+    y::Ty
     "Covariates"
-    X::TX
+    x::Tx
     "Degrees of freedom for prior."
-    ν::Tν
+    v::Tv
 end
 
-# Then make the type callable with the parameters *as a single argument*.
+# Write a function to return a properly dimensioned transformation.
 
-function (problem::LinearRegressionProblem)(θ)
-    @unpack y, X, ν = problem   # extract the data
-    @unpack β, σ = θ            # works on the named tuple too
-    loglikelihood(Normal(0, σ), y .- X*β) + logpdf(TDist(ν), σ)
+function make_transformation(model::LinearRegressionModel)
+  as((β = as(Array, size(model.x, 2)), σ = asℝ₊))
 end
 
-# We should test this, also, this would be a good place to benchmark and
-# optimize more complicated problems.
+N = size(df, 1)
+x = hcat(ones(N), hcat(df[!, :weight_s], df[!, :weight_s2]));
+model = LinearRegressionModel(;y = df[!, :height], x=x, v=1.0)
+  
+# Pack parameters *as a single argument*.
 
-N = size(df2, 1)
-X = hcat(ones(N), hcat(df2[:weight_s], df2[:weight_s2]));
-y = convert(Vector{Float64}, df2[:height])
-p = LinearRegressionProblem(y, X, 1.0);
-p((β = [1.0, 2.0, 3.0], σ = 1.0))
+function (model::LinearRegressionModel)(θ)
+    @unpack y, x, v = model   # extract data
+    @unpack β, σ = θ                 # extract parameters
+    loglikelihood(Normal(0, σ), y .- x*β) + logpdf(TDist(v), σ)
+end
 
-# For this problem, we write a function to return the transformation (as it varies with the number of covariates).
+# Evaluate at model function at some initial valuues
 
-problem_transformation(p::LinearRegressionProblem) =
-    as((β = as(Array, size(p.X, 2)), σ = asℝ₊))
+println()
+model((β = [1.0, 2.0, 3.0], σ = 1.0)) |> display
+println()
 
 # Wrap the problem with a transformation, then use Flux for the gradient.
 
-P = TransformedLogDensity(problem_transformation(p), p)
-∇P = ADgradient(:ForwardDiff, P);
+P = TransformedLogDensity(make_transformation(model), model)
+∇P = ADgradient(:Flux, P);
 
-# Finally, we sample from the posterior. `chain` holds the chain (positions and
-# diagnostic information), while the second returned value is the tuned sampler
-# which would allow continuation of sampling.
+# Tune and sample.
 
-chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
+results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000)
+posterior = P.transformation.(results.chain)
 
-# We use the transformation to obtain the posterior from the chain.
+println()
+DynamicHMC.Diagnostics.EBFMI(results.tree_statistics) |> display
+println()
 
-posterior = TransformVariables.transform.(Ref(∇P.transformation), get_position.(chain));
-posterior[1:5]
+DynamicHMC.Diagnostics.summarize_tree_statistics(results.tree_statistics) |> display
+println()
 
-# Extract the parameter posterior means: `β`,
+a3d = Array{Float64, 3}(undef, 1000, 4, 1);
+for j in 1:1
+  for i in 1:1000
+    a3d[i, 1:3, j] = values(posterior[i].β)
+    a3d[i, 4, j] = values(posterior[i].σ)
+  end
+end
 
-posterior_β = mean(first, posterior)
+pnames = ["β[1]", "β[2]", "β[3]", "σ"]
+sections =   Dict(
+  :parameters => pnames,
+)
+chns = create_mcmcchains(a3d, pnames, sections, start=1);
+chns = set_names(chns, Dict("β[1]" => "α", "β[2]" => "β[1]", "β[3]" => "β[2]"))
 
-# then `σ`:
-
-posterior_σ = mean(last, posterior)
-
-# Effective sample sizes (of untransformed draws)
-
-ess = mapslices(effective_sample_size,
-                get_position_matrix(chain); dims = 1)
-
-# NUTS-specific statistics
-
-NUTS_statistics(chain)
-
-cmdstan_result = "
+stan_result = "
 Iterations = 1:1000
 Thinning interval = 1
 Chains = 1,2,3,4
@@ -116,8 +111,6 @@ Quantiles:
 sigma   4.76114350   4.9816850   5.10326000   5.2300450   5.51500975
 ";
 
-# Extract the parameter posterior means: `β`,
-
-[posterior_β, posterior_σ]
+describe(chns)
 
 # end of m4.5d.jl

@@ -5,7 +5,7 @@ using Reexport
 @reexport using CSV, LinearAlgebra
 @reexport using ForwardDiff, Flux
 @reexport using DynamicHMC, LogDensityProblems, TransformVariables
-@reexport using StatsFuns, Distributions, Random, StatsBase
+@reexport using StatsFuns, Distributions, Random, StatsBase, MCMCChains
 @reexport using Parameters, CSV, DataFrames
 
 using DataStructures

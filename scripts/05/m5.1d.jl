@@ -2,93 +2,89 @@
 
 using DynamicHMCModels
 
-ProjDir = rel_path_d("..", "scripts", "05")
+ProjDir = @__DIR__
 cd(ProjDir)
 
 # Import the dataset.
 
 # ### snippet 5.1
 
-wd = CSV.read(rel_path("..", "data", "WaffleDivorce.csv"), delim=';')
-df = convert(DataFrame, wd);
+df = DataFrame(CSV.read(joinpath("..", "..", "data", "WaffleDivorce.csv"), delim=';'))
 mean_ma = mean(df[!, :MedianAgeMarriage])
 df[!, :MedianAgeMarriage_s] = convert(Vector{Float64},
   (df[!, :MedianAgeMarriage]) .- mean_ma)/std(df[!, :MedianAgeMarriage]);
 
-# Show the first six rows of the dataset.
+# Model ``y ∼ Normal(y - Xβ, σ)``. Flat prior `β`, half-T for `σ`.
 
-first(df, 6)
-
-# Model ``y ∼ Normal(y - Xβ, σ)``. Flat prior for `β`, half-T for `σ`.
-
-struct WaffleDivorceProblem{TY <: AbstractVector, TX <: AbstractMatrix}
+Base.@kwdef mutable struct WaffleDivorce{Ty <: AbstractVector, 
+  Tx <: AbstractMatrix}
     "Observations."
-    y::TY
+    y::Ty
     "Covariates"
-    X::TX
+    x::Tx
 end
 
-# Make the type callable with the parameters *as a single argument*.
+# Write a function to return a properly dimensioned transformation.
 
-function (problem::WaffleDivorceProblem)(θ)
-    @unpack y, X, = problem   # extract the data
-    @unpack β, σ = θ            # works on the named tuple too
-    ll = 0.0
-    ll += logpdf(Normal(10, 10), X[1]) # a = X[1]
-    ll += logpdf(Normal(0, 1), X[2]) # b1 = X[2]
-    ll += logpdf(TDist(1.0), σ)
-    ll += loglikelihood(Normal(0, σ), y .- X*β)
-    ll
+function make_transformation(model::WaffleDivorce)
+  as((β = as(Array, size(model.x, 2)), σ = asℝ₊))
 end
 
 # Instantiate the model with data and inits.
 
-N = size(df, 1)
-X = hcat(ones(N), df[!, :MedianAgeMarriage_s]);
-y = convert(Vector{Float64}, df[!, :Divorce])
-p = WaffleDivorceProblem(y, X);
-p((β = [1.0, 2.0], σ = 1.0))
+x = hcat(ones(size(df, 1)), df[!, :MedianAgeMarriage_s]);
+model = WaffleDivorce(;y=df[!, :Divorce], x=x);
 
-# Write a function to return properly dimensioned transformation.
+# Make tmodel callable with the parameters *as a single argument*.
 
-problem_transformation(p::WaffleDivorceProblem) =
-    as((β = as(Array, size(p.X, 2)), σ = asℝ₊))
+function (model::WaffleDivorce)(θ)
+    @unpack y, x = model   # extract the data
+    @unpack β, σ = θ            # works on the named tuple too
+    ll = 0.0
+    ll += logpdf(Normal(10, 10), x[1]) # alpha
+    ll += logpdf(Normal(0, 1), x[2]) # beta
+    ll += logpdf(TDist(1.0), σ)
+    ll += loglikelihood(Normal(0, σ), y .- x*β)
+    ll
+end
+
+println()
+model((β = [1.0, 2.0], σ = 1.0)) |> display
+println()
 
 # Wrap the problem with a transformation, then use Flux for the gradient.
 
-P = TransformedLogDensity(problem_transformation(p), p)
-#∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
-∇P = ADgradient(:ForwardDiff, P);
+P = TransformedLogDensity(make_transformation(model), model)
+∇P = ADgradient(:Flux, P);
 
 # Tune and sample.
 
-chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
+results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000)
+posterior = P.transformation.(results.chain)
 
-# We use the transformation to obtain the posterior from the chain.
+println()
+DynamicHMC.Diagnostics.EBFMI(results.tree_statistics) |> display
+println()
 
-posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));
-posterior[1:5]
+DynamicHMC.Diagnostics.summarize_tree_statistics(results.tree_statistics) |> display
+println()
 
-# Extract the parameter posterior means: `β`,
+a3d = Array{Float64, 3}(undef, 1000, 3, 1);
+for j in 1:1
+  for i in 1:1000
+    a3d[i, 1:2, j] = values(posterior[i].β)
+    a3d[i, 3, j] = values(posterior[i].σ)
+  end
+end
 
-posterior_β = mean(first, posterior)
+pnames = ["β[1]", "β[2]", "σ"]
+sections =   Dict(
+  :parameters => pnames,
+)
+chns = create_mcmcchains(a3d, pnames, sections, start=1);
+chns = set_names(chns, Dict("β[1]" => "α", "β[2]" => "β"))
 
-# then `σ`:
-
-posterior_σ = mean(last, posterior)
-
-# Effective sample sizes (of untransformed draws)
-
-ess = mapslices(effective_sample_size,
-                get_position_matrix(chain); dims = 1)
-
-# NUTS-specific statistics
-
-NUTS_statistics(chain)
-
-# cmdstan result
-
-cmdstan_result = "
+stan_result = "
 Iterations = 1:1000
 Thinning interval = 1
 Chains = 1,2,3,4
@@ -107,8 +103,8 @@ Quantiles:
 sigma  1.241496  1.4079225  1.504790  1.61630750  1.86642750
 ";
 
-# Extract the parameter posterior means: `β`,
+# Describe chains
 
-[posterior_β[1], posterior_β[2], posterior_σ]
+describe(chns)
 
 # end of m4.5d.jl

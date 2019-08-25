@@ -1,4 +1,4 @@
-using DynamicHMCModels
+using DynamicHMCModels, MCMCChains
 using Flux
 
 ProjDir = @__DIR__
@@ -26,8 +26,8 @@ model = Chimpanzees(; N_actors = maximum(data.actor), pulled_left = data.pulled_
                     actor = data.actor)
 
 function (model::Chimpanzees)(θ)
-    @unpack a, bp, bpC = θ
     @unpack pulled_left, prosoc_left, condition, actor = model
+    @unpack a, bp, bpC = θ
     ℓ_likelihood = mapreduce(+, actor, condition, prosoc_left,
        pulled_left) do actor, condition, prosoc_left, pulled_left
            p = logistic(a[actor] + (bp + bpC * condition) * prosoc_left)

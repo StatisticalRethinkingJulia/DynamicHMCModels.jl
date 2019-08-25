@@ -1,6 +1,6 @@
 # # Estimate Binomial draw probabilility
 
-using DynamicHMCModels
+using DynamicHMCModels, MCMCChains
 import Flux
 
 # Define a structure to hold the data.

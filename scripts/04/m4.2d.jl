@@ -1,85 +1,76 @@
 # # Heights problem with restricted prior on mu.
 
-# Result is not conform cmdstan result
-
 using DynamicHMCModels
 
-ProjDir = rel_path_d("..", "scripts", "04")
+ProjDir = @__DIR__
 cd(ProjDir)
 
 # Import the dataset.
 
-howell1 = CSV.read(rel_path("..", "data", "Howell1.csv"), delim=';')
-df = convert(DataFrame, howell1);
+data = DataFrame(CSV.read(joinpath("..", "..", "data", "Howell1.csv"), delim=';'));
 
 # Use only adults and standardize
 
-df2 = filter(row -> row[:age] >= 18, df);
+df = filter(row -> row[:age] >= 18, data);
 
-# Show the first six rows of the dataset.
+# Flat `σ`, see below.
 
-first(df2, 6)
-
-# No covariates, just height observations.
-
-struct ConstraintHeightsProblem{TY <: AbstractVector}
+Base.@kwdef struct Heights{Ty <: AbstractVector}
     "Observations."
-    y::TY
+    y::Ty
 end;
 
-# Very constraint prior on μ. Flat σ.
+# Write a function to return properly dimensioned transformation.
 
-function (problem::ConstraintHeightsProblem)(θ)
-    @unpack y = problem   # extract the data
+function make_transformation(model::Heights)
+    as((σ = asℝ₊, μ  = as(Real, 100, 250)), )
+end
+
+model = Heights(;y = df[!, :height])
+  
+# Then make the type callable with the parameters *as a single argument*. Very constraint prior on μ. Flat σ.
+
+function (model::Heights)(θ)
+    @unpack y = model   # extract the data
     @unpack μ, σ = θ
     loglikelihood(Normal(μ, σ), y) + logpdf(Normal(178, 0.1), μ) + 
     logpdf(Uniform(0, 50), σ)
 end;
 
-# Define problem with data and inits.
+# Wrap the problem with a transformation, then use Flux for the gradient.
 
-obs = convert(Vector{Float64}, df2[:height])
-p = ConstraintHeightsProblem(obs);
-p((μ = 178, σ = 5.0))
+P = TransformedLogDensity(make_transformation(model), model)
+∇P = ADgradient(:Flux, P);
 
-# Write a function to return properly dimensioned transformation.
+# Tune and sample.
 
-problem_transformation(p::ConstraintHeightsProblem) =
-    as((μ  = as(Real, 100, 250), σ = asℝ₊), )
+results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000)
+posterior = P.transformation.(results.chain)
 
-# Use Flux for the gradient.
+println()
+DynamicHMC.Diagnostics.EBFMI(results.tree_statistics) |> display
+println()
 
-P = TransformedLogDensity(problem_transformation(p), p)
-∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
+DynamicHMC.Diagnostics.summarize_tree_statistics(results.tree_statistics) |> display
+println()
 
-# FSample from the posterior.
+a3d = Array{Float64, 3}(undef, 1000, 2, 1);
+for j in 1:1
+  for i in 1:1000
+    a3d[i, 1, j] = values(posterior[i].μ)
+    a3d[i, 2, j] = values(posterior[i].σ)
+  end
+end
 
-chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
-
-# Undo the transformation to obtain the posterior from the chain.
-
-posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));
-
-# Extract the parameter posterior means: `μ`,
-
-posterior_μ = mean(first, posterior)
-
-# Extract the parameter posterior means: `μ`,
-
-posterior_σ = mean(last, posterior)
-
-# Effective sample sizes (of untransformed draws)
-
-ess = mapslices(effective_sample_size,
-                get_position_matrix(chain); dims = 1)
-
-# NUTS-specific statistics
-
-NUTS_statistics(chain)
+pnames = ["μ", "σ"]
+sections =   Dict(
+  :parameters => pnames,
+)
+chns = create_mcmcchains(a3d, pnames, sections, start=1);
 
 # cmdstan result
 
-cmdstan_result = "
+stan_result = "
 Iterations = 1:1000
 Thinning interval = 1
 Chains = 1,2,3,4
@@ -96,8 +87,6 @@ sigma  22.826377  23.942275  24.56935  25.2294  26.528368
    mu 177.665000 177.797000 177.86400 177.9310 178.066000
 ";
 
-# Extract the parameter posterior means: `β`,
+describe(chns)
 
-[posterior_μ, posterior_σ]
-
-# end of m4.5d.jl
+# end of m4.2d.jl

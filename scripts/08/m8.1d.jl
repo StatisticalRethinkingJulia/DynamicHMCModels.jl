@@ -2,89 +2,87 @@
 
 using DynamicHMCModels
 
-# CmdStan uses a tmp directory to store the output of cmdstan
-
-ProjDir = rel_path_d("..", "scripts", "08")
+ProjDir = @__DIR__
 cd(ProjDir)
 
-# ### snippet 5.1
+# Read in data
 
-d = CSV.read(rel_path("..", "data", "rugged.csv"), delim=';');
-df = convert(DataFrame, d);
+df = DataFrame(CSV.read(joinpath("..", "..", "data", "rugged.csv"), delim=';'))
+df = filter(row -> !(ismissing(row[:rgdppc_2000])), df)
+df[!, :log_gdp] = log.(df[!, :rgdppc_2000])
+df[!, :cont_africa] = Array{Float64}(convert(Array{Int}, df[!, :cont_africa]))
 
-dcc = filter(row -> !(ismissing(row[:rgdppc_2000])), df)
-dcc[!, :log_gdp] = log.(dcc[!, :rgdppc_2000])
-dcc[!, :cont_africa] = Array{Float64}(convert(Array{Int}, dcc[!, :cont_africa]))
-
-# First 5 rows with data
-
-first(dcc[!, [:rugged, :cont_africa, :log_gdp]], 5)
-
-struct m_8_1_model{TY <: AbstractVector, TX <: AbstractMatrix}
+Base.@kwdef mutable struct RuggedModel{Ty <: AbstractVector,
+  Tx <: AbstractMatrix}
     "Observations."
-    y::TY
+    y::Ty
     "Covariates"
-    X::TX
+    x::Tx
 end
-
-# Make the type callable with the parameters *as a single argument*.
-
-function (problem::m_8_1_model)(θ)
-    @unpack y, X, = problem   # extract the data
-    @unpack β, σ = θ            # works on the named tuple too
-    ll = 0.0
-    ll += logpdf(Normal(0, 100), X[1]) # a = X[1]
-    ll += logpdf(Normal(0, 10), X[2]) # bR = X[2]
-    ll += logpdf(Normal(0, 10), X[3]) # bA = X[3]
-    ll += logpdf(Normal(0, 10), X[4]) # bAR = X[4]
-    ll += logpdf(TDist(1.0), σ)
-    ll += loglikelihood(Normal(0, σ), y .- X*β)
-    ll
-end
-
-# Instantiate the model with data and inits.
-
-N = size(dcc, 1)
-X = hcat(ones(N), dcc[!, :rugged], dcc[!, :cont_africa], dcc[!, :rugged].*dcc[!, :cont_africa]);
-y = convert(Vector{Float64}, dcc[!, :log_gdp])
-p = m_8_1_model(y, X);
-p((β = [1.0, 2.0, 1.0, 2.0], σ = 1.0))
 
 # Write a function to return properly dimensioned transformation.
 
-problem_transformation(p::m_8_1_model) =
-    as((β = as(Array, size(p.X, 2)), σ = asℝ₊))
+function make_transformation(model::RuggedModel)
+  as((β = as(Array, size(model.x, 2)), σ = asℝ₊))
+end
+  
+# Instantiate the model with data and inits.
+
+x = hcat(ones(size(df, 1)), df[!, :rugged], df[!, :cont_africa],
+  df[!, :rugged] .* df[!, :cont_africa]);
+model = RuggedModel(;y=df[!, :log_gdp], x=x)
+
+# Model callable with *a single argument*.
+
+function (problem::RuggedModel)(θ)
+    @unpack y, x = problem   # extract the data
+    @unpack β, σ = θ            # works on the named tuple too
+    ll = 0.0
+    ll += logpdf(Normal(0, 100), x[1])
+    ll += logpdf(Normal(0, 10), x[2])
+    ll += logpdf(Normal(0, 10), x[3])
+    ll += logpdf(Normal(0, 10), x[4])
+    ll += logpdf(TDist(1.0), σ)
+    ll += loglikelihood(Normal(0, σ), y .- x*β)
+    ll
+end
+
+println()
+model((β = [1.0, 2.0, 1.0, 2.0], σ = 1.0))
+println()
 
 # Wrap the problem with a transformation, then use Flux for the gradient.
 
-P = TransformedLogDensity(problem_transformation(p), p)
-∇P = ADgradient(:ForwardDiff, P);
+P = TransformedLogDensity(make_transformation(model), model)
+∇P = ADgradient(:Flux, P);
 
 # Tune and sample.
 
-chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
+results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000)
+posterior = P.transformation.(results.chain)
 
-# We use the transformation to obtain the posterior from the chain.
+println()
+DynamicHMC.Diagnostics.EBFMI(results.tree_statistics) |> display
+println()
 
-posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));
-posterior[1:5]
+DynamicHMC.Diagnostics.summarize_tree_statistics(results.tree_statistics) |> display
+println()
 
-# Extract the parameter posterior means: `β`,
+a3d = Array{Float64, 3}(undef, 1000, 5, 1);
+for j in 1:1
+  for i in 1:1000
+    a3d[i, 1:4, j] = values(posterior[i].β)
+    a3d[i, 5, j] = values(posterior[i].σ)
+  end
+end
 
-posterior_β = mean(first, posterior)
-
-# then `σ`:
-
-posterior_σ = mean(last, posterior)
-
-# Effective sample sizes (of untransformed draws)
-
-ess = mapslices(effective_sample_size,
-                get_position_matrix(chain); dims = 1)
-
-# NUTS-specific statistics
-
-NUTS_statistics(chain)
+pnames = ["β[1]", "β[2]", "β[3]", "β[4]", "σ"]
+sections =   Dict(
+  :parameters => pnames,
+)
+chns = create_mcmcchains(a3d, pnames, sections, start=1);
+chns = set_names(chns, Dict("β[1]" => "α", "β[2]" => "β[1]", 
+  "β[3]" => "β[2]", "β[4]" => "β[3]"))
 
 # Result rethinking
 
@@ -99,6 +97,6 @@ sigma  0.96 0.05  0.87  1.04   339    1
 
 # Summary
 
-[posterior_β, posterior_σ]
+describe(chns)
 
 # End of `08/m8.1s.jl`

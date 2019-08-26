@@ -1,82 +1,102 @@
 using DynamicHMCModels
 
-ProjDir = rel_path_d("..", "scripts", "12")
+ProjDir = @__DIR__
 
-df = CSV.read(rel_path( "..", "data",  "Kline.csv"), delim=';');
-size(df) # Should be 10x5
+df = DataFrame(CSV.read(joinpath(ProjDir, "..", "..", "data",  "Kline.csv"), delim=';'))
 
 # New col logpop, set log() for population data
 df[!, :logpop] = map((x) -> log(x), df[!, :population]);
 df[!, :society] = 1:10;
 
-first(df[!, [:total_tools, :logpop, :society]], 5)
-
-struct m_12_06d_model{TY <: AbstractVector, TX <: AbstractMatrix,
-  TS <: AbstractVector}
+Base.@kwdef mutable struct KlineModel{Ty <: AbstractVector,
+  Tx <: AbstractMatrix, Ts <: AbstractVector}
     "Observations (total_tools)."
-    y::TY
+    y::Ty
     "Covariates (logpop)"
-    X::TX
+    x::Tx
     "Society"
-    S::TS
+    s::Ts
     "Number of observations (10)"
     N::Int
     "Number of societies (also 10)"
     N_societies::Int
 end
 
-# Make the type callable with the parameters *as a single argument*.
-
-function (problem::m_12_06d_model)(θ)
-    @unpack y, X, S, N, N_societies = problem   # extract the data
-    @unpack β, α, σ = θ  # β : a, bp, α : a_society
-    ll = 0.0
-    ll += logpdf(Cauchy(0, 1), σ)
-    ll += sum(logpdf.(Normal(0, σ), α)) # α[1:10]
-    ll += logpdf.(Normal(0, 10), β[1]) # a
-    ll += logpdf.(Normal(0, 1), β[2]) # a
-    ll += sum(
-      [loglikelihood(Poisson(exp(α[S[i]] + dot(X[i, :], β))), [y[i]]) for i in 1:N]
-    )
-    ll
+function make_transformation(model::KlineModel)
+    as( (β = as(Array, size(model.x, 2)), α = as(Array, model.N_societies), σ = asℝ₊) )
 end
 
 # Instantiate the model with data and inits.
 
 N = size(df, 1)
 N_societies = length(unique(df[!, :society]))
-X = hcat(ones(Int64, N), df[!, :logpop]);
-S = df[!, :society]
+x = hcat(ones(Int64, N), df[!, :logpop]);
+s = df[!, :society]
 y = df[!, :total_tools]
-p = m_12_06d_model(y, X, S, N, N_societies);
-θ = (β = [1.0, 0.25], α = rand(Normal(0, 1), N_societies), σ = 0.2)
-p(θ)
+model = KlineModel(; y=y, x=x, s=s, N=N, N_societies=N_societies)
 
-# Write a function to return properly dimensioned transformation.
+# Make the type callable with the parameters *as a single argument*.
 
-problem_transformation(p::m_12_06d_model) =
-    as( (β = as(Array, size(p.X, 2)), α = as(Array, p.N_societies), σ = asℝ₊) )
+function (model::KlineModel)(θ)
+    @unpack y, x, s, N, N_societies = model   # data
+    @unpack β, α, σ = θ  # parameters
+    ll = 0.0
+    ll += logpdf(Cauchy(0, 1), σ)
+    ll += sum(logpdf.(Normal(0, σ), α)) # α[1:10]
+    ll += logpdf.(Normal(0, 10), β[1]) # a
+    ll += logpdf.(Normal(0, 1), β[2]) # a
+    ll += sum(
+      [loglikelihood(Poisson(exp(α[s[i]] + dot(x[i, :], β))), [y[i]]) for i in 1:N]
+    )
+    ll
+end
+
+println()
+model((β = [1.0, 0.25], α = rand(Normal(0, 1), N_societies), σ = 0.2)) |> display
+println()
 
 # Wrap the problem with a transformation, then use Flux for the gradient.
 
-P = TransformedLogDensity(problem_transformation(p), p)
-∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
-#∇P = ADgradient(:ForwardDiff, P);
+P = TransformedLogDensity(make_transformation(model), model)
+∇P = ADgradient(:Flux, P);
+results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000;
+#  initialization = (ϵ = 0.001, ),
+#  warmup_stages = fixed_stepsize_warmup_stages()
+)
+posterior = P.transformation.(results.chain)
 
-# Tune and sample.
+println()
+DynamicHMC.Diagnostics.EBFMI(results.tree_statistics) |> display
 
-posterior = Vector{Array{NamedTuple{(:β, :α, :σ),Tuple{Array{Float64,1},
-  Array{Float64,1},Float64}},1}}(undef, 4)
+println()
+DynamicHMC.Diagnostics.summarize_tree_statistics(results.tree_statistics) |> display
+println()
 
-for i in 1:4
-  chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
-  posterior[i] = TransformVariables.transform.(Ref(problem_transformation(p)),
-    get_position.(chain));
+# Set varable names
+
+parameter_names = ["a", "bp", "sigma_society"]
+pooled_parameter_names = ["a_society[$i]" for i in 1:10]
+
+# Create a3d
+
+a3d = Array{Float64, 3}(undef, 1000, 13, 1);
+for j in 1:1
+  for i in 1:1000
+    a3d[i, 1:2, j] = values(posterior[i].β)
+    a3d[i, 3, j] = values(posterior[i].σ)
+    a3d[i, 4:13, j] = values(posterior[i].α)
+  end
 end
 
-# CmdStan result
+chns = MCMCChains.Chains(a3d,
+  vcat(parameter_names, pooled_parameter_names),
+  Dict(
+    :parameters => parameter_names,
+    :pooled => pooled_parameter_names
+  )
+);
 
-m_12_6_result = "
+stan_result = "
 Iterations = 1:1000
 Thinning interval = 1
 Chains = 1,2,3,4
@@ -99,45 +119,12 @@ Empirical Posterior Estimates:
 sigma_society    0.310352849  0.1374834682 0.00217380450 0.0057325226  575.187461
 ";
         
-# Set varable names
-
-parameter_names = ["a", "bp", "sigma_society"]
-pooled_parameter_names = ["a_society[$i]" for i in 1:10]
-
-# Create a3d
-
-a3d = Array{Float64, 3}(undef, 1000, 13, 4);
-for j in 1:4
-  for i in 1:1000
-    a3d[i, 1:2, j] = values(posterior[j][i][1])
-    a3d[i, 3, j] = values(posterior[j][i][3])
-    a3d[i, 4:13, j] = values(posterior[j][i][2])
-  end
-end
-
-chns = MCMCChains.Chains(a3d,
-  vcat(parameter_names, pooled_parameter_names),
-  Dict(
-    :parameters => parameter_names,
-    :pooled => pooled_parameter_names
-  )
-);
-
 # Describe the chain
 
-describe(chns)
+describe(chns) |> display
+println()
 
 # Describe the chain
 
 describe(chns, sections=[:pooled])
-
-# Plot the chain parameters
-
-plot(chns)
-
-# Plot the chain pooled parameters
-
-plot(chns, section=:pooled)
-
-# End of m12.6d.jl
 

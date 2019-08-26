@@ -2,15 +2,14 @@
 
 using DynamicHMCModels
 
-ProjDir = rel_path_d("..", "scripts", "05")
+ProjDir = @__DIR__
 cd(ProjDir)
 
 # Import the dataset.
 
 # ### snippet 5.4
 
-wd = CSV.read(rel_path("..", "data", "WaffleDivorce.csv"), delim=';')
-df = convert(DataFrame, wd);
+df = DataFrame(CSV.read(joinpath("..", "..", "data", "WaffleDivorce.csv"), delim=';'))
 
 mean_ma = mean(df[!, :Marriage])
 df[!, :Marriage_s] = convert(Vector{Float64},
@@ -20,80 +19,83 @@ mean_mam = mean(df[!, :MedianAgeMarriage])
 df[!, :MedianAgeMarriage_s] = convert(Vector{Float64},
   (df[!, :MedianAgeMarriage]) .- mean_mam)/std(df[!, :MedianAgeMarriage]);
 
-# Show the first six rows of the dataset.
+# Model ``y ∼ Xβ + ϵ``, where ``ϵ ∼ N(0, σ²)`` IID. Student on σ
 
-first(df[!, [1, 7, 14,15]], 6)
-
-# Model ``y ∼ Xβ + ϵ``, where ``ϵ ∼ N(0, σ²)`` IID. Student prior on σ
-
-struct m_5_3{TY <: AbstractVector, TX <: AbstractMatrix}
+Base.@kwdef mutable struct WaffleDivorce{Ty <: AbstractVector, Tx <: AbstractMatrix}
     "Observations."
-    y::TY
+    y::Ty
     "Covariates"
-    X::TX
+    x::Tx
 end
 
-# Make the type callable with the parameters *as a single argument*.
+# Write a function to return a properly dimensioned transformation.
 
-function (problem::m_5_3)(θ)
-    @unpack y, X, = problem   # extract the data
-    @unpack β, σ = θ            # works on the named tuple too
-    ll = 0.0
-    ll += logpdf(Normal(10, 10), X[1]) # a = X[1]
-    ll += logpdf(Normal(0, 1), X[2]) # b1 = X[2]
-    ll += logpdf(Normal(0, 1), X[3]) # b1 = X[3]
-    ll += logpdf(TDist(1.0), σ)
-    ll += loglikelihood(Normal(0, σ), y .- X*β)
-    ll
+function make_transformation(model::WaffleDivorce)
+  as((β = as(Array, size(model.x, 2)), σ = asℝ₊))
 end
 
 # Instantiate the model with data and inits.
 
-N = size(df, 1)
-X = hcat(ones(N), df[!, :Marriage_s], df[!, :MedianAgeMarriage_s]);
-y = convert(Vector{Float64}, df[!, :Divorce])
-p = m_5_3(y, X);
-p((β = [1.0, 2.0, 3.0], σ = 1.0))
+x = hcat(ones(size(df, 1)), df[!, :Marriage_s], df[!, :MedianAgeMarriage_s]);
+model = WaffleDivorce(;y=df[!, :Divorce], x=x);
 
-# Write a function to return properly dimensioned transformation.
+# Make the type callable with the parameters *as a single argument*.
 
-problem_transformation(p::m_5_3) =
-    as((β = as(Array, size(p.X, 2)), σ = asℝ₊))
+function (model::WaffleDivorce)(θ)
+    @unpack y, x = model   # extract the data
+    @unpack β, σ = θ            # works on the named tuple too
+    ll = 0.0
+    ll += logpdf(Normal(10, 10), x[1])
+    ll += logpdf(Normal(0, 1), x[2])
+    ll += logpdf(Normal(0, 1), x[3])
+    ll += logpdf(TDist(1.0), σ)
+    ll += loglikelihood(Normal(0, σ), y .- x*β)
+    ll
+end
+
+println()
+model((β = [1.0, 2.0, 3.0], σ = 1.0)) |> display
+println()
+
+# Instantiate the model with data and inits.
+
+println()
+model((β = [1.0, 2.0, 3.0], σ = 1.0))
+println()
 
 # Wrap the problem with a transformation, then use Flux for the gradient.
 
-P = TransformedLogDensity(problem_transformation(p), p)
-∇P = ADgradient(:ForwardDiff, P);
+P = TransformedLogDensity(make_transformation(model), model)
+∇P = ADgradient(:Flux, P);
 
 # Tune and sample.
 
-chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
+results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000)
+posterior = P.transformation.(results.chain)
 
-# We use the transformation to obtain the posterior from the chain.
+println()
+DynamicHMC.Diagnostics.EBFMI(results.tree_statistics) |> display
+println()
 
-posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));
-posterior[1:5]
+DynamicHMC.Diagnostics.summarize_tree_statistics(results.tree_statistics) |> display
+println()
 
-# Extract the parameter posterior means: `β`,
+a3d = Array{Float64, 3}(undef, 1000, 4, 1);
+for j in 1:1
+  for i in 1:1000
+    a3d[i, 1:3, j] = values(posterior[i].β)
+    a3d[i, 4, j] = values(posterior[i].σ)
+  end
+end
 
-posterior_β = mean(first, posterior)
+pnames = ["β[1]", "β[2]", "β[3]", "σ"]
+sections =   Dict(
+  :parameters => pnames,
+)
+chns = create_mcmcchains(a3d, pnames, sections, start=1);
+chns = set_names(chns, Dict("β[1]" => "α", "β[2]" => "β[1]", "β[3]" => "β[2]"))
 
-# then `σ`:
-
-posterior_σ = mean(last, posterior)
-
-# Effective sample sizes (of untransformed draws)
-
-ess = mapslices(effective_sample_size,
-                get_position_matrix(chain); dims = 1)
-
-# NUTS-specific statistics
-
-NUTS_statistics(chain)
-
-# cmdstan result
-
-cmdstan_result = "
+stan_result = "
 Iterations = 1:1000
 Thinning interval = 1
 Chains = 1,2,3,4
@@ -114,8 +116,6 @@ Quantiles:
 sigma  1.2421182  1.4125950  1.5107700  1.61579000  1.89891925
 ";
 
-# Extract the parameter posterior means: `[β, σ]`,
-
-[posterior_β, posterior_σ]
+describe(chns)
 
 # end of m4.5d.jl

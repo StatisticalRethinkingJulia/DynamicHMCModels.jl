@@ -4,90 +4,86 @@ using DynamicHMCModels
 
 # CmdStan uses a tmp directory to store the output of cmdstan
 
-ProjDir = rel_path_d("..", "scripts", "05")
+ProjDir = @__DIR__
 cd(ProjDir)
 
 # Read the milk data
 
-wd = CSV.read(rel_path("..", "data", "milk.csv"), delim=';')
-df = convert(DataFrame, wd);
-dcc = filter(row -> !(row[:neocortex_perc] == "NA"), df)
-dcc[!, :kcal_per_g] = convert(Vector{Float64}, dcc[!, :kcal_per_g])
-dcc[!, :log_mass] = log.(convert(Vector{Float64}, dcc[!, :mass]))
-
-# Show first 5 rows
-
-first(dcc[!, [3, 7, 9]], 5)
+df = DataFrame(CSV.read(joinpath("..", "..", "data", "milk.csv"), delim=';'))
+df = filter(row -> !(row[:neocortex_perc] == "NA"), df)
+#df[!, :kcal_per_g] = convert(Vector{Float64}, df[!, :kcal_per_g])
+df[!, :log_mass] = log.(convert(Vector{Float64}, df[!, :mass]))
 
 # Define the model struct
 
-struct m_5_6{TY <: AbstractVector, TX <: AbstractMatrix}
+Base.@kwdef mutable struct MilkModel{Ty <: AbstractVector, Tx <: AbstractMatrix}
     "Observations."
-    y::TY
+    y::Ty
     "Covariates"
-    X::TX
+    x::Tx
 end
-
-# Make the type callable with the parameters *as a single argument*.
-
-function (problem::m_5_6)(θ)
-    @unpack y, X, = problem   # extract the data
-    @unpack β, σ = θ            # works on the named tuple too
-    ll = 0.0
-    ll += logpdf(Normal(0, 100), X[1]) # a = X[1]
-    ll += logpdf(Normal(0, 1), X[2]) # b1 = X[2]
-    ll += logpdf(TDist(1.0), σ)
-    ll += loglikelihood(Normal(0, σ), y .- X*β)
-    ll
-end
-
-# Instantiate the model with data and inits.
-
-N = size(dcc, 1)
-X = hcat(ones(N), dcc[!, :log_mass]);
-y = dcc[!, :kcal_per_g]
-p = m_5_6(y, X);
-p((β = [1.0, 2.0], σ = 1.0))
 
 # Write a function to return properly dimensioned transformation.
 
-problem_transformation(p::m_5_6) =
-    as((β = as(Array, size(p.X, 2)), σ = asℝ₊))
+function make_transformation(model::MilkModel)
+  as((β = as(Array, size(model.x, 2)), σ = asℝ₊))
+end
+  
+# Instantiate the model with data and inits.
+
+x = hcat(ones(size(df, 1)), df[!, :log_mass]);
+model = MilkModel(;y=df[!, :kcal_per_g], x=x)
+
+# Make the type callable with the parameters *as a single argument*.
+
+function (model::MilkModel)(θ)
+    @unpack y, x, = model   # extract the data
+    @unpack β, σ = θ            # works on the named tuple too
+    ll = 0.0
+    ll += logpdf(Normal(0, 100), x[1])
+    ll += logpdf(Normal(0, 1), x[2])
+    ll += logpdf(TDist(1.0), σ)
+    ll += loglikelihood(Normal(0, σ), y .- x*β)
+    ll
+end
+
+println()
+model((β = [1.0, 2.0], σ = 1.0))
+println()
 
 # Wrap the problem with a transformation, then use Flux for the gradient.
 
-P = TransformedLogDensity(problem_transformation(p), p)
-∇P = ADgradient(:ForwardDiff, P);
+P = TransformedLogDensity(make_transformation(model), model)
+∇P = ADgradient(:Flux, P);
 
 # Tune and sample.
 
-chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
+results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000)
+posterior = P.transformation.(results.chain)
 
-# We use the transformation to obtain the posterior from the chain.
+println()
+DynamicHMC.Diagnostics.EBFMI(results.tree_statistics) |> display
+println()
 
-posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));
-posterior[1:5]
+DynamicHMC.Diagnostics.summarize_tree_statistics(results.tree_statistics) |> display
+println()
 
-# Extract the parameter posterior means: `β`,
+a3d = Array{Float64, 3}(undef, 1000, 3, 1);
+for j in 1:1
+  for i in 1:1000
+    a3d[i, 1:2, j] = values(posterior[i].β)
+    a3d[i, 3, j] = values(posterior[i].σ)
+  end
+end
 
-posterior_β = mean(first, posterior)
+pnames = ["β[1]", "β[2]", "σ"]
+sections =   Dict(
+  :parameters => pnames,
+)
+chns = create_mcmcchains(a3d, pnames, sections, start=1);
+chns = set_names(chns, Dict("β[1]" => "α", "β[2]" => "β"))
 
-# then `σ`:
-
-posterior_σ = mean(last, posterior)
-
-# Effective sample sizes (of untransformed draws)
-
-ess = mapslices(effective_sample_size,
-                get_position_matrix(chain); dims = 1)
-
-# NUTS-specific statistics
-
-NUTS_statistics(chain)
-
-# cmdstan result
-
-cmdstan_result = "
+stan_result = "
 Iterations = 1:1000
 Thinning interval = 1
 Chains = 1,2,3,4
@@ -106,8 +102,6 @@ Quantiles:
 sigma  0.12638780  0.15605950  0.17800600  0.204319250 0.27993590
 ";
 
-# Extract the parameter posterior means: `[β, σ]`,
-
-[posterior_β, posterior_σ]
+describe(chns)
 
 # End of `05/5.6d.jl`

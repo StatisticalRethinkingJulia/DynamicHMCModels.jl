@@ -4,7 +4,7 @@ ProjDir = @__DIR__
 
 df = DataFrame(CSV.read(joinpath(ProjDir, "..", "..", "data", "chimpanzees.csv"), delim=';'))
 
-Base.@kwdef struct Chimpanzees
+Base.@kwdef struct Chimpanzees_02
     "Number of actors"
     N_actors::Int
     pulled_left::Vector{Int}
@@ -13,15 +13,15 @@ Base.@kwdef struct Chimpanzees
     actor::Vector{Int}
 end
 
-function make_transformation(model::Chimpanzees)
+function make_transformation(model::Chimpanzees_02)
     as((a = as(Vector, model.N_actors), bp = asℝ, bpC = asℝ))
 end
 
-model = Chimpanzees(; N_actors = maximum(df.actor), pulled_left = df.pulled_left,
+model = Chimpanzees_02(; N_actors = maximum(df.actor), pulled_left = df.pulled_left,
                     prosoc_left = df.prosoc_left, condition = df.condition,
                     actor = df.actor)
 
-function (model::Chimpanzees)(θ)
+function (model::Chimpanzees_02)(θ)
     @unpack pulled_left, prosoc_left, condition, actor = model
     @unpack a, bp, bpC = θ
     ℓ_likelihood = mapreduce(+, actor, condition, prosoc_left,

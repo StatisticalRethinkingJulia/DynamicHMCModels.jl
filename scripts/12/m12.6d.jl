@@ -52,7 +52,8 @@ function (model::KlineModel)(θ)
 end
 
 println()
-model((β = [1.0, 0.25], α = rand(Normal(0, 1), N_societies), σ = 0.2)) |> display
+θ = (β = [1.0, 0.25], α = rand(Normal(0, 1), N_societies), σ = 0.2)
+model(θ) |> display
 println()
 
 # Wrap the problem with a transformation, then use Flux for the gradient.
@@ -60,6 +61,7 @@ println()
 P = TransformedLogDensity(make_transformation(model), model)
 ∇P = ADgradient(:Flux, P);
 results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000;
+  initialization = (q = θ,)
 #  initialization = (ϵ = 0.001, ),
 #  warmup_stages = fixed_stepsize_warmup_stages()
 )

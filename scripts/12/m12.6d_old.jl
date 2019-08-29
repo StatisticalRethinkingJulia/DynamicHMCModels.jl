@@ -1,89 +1,95 @@
-using DynamicHMC, LogDensityProblems, TransformVariables, Flux, Random
-using Distributions, Parameters, CSV, DataFrames, LinearAlgebra
+using DynamicHMCModels
 
-Random.seed!(1)
+ProjDir = rel_path_d("..", "scripts", "12")
 
-df = DataFrame(CSV.read(joinpath(@__DIR__, "Kline.txt"), delim=';'));
-# Add col logpop, set log() for population data
-df.logpop = map((x) -> log(x), df.population);
-# Add id for societies
-df.society = 1:10;
+df = CSV.read(rel_path( "..", "data",  "Kline.csv"), delim=';');
+size(df) # Should be 10x5
 
-Base.@kwdef mutable struct KlineModel{Ty <: AbstractVector,
-  Tx <: AbstractMatrix, Ts <: AbstractVector}
+# New col logpop, set log() for population data
+df[!, :logpop] = map((x) -> log(x), df[!, :population]);
+df[!, :society] = 1:10;
+
+first(df[!, [:total_tools, :logpop, :society]], 5)
+
+struct m_12_06d_model{TY <: AbstractVector, TX <: AbstractMatrix,
+  TS <: AbstractVector}
     "Observations (total_tools)."
-    y::Ty
+    y::TY
     "Covariates (logpop)"
-    x::Tx
+    X::TX
     "Society"
-    s::Ts
+    S::TS
     "Number of observations (10)"
     N::Int
     "Number of societies (also 10)"
     N_societies::Int
 end
 
-function make_transformation(model::KlineModel)
-    as( (β = as(Array, size(model.x, 2)), α = as(Array, model.N_societies), σ = asℝ₊) )
-end
-
-# Instantiate the model with data and inits.
-
-N = size(df, 1)
-N_societies = length(unique(df.society))
-x = hcat(ones(Int64, N), df.logpop);
-s = df.society
-y = df.total_tools
-model = KlineModel(; y=y, x=x, s=s, N=N, N_societies=N_societies)
-
 # Make the type callable with the parameters *as a single argument*.
 
-function (model::KlineModel)(θ)
-    @unpack y, x, s, N, N_societies = model   # data
-    @unpack β, α, σ = θ  # parameters
+function (problem::m_12_06d_model)(θ)
+    @unpack y, X, S, N, N_societies = problem   # extract the data
+    @unpack β, α, σ = θ  # β : a, bp, α : a_society
     ll = 0.0
     ll += logpdf(Cauchy(0, 1), σ)
     ll += sum(logpdf.(Normal(0, σ), α)) # α[1:10]
     ll += logpdf.(Normal(0, 10), β[1]) # a
     ll += logpdf.(Normal(0, 1), β[2]) # a
     ll += sum(
-      [loglikelihood(Poisson(exp(α[s[i]] + dot(x[i, :], β))), [y[i]]) for i in 1:N]
+      [loglikelihood(Poisson(exp(α[S[i]] + dot(X[i, :], β))), [y[i]]) for i in 1:N]
     )
     ll
 end
 
-println()
+# Instantiate the model with data and inits.
+
+N = size(df, 1)
+N_societies = length(unique(df[!, :society]))
+X = hcat(ones(Int64, N), df[!, :logpop]);
+S = df[!, :society]
+y = df[!, :total_tools]
+p = m_12_06d_model(y, X, S, N, N_societies);
 θ = (β = [1.0, 0.25], α = rand(Normal(0, 1), N_societies), σ = 0.2)
-model(θ) |> display
-println()
+p(θ)
+
+# Write a function to return properly dimensioned transformation.
+
+problem_transformation(p::m_12_06d_model) =
+    as( (β = as(Array, size(p.X, 2)), α = as(Array, p.N_societies), σ = asℝ₊) )
 
 # Wrap the problem with a transformation, then use Flux for the gradient.
 
-P = TransformedLogDensity(make_transformation(model), model)
-∇P = ADgradient(:Flux, P);
+P = TransformedLogDensity(problem_transformation(p), p)
+#∇P = LogDensityRejectErrors(ADgradient(:ForwardDiff, P));
+∇P = ADgradient(:ForwardDiff, P);
 
-# Can we initialize? E.g.:
+# Tune and sample.
 
-results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 100;
-#results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000;
-#  initialization = (q = θ,)
-#  initialization = (ϵ = 0.001, ),
-#  warmup_stages = fixed_stepsize_warmup_stages()
-)
-posterior = P.transformation.(results.chain)
+chain, NUTS_tuned = NUTS_init_tune_mcmc(∇P, 1000);
 
-println()
-DynamicHMC.Diagnostics.EBFMI(results.tree_statistics) |> display
+# We use the transformation to obtain the posterior from the chain.
 
-println()
-DynamicHMC.Diagnostics.summarize_tree_statistics(results.tree_statistics) |> display
-println()
+posterior = TransformVariables.transform.(Ref(problem_transformation(p)), get_position.(chain));
+posterior[1:5]
+
+# Extract the parameter posterior means.
 
 posterior_β = mean(posterior[i].β for i in 1:length(posterior))
 posterior_α = mean(posterior[i].α for i in 1:length(posterior))
 posterior_σ = mean(posterior[i].σ for i in 1:length(posterior))
 
-stan_result = "
+# Effective sample sizes (of untransformed draws)
+
+ess = mapslices(effective_sample_size, get_position_matrix(chain); dims = 1)
+ess
+
+# NUTS-specific statistics
+
+NUTS_statistics(chain)
+
+# CmdStan result
+
+m_12_6_result = "
 Iterations = 1:1000
 Thinning interval = 1
 Chains = 1,2,3,4
@@ -106,11 +112,9 @@ Empirical Posterior Estimates:
 sigma_society    0.310352849  0.1374834682 0.00217380450 0.0057325226  575.187461
 ";
         
-println()
-posterior_β |> display
-println()
-posterior_α  |> display
-println()
-posterior_σ |> display
-println()
+# Show means
+
+[posterior_β, posterior_α, [posterior_σ]]
+
+# End of m12.6d.jl
 

@@ -35,7 +35,7 @@ function (model::Chimpanzees_02)(θ)
 end
 
 P = TransformedLogDensity(make_transformation(model), model)
-∇P = ADgradient(:Flux, P)
+∇P = ADgradient(:ForwardDiff, P)
 results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000)
 posterior = P.transformation.(results.chain)
 

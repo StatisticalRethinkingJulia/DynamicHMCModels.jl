@@ -55,7 +55,7 @@ println()
 # Wrap the problem with a transformation, then use Flux for the gradient.
 
 P = TransformedLogDensity(make_transformation(model), model)
-∇P = ADgradient(:Flux, P);
+∇P = ADgradient(:ForwardDiff, P);
 
 # Tune and sample.
 

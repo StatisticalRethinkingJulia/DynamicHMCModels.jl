@@ -1,7 +1,8 @@
 # # Estimate Binomial draw probabilility
 
-using DynamicHMCModels, MCMCChains
-import Flux
+using DynamicHMCModels
+
+Random.seed!(1356779)
 
 # Define a structure to hold the data.
 
@@ -32,13 +33,15 @@ end
 # Use a flat priors (the default, omitted) for α
 
 P = TransformedLogDensity(make_transformation(model), model)
-∇P = ADgradient(:Flux, P);
+∇P = ADgradient(:ForwardDiff, P);
 
 # Sample 4 chains
 
 a3d = Array{Float64, 3}(undef, 1000, 1, 4);
 for j in 1:4
-  global results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000)
+  global results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000;
+    #initialization = (q = (p = 0.2,)),
+    reporter = NoProgressReport())
   posterior = P.transformation.(results.chain)
 
   for i in 1:1000

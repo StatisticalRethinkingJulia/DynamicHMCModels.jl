@@ -59,12 +59,8 @@ println()
 # Wrap the problem with a transformation, then use Flux for the gradient.
 
 P = TransformedLogDensity(make_transformation(model), model)
-∇P = ADgradient(:Flux, P);
-results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000;
-  initialization = (q = θ,)
-#  initialization = (ϵ = 0.001, ),
-#  warmup_stages = fixed_stepsize_warmup_stages()
-)
+∇P = ADgradient(:ForwardDiff, P);
+results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000)
 posterior = P.transformation.(results.chain)
 
 println()

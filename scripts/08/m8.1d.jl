@@ -9,8 +9,8 @@ cd(ProjDir)
 
 df = DataFrame(CSV.read(joinpath("..", "..", "data", "rugged.csv"), delim=';'))
 df = filter(row -> !(ismissing(row[:rgdppc_2000])), df)
-df[!, :log_gdp] = log.(df[!, :rgdppc_2000])
-df[!, :cont_africa] = Array{Float64}(convert(Array{Int}, df[!, :cont_africa]))
+df[!, :log_gdp] = log.(df[:, :rgdppc_2000])
+df[!, :cont_africa] = Array{Float64}(convert(Array{Int}, df[:, :cont_africa]))
 
 Base.@kwdef mutable struct RuggedModel{Ty <: AbstractVector,
   Tx <: AbstractMatrix}
@@ -28,9 +28,9 @@ end
   
 # Instantiate the model with data and inits.
 
-x = hcat(ones(size(df, 1)), df[!, :rugged], df[!, :cont_africa],
-  df[!, :rugged] .* df[!, :cont_africa]);
-model = RuggedModel(;y=df[!, :log_gdp], x=x)
+x = hcat(ones(size(df, 1)), df[:, :rugged], df[:, :cont_africa],
+  df[:, :rugged] .* df[:, :cont_africa]);
+model = RuggedModel(;y=df[:, :log_gdp], x=x)
 
 # Model callable with *a single argument*.
 

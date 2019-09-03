@@ -30,7 +30,7 @@ function make_transformation(model::Heights_1)
     as((σ = asℝ₊, μ  = as(Real, 100, 250)), )
 end
 
-model = Heights_1(;y = df[!, :height], v=1.0)
+model = Heights_1(;y = df[:, :height], v=1.0)
   
 # Then make the type callable with the parameters *as a single argument*.
 

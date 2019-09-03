@@ -11,8 +11,8 @@ cd(ProjDir)
 
 df = DataFrame(CSV.read(joinpath("..", "..", "data", "milk.csv"), delim=';'))
 df = filter(row -> !(row[:neocortex_perc] == "NA"), df)
-#df[!, :kcal_per_g] = convert(Vector{Float64}, df[!, :kcal_per_g])
-df[!, :log_mass] = log.(convert(Vector{Float64}, df[!, :mass]))
+#df[:, :kcal_per_g] = convert(Vector{Float64}, df[:, :kcal_per_g])
+df[!, :log_mass] = log.(convert(Vector{Float64}, df[:, :mass]))
 
 # Define the model struct
 
@@ -31,8 +31,8 @@ end
   
 # Instantiate the model with data and inits.
 
-x = hcat(ones(size(df, 1)), df[!, :log_mass]);
-model = MilkModel(;y=df[!, :kcal_per_g], x=x)
+x = hcat(ones(size(df, 1)), df[:, :log_mass]);
+model = MilkModel(;y=df[:, :kcal_per_g], x=x)
 
 # Make the type callable with the parameters *as a single argument*.
 

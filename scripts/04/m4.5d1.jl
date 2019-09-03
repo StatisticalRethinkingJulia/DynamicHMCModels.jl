@@ -12,9 +12,9 @@ data = DataFrame(CSV.read(joinpath("..", "..", "data", "Howell1.csv"), delim=';'
 # Use only adults and standardize
 
 df = filter(row -> row[:age] >= 18, data);
-df[!, :weight] = convert(Vector{Float64}, df[!, :weight]);
-df[!, :weight_s] = (df[!, :weight] .- mean(df[!, :weight])) / std(df[!, :weight]);
-df[!, :weight_s2] = df[!, :weight_s] .^ 2;
+df[!, :weight] = convert(Vector{Float64}, df[:, :weight]);
+df[!, :weight_s] = (df[:, :weight] .- mean(df[:, :weight])) / std(df[:, :weight]);
+df[!, :weight_s2] = df[:, :weight_s] .^ 2;
 
 
 # Define a structure to hold the data: observables, covariates,
@@ -41,8 +41,8 @@ function make_transformation(model::LinearRegressionModel)
 end
 
 N = size(df, 1)
-x = hcat(ones(N), hcat(df[!, :weight_s], df[!, :weight_s2]));
-model = LinearRegressionModel(;y = df[!, :height], x=x, v=1.0)
+x = hcat(ones(N), hcat(df[:, :weight_s], df[:, :weight_s2]));
+model = LinearRegressionModel(;y = df[:, :height], x=x, v=1.0)
   
 # Pack parameters *as a single argument*.
 

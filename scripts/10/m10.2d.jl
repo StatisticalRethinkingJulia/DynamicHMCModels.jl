@@ -4,8 +4,8 @@ ProjDir = @__DIR__
 cd(ProjDir)
 
 df = DataFrame(CSV.read(joinpath("..", "..", "data", "chimpanzees.csv"), delim=';'))
-df[!, :pulled_left] = convert(Array{Int64}, df[!, :pulled_left])
-df[!, :prosoc_left] = convert(Array{Int64}, df[!, :prosoc_left])
+df[!, :pulled_left] = convert(Array{Int64}, df[:, :pulled_left])
+df[!, :prosoc_left] = convert(Array{Int64}, df[:, :prosoc_left])
 first(df, 5)
 
 Base.@kwdef mutable struct Chimpanzees{Ty <: AbstractVector,
@@ -27,8 +27,8 @@ end
 # Instantiate the model with data and inits.
 
 N = size(df, 1)
-x = hcat(ones(Int64, N), df[!, :prosoc_left]);
-y = df[!, :pulled_left]
+x = hcat(ones(Int64, N), df[:, :prosoc_left]);
+y = df[:, :pulled_left]
 model = Chimpanzees(;y=y, x=x, N=N);
 
 # Make the model callable with a single argument.

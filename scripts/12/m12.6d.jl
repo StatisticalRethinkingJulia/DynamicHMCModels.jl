@@ -5,7 +5,7 @@ ProjDir = @__DIR__
 df = DataFrame(CSV.read(joinpath(ProjDir, "..", "..", "data",  "Kline.csv"), delim=';'))
 
 # New col logpop, set log() for population data
-df[!, :logpop] = map((x) -> log(x), df[!, :population]);
+df[!, :logpop] = map((x) -> log(x), df[:, :population]);
 df[!, :society] = 1:10;
 
 Base.@kwdef mutable struct KlineModel{Ty <: AbstractVector,
@@ -29,10 +29,10 @@ end
 # Instantiate the model with data and inits.
 
 N = size(df, 1)
-N_societies = length(unique(df[!, :society]))
-x = hcat(ones(Int64, N), df[!, :logpop]);
-s = df[!, :society]
-y = df[!, :total_tools]
+N_societies = length(unique(df[:, :society]))
+x = hcat(ones(Int64, N), df[:, :logpop]);
+s = df[:, :society]
+y = df[:, :total_tools]
 model = KlineModel(; y=y, x=x, s=s, N=N, N_societies=N_societies)
 
 # Make the type callable with the parameters *as a single argument*.

@@ -26,7 +26,7 @@ function make_transformation(model::Heights_2)
     as((σ = asℝ₊, μ  = as(Real, 100, 250)), )
 end
 
-model = Heights_2(;y = df[!, :height])
+model = Heights_2(;y = df[:, :height])
   
 # Then make the type callable with the parameters *as a single argument*. Very constraint prior on μ. Flat σ.
 

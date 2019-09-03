@@ -10,9 +10,9 @@ cd(ProjDir)
 # ### snippet 5.1
 
 df = DataFrame(CSV.read(joinpath("..", "..", "data", "WaffleDivorce.csv"), delim=';'))
-mean_ma = mean(df[!, :MedianAgeMarriage])
+mean_ma = mean(df[:, :MedianAgeMarriage])
 df[!, :MedianAgeMarriage_s] = convert(Vector{Float64},
-  (df[!, :MedianAgeMarriage]) .- mean_ma)/std(df[!, :MedianAgeMarriage]);
+  (df[:, :MedianAgeMarriage]) .- mean_ma)/std(df[:, :MedianAgeMarriage]);
 
 # Model ``y ∼ Normal(y - Xβ, σ)``. Flat prior `β`, half-T for `σ`.
 
@@ -32,8 +32,8 @@ end
 
 # Instantiate the model with data and inits.
 
-x = hcat(ones(size(df, 1)), df[!, :MedianAgeMarriage_s]);
-model = WaffleDivorce(;y=df[!, :Divorce], x=x);
+x = hcat(ones(size(df, 1)), df[:, :MedianAgeMarriage_s]);
+model = WaffleDivorce(;y=df[:, :Divorce], x=x);
 
 # Make tmodel callable with the parameters *as a single argument*.
 

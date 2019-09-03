@@ -11,13 +11,13 @@ cd(ProjDir)
 
 df = DataFrame(CSV.read(joinpath("..", "..", "data", "WaffleDivorce.csv"), delim=';'))
 
-mean_ma = mean(df[!, :Marriage])
+mean_ma = mean(df[:, :Marriage])
 df[!, :Marriage_s] = convert(Vector{Float64},
-  (df[!, :Marriage]) .- mean_ma)/std(df[!, :Marriage]);
+  (df[:, :Marriage]) .- mean_ma)/std(df[:, :Marriage]);
 
-mean_mam = mean(df[!, :MedianAgeMarriage])
+mean_mam = mean(df[:, :MedianAgeMarriage])
 df[!, :MedianAgeMarriage_s] = convert(Vector{Float64},
-  (df[!, :MedianAgeMarriage]) .- mean_mam)/std(df[!, :MedianAgeMarriage]);
+  (df[:, :MedianAgeMarriage]) .- mean_mam)/std(df[:, :MedianAgeMarriage]);
 
 # Model ``y ∼ Xβ + ϵ``, where ``ϵ ∼ N(0, σ²)`` IID. Student on σ
 
@@ -36,8 +36,8 @@ end
 
 # Instantiate the model with data and inits.
 
-x = hcat(ones(size(df, 1)), df[!, :Marriage_s], df[!, :MedianAgeMarriage_s]);
-model = WaffleDivorce(;y=df[!, :Divorce], x=x);
+x = hcat(ones(size(df, 1)), df[:, :Marriage_s], df[:, :MedianAgeMarriage_s]);
+model = WaffleDivorce(;y=df[:, :Divorce], x=x);
 
 # Make the type callable with the parameters *as a single argument*.
 

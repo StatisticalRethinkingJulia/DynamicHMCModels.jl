@@ -13,7 +13,7 @@ This package implements the models using [DynamicHMC](https://github.com/tpapp/D
 
 ## Note
 
-Master is being converted to future DynamicHMC. WIP!!
+Converted to DynamicHMC 2.0
 
 ## Acknowledgements
 

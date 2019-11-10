@@ -1,6 +1,6 @@
 # # Estimate Binomial draw probabilility
 
-using DynamicHMCModels
+using DynamicHMCModels, MCMCChains
 
 Random.seed!(1356779)
 
@@ -41,8 +41,9 @@ a3d = Array{Float64, 3}(undef, 1000, 1, 4);
 for j in 1:4
   global results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000;
     #initialization = (q = (p = 0.2,)),
-    reporter = NoProgressReport())
-  posterior = P.transformation.(results.chain)
+    #reporter = NoProgressReport()
+    )
+  global posterior = P.transformation.(results.chain)
 
   for i in 1:1000
     a3d[i, 1, j] = values(posterior[i].p)

@@ -145,20 +145,38 @@ function sampleDHMC(choice, rt, N, Nc, nsamples)
     return sampleDHMC(data, N, Nc, nsamples)
 end
 
-#Random.seed!(54548)
-Random.seed!(123)
+Random.seed!(54548)
+#Random.seed!(123)
 N = 10
 data = simulateLBA(Nd = N)
 p = LBAProb(collect(zip(data.choice, data.rt)), N, data.Nc)
 p((v=fill(.5, data.Nc),A=.8, k=.2, tau=.4))
 
-trans = as((v=as(Array,asℝ₊,data.Nc),A=asℝ₊,k=asℝ₊,tau=asℝ₊))
+#trans = as((v=as(Array,asℝ₊,data.Nc),A=asℝ₊,k=asℝ₊,tau=asℝ₊))
 
-#minRT = minimum(data.rt)
-#trans = as((v=as(Array,asℝ₊,data.Nc),A=asℝ₊,k=asℝ₊,tau=as(Real,0,minRT)))
+minRT = minimum(data.rt)
+trans = as((v=as(Array,asℝ₊,data.Nc),A=asℝ₊,k=asℝ₊,tau=as(Real,0,minRT)))
 
 P = TransformedLogDensity(trans, p)
 ∇P = ADgradient(:ForwardDiff, P)
+
+bad_xs = LogDensityProblems.stresstest(LogDensityProblems.logdensity, P; scale = 0.001)
+bad_xs |> display
+
+bad_θs = trans.(bad_xs)
+bad_θs |> display
+
+bad_gxs = LogDensityProblems.stresstest(LogDensityProblems.logdensity_and_gradient, P; scale = 0.001)
+bad_gxs |> display
+
+bad_gθs = trans.(bad_gxs)
+bad_gθs |> display
+
+#LogDensityProblems.logdensity(P, bad_xs[1])
+#p(bad_θs[1])
+
+#=
 results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 2000; warmup_stages =
     default_warmup_stages(; local_optimization = nothing, M = DynamicHMC.Symmetric))
 posterior = trans.(results.chain)
+=#

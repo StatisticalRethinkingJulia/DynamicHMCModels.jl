@@ -5,10 +5,8 @@ using Reexport
 @reexport using CSV, LinearAlgebra
 @reexport using ForwardDiff
 @reexport using DynamicHMC, LogDensityProblems, TransformVariables
-@reexport using StatsFuns, Distributions, Random, StatsBase, MCMCChains
-@reexport using Parameters, CSV, DataFrames
-
-using DataStructures
+@reexport using StatsFuns, Distributions, Random, MCMCChains
+@reexport using Parameters, CSV, DataFrames, StatsPlots
 
 include("chains.jl")
 include("nptochain.jl")

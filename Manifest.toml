@@ -316,12 +316,6 @@ version = "7.0.1"
 deps = ["Libdl"]
 uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
-[[Literate]]
-deps = ["Base64", "JSON", "REPL"]
-git-tree-sha1 = "eb9fc04f313ed38de4cba4145c1afc77e29d0a6e"
-uuid = "98b081ad-f1c9-55d3-8b20-4c87d4299306"
-version = "2.1.0"
-
 [[LogDensityProblems]]
 deps = ["ArgCheck", "BenchmarkTools", "DiffResults", "DocStringExtensions", "Parameters", "Random", "Requires", "TransformVariables"]
 git-tree-sha1 = "10058bfce11b71237e3ea9975b4153f8207d536e"

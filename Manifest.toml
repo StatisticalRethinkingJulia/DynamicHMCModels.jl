@@ -71,9 +71,9 @@ version = "0.5.0"
 
 [[CategoricalArrays]]
 deps = ["Compat", "DataAPI", "Future", "JSON", "Missings", "Printf", "Reexport", "Unicode"]
-git-tree-sha1 = "45101c4d0df3946acb6e9bfcfd3a8c32abbd421b"
+git-tree-sha1 = "2473560b9c7cb18f98c3c926af0dc7bedccfc7ab"
 uuid = "324d7699-5711-5eae-9e2f-1d82baa6b597"
-version = "0.7.1"
+version = "0.7.2"
 
 [[Clustering]]
 deps = ["Distances", "LinearAlgebra", "NearestNeighbors", "Printf", "SparseArrays", "Statistics", "StatsBase"]
@@ -183,9 +183,9 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[Distributions]]
 deps = ["LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns"]
-git-tree-sha1 = "838a37797ac24c1b4c3353d46ec87ea6598f2308"
+git-tree-sha1 = "ce189b71fac635d6ec9582dc0f208887db25e6d3"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.21.7"
+version = "0.21.8"
 
 [[DocStringExtensions]]
 deps = ["LibGit2", "Markdown", "Pkg", "Test"]

@@ -195,7 +195,7 @@ version = "0.8.1"
 
 [[DynamicHMC]]
 deps = ["ArgCheck", "DocStringExtensions", "LinearAlgebra", "LogDensityProblems", "NLSolversBase", "Optim", "Parameters", "Random", "Statistics"]
-git-tree-sha1 = "b60e938bf1406254aaf059ed54e1381d41f4a94b"
+git-tree-sha1 = "afdd4ba9fbf076e1ef639d0fa9ea7c2985cb8792"
 repo-rev = "master"
 repo-url = "https://github.com/tpapp/DynamicHMC.jl.git"
 uuid = "bbc10e6e-7c05-544b-b16e-64fede858acb"
@@ -424,7 +424,7 @@ uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
 version = "0.3.8"
 
 [[Pkg]]
-deps = ["Dates", "LibGit2", "Markdown", "Printf", "REPL", "Random", "SHA", "UUIDs"]
+deps = ["Dates", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "UUIDs"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 
 [[PlotThemes]]

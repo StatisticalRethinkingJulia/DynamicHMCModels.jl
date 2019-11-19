@@ -155,7 +155,7 @@ trans = as((v=as(Array,asℝ₊,data.Nc),A=asℝ₊,k=asℝ₊,tau=asℝ₊))
 P = TransformedLogDensity(trans, p)
 ∇P = ADgradient(:ForwardDiff, P)
 results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 2000;
-    warmup_stages = default_warmup_stages(local_optimization=nothing)
+#    warmup_stages = default_warmup_stages(local_optimization=nothing)
 )
 posterior = trans.(results.chain)
 

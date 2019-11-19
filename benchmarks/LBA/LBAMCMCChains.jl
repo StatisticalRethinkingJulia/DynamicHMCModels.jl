@@ -146,7 +146,7 @@ function sampleDHMC(choice, rt, N, Nc, nsamples)
     return sampleDHMC(data, N, Nc, nsamples)
 end
 
-Random.seed!(1333)
+#Random.seed!(1333)
 N = 10
 data = simulateLBA(Nd = N)
 p = LBAProb(collect(zip(data.choice, data.rt)), N, data.Nc)

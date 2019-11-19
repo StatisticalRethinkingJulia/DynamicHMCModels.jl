@@ -59,9 +59,9 @@ version = "0.5.8"
 
 [[CSV]]
 deps = ["CategoricalArrays", "DataFrames", "Dates", "FilePathsBase", "LazyArrays", "Mmap", "Parsers", "PooledArrays", "Profile", "Tables", "Unicode", "WeakRefStrings"]
-git-tree-sha1 = "4194bc05efd054cdbf2765ce4a0d1497bf8eec65"
+git-tree-sha1 = "6b3dcd52e5a86e6c6c00777b9a9c7c5b5cc4a588"
 uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
-version = "0.5.16"
+version = "0.5.17"
 
 [[Calculus]]
 deps = ["Compat"]
@@ -195,7 +195,9 @@ version = "0.8.1"
 
 [[DynamicHMC]]
 deps = ["ArgCheck", "DocStringExtensions", "LinearAlgebra", "LogDensityProblems", "NLSolversBase", "Optim", "Parameters", "Random", "Statistics"]
-git-tree-sha1 = "82588b1eeb6d229a272b2204b718a4826194d9d4"
+git-tree-sha1 = "b60e938bf1406254aaf059ed54e1381d41f4a94b"
+repo-rev = "master"
+repo-url = "https://github.com/tpapp/DynamicHMC.jl.git"
 uuid = "bbc10e6e-7c05-544b-b16e-64fede858acb"
 version = "2.1.0"
 

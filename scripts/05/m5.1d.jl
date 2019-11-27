@@ -105,6 +105,6 @@ sigma  1.241496  1.4079225  1.504790  1.61630750  1.86642750
 
 # Describe chains
 
-describe(chns)
+show(chns)
 
 # end of m4.5d.jl

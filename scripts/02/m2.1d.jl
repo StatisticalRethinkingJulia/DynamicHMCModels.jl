@@ -41,7 +41,7 @@ a3d = Array{Float64, 3}(undef, 1000, 1, 4);
 for j in 1:4
   global results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000;
     #initialization = (q = (p = 0.2,)),
-    #reporter = NoProgressReport()
+    reporter = NoProgressReport()
     )
   global posterior = P.transformation.(results.chain)
 

@@ -116,6 +116,6 @@ Quantiles:
 sigma  1.2421182  1.4125950  1.5107700  1.61579000  1.89891925
 ";
 
-describe(chns)
+show(chns)
 
 # end of m4.5d.jl

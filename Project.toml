@@ -1,7 +1,7 @@
 name = "DynamicHMCModels"
 uuid = "6266e5bf-9887-5dfa-a522-2c46ecdcf14a"
 authors = ["Rob J Goedman <goedman@icloud.com"]
-version = "1.1.0"
+version = "1.1.1"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
@@ -29,7 +29,7 @@ Distributions = "0.21"
 DynamicHMC = "2.1"
 ForwardDiff = "0.10"
 LogDensityProblems = "0.9"
-MCMCChains = "0.3, 0.4"
+MCMCChains = "1.0"
 MCMCDiagnostics = "0.3"
 Optim = "0.18, 0.19"
 Parameters = "0.12"

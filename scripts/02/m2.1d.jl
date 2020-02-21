@@ -37,27 +37,16 @@ P = TransformedLogDensity(make_transformation(model), model)
 
 # Sample 4 chains
 
-a3d = Array{Float64, 3}(undef, 1000, 1, 4);
-for j in 1:4
-  global results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000;
-    #initialization = (q = (p = 0.2,)),
-    reporter = NoProgressReport()
-    )
-  global posterior = P.transformation.(results.chain)
-
-  for i in 1:1000
-    a3d[i, 1, j] = values(posterior[i].p)
-  end
-end
-
-# Create MCMCChains object
-
-parameter_names = ["p"]
-sections =   Dict(
-  :parameters => parameter_names,
+results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000;
+  #initialization = (q = (p = 0.2,)),
+  reporter = NoProgressReport()
 )
-chns = create_mcmcchains(a3d, parameter_names, sections, start=1)
-show(chns)
+
+posterior = P.transformation.(results.chain)
+
+# Create Particles NamedTuple object
+
+p = Particles(posterior)
 
 println()
 DynamicHMC.Diagnostics.EBFMI(results.tree_statistics) |> display

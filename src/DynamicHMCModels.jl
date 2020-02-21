@@ -1,20 +1,14 @@
 module DynamicHMCModels
 
-using Reexport 
+using Reexport
 
-@reexport using CSV, LinearAlgebra
-@reexport using ForwardDiff
+#using ForwardDiff
 @reexport using DynamicHMC, LogDensityProblems, TransformVariables
-@reexport using StatsFuns, Distributions, Random, MCMCChains
-@reexport using Parameters, CSV, DataFrames, StatsPlots
+@reexport using Distributions, Random, Statistics
+@reexport using Parameters, CSV, DataFrames
+@reexport using MonteCarloMeasurements
 
-include("chains.jl")
-include("nptochain.jl")
-
-export
-  create_a3d,
-  insert_chain!,
-  nptochain,
-  create_mcmcchains
+#include("chains.jl")
+include("particles.jl")
 
 end # module

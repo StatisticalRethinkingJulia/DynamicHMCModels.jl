@@ -1,6 +1,6 @@
 # # Estimate Binomial draw probabilility
 
-using DynamicHMCModels, Random, Distributions
+using StatisticalRethinking, DynamicHMCModels
 
 Random.seed!(1356779)
 
@@ -35,17 +35,21 @@ end
 P = TransformedLogDensity(make_transformation(model), model)
 ∇P = ADgradient(:ForwardDiff, P);
 
-# Sample 4 chains
+# Sample chain
+
+results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000;
+  reporter = NoProgressReport()
+)
 
 posterior = P.transformation.(results.chain)
 
-posterior = P.transformation.(results.chain)
-# Create MCMCChains object
+# Create Particles NamedTuple object
 
+p = as_particles(posterior)
+p |> display
 
 println()
 DynamicHMC.Diagnostics.EBFMI(results.tree_statistics) |> display
 
 println()
-DynamicHMC.Diagnostics.summarize_tree_statistics(results.tree_statistics)
-
+DynamicHMC.Diagnostics.summarize_tree_statistics(results.tree_statistics) |> display

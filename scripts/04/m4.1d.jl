@@ -2,14 +2,14 @@
 
 # We estimate simple linear regression model with a half-T prior.
 
-using StatisticalRethinking, DynamicHMCModels
+using StatisticalRethinking, DynamicHMCModels, MCMCChains
 
 ProjDir = @__DIR__
 cd(ProjDir)
 
 # Import the dataset.
 
-data = DataFrame(CSV.read(rel_path(..", "data", "Howell1.csv"), delim=';'));
+data = DataFrame(CSV.read(rel_path("..", "data", "Howell1.csv"), delim=';'));
 
 # Use only adults and standardize
 
@@ -89,6 +89,6 @@ sigma   7.21853   7.5560625   7.751355   7.9566775   8.410391
    mu 153.77992 154.3157500 154.602000 154.8820000 155.431000
 ";
 
-describe(chns)
+show(chns)
 
 # end of m4.1d.jl

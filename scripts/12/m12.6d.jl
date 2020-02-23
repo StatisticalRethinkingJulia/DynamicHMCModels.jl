@@ -88,6 +88,3 @@ Empirical Posterior Estimates:
  a_society.10   -0.094149204  0.2846206232 0.00450024719 0.0080735022 1000.000000
 sigma_society    0.310352849  0.1374834682 0.00217380450 0.0057325226  575.187461
 ";
-
-describe(chns, sections=[:pooled])
-

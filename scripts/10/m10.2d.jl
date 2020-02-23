@@ -1,4 +1,4 @@
-using DynamicHMCModels, StatsFuns
+using DynamicHMCModels, LinearAlgebra, StatsFuns
 
 ProjDir = @__DIR__
 cd(ProjDir)

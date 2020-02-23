@@ -2,14 +2,14 @@
 
 # We estimate simple linear regression model with a half-T prior.
 
-using StatisticalRethinking, DynamicHMCModels, MCMCChains
+using DynamicHMCModels
 
 ProjDir = @__DIR__
 cd(ProjDir)
 
 # Import the dataset.
 
-data = DataFrame(CSV.read(rel_path("..", "data", "Howell1.csv"), delim=';'));
+data = DataFrame(CSV.read(joinpath("..", "..", "data", "Howell1.csv"), delim=';'));
 
 # Use only adults and standardize
 
@@ -50,25 +50,8 @@ P = TransformedLogDensity(make_transformation(model), model)
 results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000)
 posterior = P.transformation.(results.chain)
 
-DynamicHMC.Diagnostics.EBFMI(results.tree_statistics) |> display
-println()
-
-DynamicHMC.Diagnostics.summarize_tree_statistics(results.tree_statistics) |> display
-println()
-
-a3d = Array{Float64, 3}(undef, 1000, 2, 1);
-for j in 1:1
-  for i in 1:1000
-    a3d[i, 1, j] = values(posterior[i].μ)
-    a3d[i, 2, j] = values(posterior[i].σ)
-  end
-end
-
-pnames = ["μ", "σ"]
-sections =   Dict(
-  :parameters => pnames,
-)
-chns = create_mcmcchains(a3d, pnames, sections, start=1);
+p = as_particles(posterior)
+display(p)
 
 # Stan.jl results
 
@@ -88,7 +71,5 @@ Quantiles:
 sigma   7.21853   7.5560625   7.751355   7.9566775   8.410391
    mu 153.77992 154.3157500 154.602000 154.8820000 155.431000
 ";
-
-show(chns)
 
 # end of m4.1d.jl

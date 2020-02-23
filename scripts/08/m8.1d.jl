@@ -61,28 +61,8 @@ P = TransformedLogDensity(make_transformation(model), model)
 results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000)
 posterior = P.transformation.(results.chain)
 
-println()
-DynamicHMC.Diagnostics.EBFMI(results.tree_statistics) |> display
-println()
-
-DynamicHMC.Diagnostics.summarize_tree_statistics(results.tree_statistics) |> display
-println()
-
-a3d = Array{Float64, 3}(undef, 1000, 5, 1);
-for j in 1:1
-  for i in 1:1000
-    a3d[i, 1:4, j] = values(posterior[i].β)
-    a3d[i, 5, j] = values(posterior[i].σ)
-  end
-end
-
-pnames = ["β[1]", "β[2]", "β[3]", "β[4]", "σ"]
-sections =   Dict(
-  :parameters => pnames,
-)
-chns = create_mcmcchains(a3d, pnames, sections, start=1);
-chns = set_names(chns, Dict("β[1]" => "α", "β[2]" => "β[1]", 
-  "β[3]" => "β[2]", "β[4]" => "β[3]"))
+p = as_particles(posterior)
+display(p)
 
 # Result rethinking
 
@@ -94,9 +74,5 @@ bA    -1.94 0.24 -2.33 -1.59   268    1
 bAR    0.40 0.14  0.18  0.62   271    1
 sigma  0.96 0.05  0.87  1.04   339    1
 "
-
-# Summary
-
-describe(chns)
 
 # End of `08/m8.1s.jl`

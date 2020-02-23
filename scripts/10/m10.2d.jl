@@ -1,4 +1,4 @@
-using DynamicHMCModels
+using DynamicHMCModels, StatsFuns
 
 ProjDir = @__DIR__
 cd(ProjDir)
@@ -54,24 +54,8 @@ P = TransformedLogDensity(make_transformation(model), model)
 results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000)
 posterior = P.transformation.(results.chain)
 
-DynamicHMC.Diagnostics.EBFMI(results.tree_statistics)
-
-DynamicHMC.Diagnostics.summarize_tree_statistics(results.tree_statistics)
-
-a3d = Array{Float64, 3}(undef, 1000, 2, 1);
-for j in 1:1
-  for i in 1:1000
-    a3d[i, 1:2, j] = values(posterior[i].β)
-  end
-end
-
-# Create MCMCChains object
-
-cnames = ["bp", "bpC"]
-sections =   Dict(
-  :parameters =>  ["bp", "bpC"]
-)
-chns = create_mcmcchains(a3d, cnames, sections, start=1)
+p = as_particles(posterior)
+display(p)
 
 stan_result = "
 Iterations = 1:1000
@@ -89,9 +73,5 @@ Quantiles:
  a -0.19755400 -0.029431425 0.05024655 0.12978825 0.30087758
 bp  0.20803447  0.433720250 0.55340400 0.67960975 0.91466915
 ";
-
-# Summarize results
-
-describe(chns)
 
 # End of `10/m10.2d.jl`

@@ -9,9 +9,7 @@ function as_particles(posterior)
     pnt = posterior[1]
     for parm in keys(pnt)
         if size(pnt[parm], 1) > 1
-            #(a3d, names) = nptoa3d(posterior)
             d[parm] = Particles[]
-
             for i in 1:size(pnt[parm], 1)
                 temp = Float64[]
                 for post in posterior

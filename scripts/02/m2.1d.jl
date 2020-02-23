@@ -1,6 +1,6 @@
 # # Estimate Binomial draw probabilility
 
-using StatisticalRethinking, DynamicHMCModels
+using DynamicHMCModels
 
 Random.seed!(1356779)
 

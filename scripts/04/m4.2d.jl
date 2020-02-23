@@ -1,13 +1,13 @@
 # # Heights_2 problem with restricted prior on mu.
 
-using StatisticalRethinking, DynamicHMCModels
+using DynamicHMCModels
 
 ProjDir = @__DIR__
 cd(ProjDir)
 
 # Import the dataset.
 
-data = DataFrame(CSV.read(rel_path("..", "data", "Howell1.csv"), delim=';'));
+data = DataFrame(CSV.read(joinpath("..", "..", "data", "Howell1.csv"), delim=';'));
 
 # Use only adults and standardize
 

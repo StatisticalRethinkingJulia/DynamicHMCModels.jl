@@ -62,27 +62,8 @@ P = TransformedLogDensity(make_transformation(model), model)
 results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000)
 posterior = P.transformation.(results.chain)
 
-println()
-DynamicHMC.Diagnostics.EBFMI(results.tree_statistics) |> display
-println()
-
-DynamicHMC.Diagnostics.summarize_tree_statistics(results.tree_statistics) |> display
-println()
-
-a3d = Array{Float64, 3}(undef, 1000, 3, 1);
-for j in 1:1
-  for i in 1:1000
-    a3d[i, 1:2, j] = values(posterior[i].β)
-    a3d[i, 3, j] = values(posterior[i].σ)
-  end
-end
-
-pnames = ["β[1]", "β[2]", "σ"]
-sections =   Dict(
-  :parameters => pnames,
-)
-chns = create_mcmcchains(a3d, pnames, sections, start=1);
-chns = set_names(chns, Dict("β[1]" => "α", "β[2]" => "β"))
+p = as_particles(posterior)
+display(p)
 
 stan_result = "
 Iterations = 1:1000
@@ -102,9 +83,5 @@ Quantiles:
    bA -1.454571 -1.1821025 -1.033065 -0.89366925 -0.61711705
 sigma  1.241496  1.4079225  1.504790  1.61630750  1.86642750
 ";
-
-# Describe chains
-
-show(chns)
 
 # end of m4.5d.jl

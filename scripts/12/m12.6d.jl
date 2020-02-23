@@ -63,36 +63,8 @@ P = TransformedLogDensity(make_transformation(model), model)
 results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000)
 posterior = P.transformation.(results.chain)
 
-println()
-DynamicHMC.Diagnostics.EBFMI(results.tree_statistics) |> display
-
-println()
-DynamicHMC.Diagnostics.summarize_tree_statistics(results.tree_statistics) |> display
-println()
-
-# Set varable names
-
-parameter_names = ["a", "bp", "sigma_society"]
-pooled_parameter_names = ["a_society[$i]" for i in 1:10]
-
-# Create a3d
-
-a3d = Array{Float64, 3}(undef, 1000, 13, 1);
-for j in 1:1
-  for i in 1:1000
-    a3d[i, 1:2, j] = values(posterior[i].β)
-    a3d[i, 3, j] = values(posterior[i].σ)
-    a3d[i, 4:13, j] = values(posterior[i].α)
-  end
-end
-
-chns = MCMCChains.Chains(a3d,
-  vcat(parameter_names, pooled_parameter_names),
-  Dict(
-    :parameters => parameter_names,
-    :pooled => pooled_parameter_names
-  )
-);
+p = as_particles(posterior)
+display(p)
 
 stan_result = "
 Iterations = 1:1000
@@ -116,13 +88,6 @@ Empirical Posterior Estimates:
  a_society.10   -0.094149204  0.2846206232 0.00450024719 0.0080735022 1000.000000
 sigma_society    0.310352849  0.1374834682 0.00217380450 0.0057325226  575.187461
 ";
-        
-# Describe the chain
-
-describe(chns) |> display
-println()
-
-# Describe the chain
 
 describe(chns, sections=[:pooled])
 

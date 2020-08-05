@@ -2,11 +2,12 @@ using DynamicHMCModels
 
 ProjDir = @__DIR__
 
-df = DataFrame(CSV.read(joinpath(ProjDir, "..", "..", "data",  "Kline.csv"), delim=';'))
+delim = ';'
+df = CSV.read(joinpath(ProjDir, "..", "..", "data",  "Kline.csv"), DataFrame; delim)
 
 # New col logpop, set log() for population data
-df[!, :logpop] = map((x) -> log(x), df[:, :population]);
-df[!, :society] = 1:10;
+df.logpop = map((x) -> log(x), df.population);
+df.society = 1:10;
 
 Base.@kwdef mutable struct KlineModel{Ty <: AbstractVector,
   Tx <: AbstractMatrix, Ts <: AbstractVector}

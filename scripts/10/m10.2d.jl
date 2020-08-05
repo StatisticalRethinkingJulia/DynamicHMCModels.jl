@@ -3,9 +3,10 @@ using DynamicHMCModels, LinearAlgebra, StatsFuns
 ProjDir = @__DIR__
 cd(ProjDir)
 
-df = DataFrame(CSV.read(joinpath("..", "..", "data", "chimpanzees.csv"), delim=';'))
-df[!, :pulled_left] = convert(Array{Int64}, df[:, :pulled_left])
-df[!, :prosoc_left] = convert(Array{Int64}, df[:, :prosoc_left])
+delim = ';'
+df = CSV.read(joinpath("..", "..", "data", "chimpanzees.csv"), DataFrame; delim)
+df.pulled_left = convert(Array{Int64}, df.pulled_left)
+df.prosoc_left = convert(Array{Int64}, df.prosoc_left)
 first(df, 5)
 
 Base.@kwdef mutable struct Chimpanzees{Ty <: AbstractVector,

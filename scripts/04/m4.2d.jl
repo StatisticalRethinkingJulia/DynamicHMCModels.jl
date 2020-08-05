@@ -7,7 +7,7 @@ cd(ProjDir)
 
 # Import the dataset.
 
-data = DataFrame(CSV.read(joinpath("..", "..", "data", "Howell1.csv"), delim=';'));
+data = DataFrame!(CSV.File(joinpath("..", "..", "data", "Howell1.csv"), delim=';'));
 
 # Use only adults and standardize
 

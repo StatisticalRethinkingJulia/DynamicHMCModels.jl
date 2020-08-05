@@ -7,10 +7,11 @@ cd(ProjDir)
 
 # Read in data
 
-df = DataFrame(CSV.read(joinpath("..", "..", "data", "rugged.csv"), delim=';'))
+delim = ';'
+df = CSV.read(joinpath("..", "..", "data", "rugged.csv"), DataFrame; delim)
 df = filter(row -> !(ismissing(row[:rgdppc_2000])), df)
-df[!, :log_gdp] = log.(df[:, :rgdppc_2000])
-df[!, :cont_africa] = Array{Float64}(convert(Array{Int}, df[:, :cont_africa]))
+df.log_gdp = log.(df.rgdppc_2000)
+df.cont_africa = Array{Float64}(convert(Array{Int}, df.cont_africa))
 
 Base.@kwdef mutable struct RuggedModel{Ty <: AbstractVector,
   Tx <: AbstractMatrix}

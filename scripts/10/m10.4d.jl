@@ -2,7 +2,8 @@ using DynamicHMCModels, StatsFuns
 
 ProjDir = @__DIR__
 
-df = DataFrame(CSV.read(joinpath(ProjDir, "..", "..", "data", "chimpanzees.csv"), delim=';'))
+delim = ';'
+df = CSV.read(joinpath(ProjDir, "..", "..", "data", "chimpanzees.csv"), DataFrame; delim)
 
 Base.@kwdef struct Chimpanzees_02
     "Number of actors"

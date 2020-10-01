@@ -29,8 +29,8 @@ Question and contributions are very welcome, as are feature requests and suggest
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [docs-stable-url]: https://statisticalrethinkingjulia.github.io/DynamicHMCModels.jl/stable
 
-[travis-img]: https://travis-ci.org/StatisticalRethinkingJulia/DynamicHMCModels.jl.svg?branch=master
-[travis-url]: https://travis-ci.org/StatisticalRethinkingJulia/DynamicHMCModels.jl
+[travis-img]: https://travis-ci.com/StatisticalRethinkingJulia/DynamicHMCModels.jl.svg?branch=master
+[travis-url]: https://travis-ci.com/StatisticalRethinkingJulia/DynamicHMCModels.jl
 
 [codecov-img]: https://codecov.io/gh/StatisticalRethinkingJulia/DynamicHMCModels.jl/branch/master/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/StatisticalRethinkingJulia/DynamicHMCModels.jl

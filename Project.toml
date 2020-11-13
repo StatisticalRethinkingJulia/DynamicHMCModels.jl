@@ -1,7 +1,7 @@
 name = "DynamicHMCModels"
 uuid = "6266e5bf-9887-5dfa-a522-2c46ecdcf14a"
 authors = ["Rob J Goedman <goedman@icloud.com"]
-version = "2.0.4"
+version = "2.1.0"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"

@@ -9,7 +9,7 @@ cd(ProjDir)
 
 # Read the milk data
 
-df = DataFrame!(CSV.File(joinpath("..", "..", "data", "milk.csv"), delim=';'))
+df = CSV.read(joinpath("..", "..", "data", "milk.csv"), DataFrame)
 df = filter(row -> !(row[:neocortex_perc] == "NA"), df)
 #df[:, :kcal_per_g] = convert(Vector{Float64}, df[:, :kcal_per_g])
 df[!, :log_mass] = log.(convert(Vector{Float64}, df[:, :mass]))

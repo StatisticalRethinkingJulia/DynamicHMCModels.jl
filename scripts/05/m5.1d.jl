@@ -9,7 +9,7 @@ cd(ProjDir)
 
 # ### snippet 5.1
 
-df = DataFrame!(CSV.File(joinpath("..", "..", "data", "WaffleDivorce.csv"), delim=';'))
+df = CSV.read(joinpath("..", "..", "data", "WaffleDivorce.csv"), DataFrame)
 mean_ma = mean(df[:, :MedianAgeMarriage])
 df[!, :MedianAgeMarriage_s] = convert(Vector{Float64},
   (df[:, :MedianAgeMarriage]) .- mean_ma)/std(df[:, :MedianAgeMarriage]);

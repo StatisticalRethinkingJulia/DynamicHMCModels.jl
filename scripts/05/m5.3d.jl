@@ -9,7 +9,7 @@ cd(ProjDir)
 
 # ### snippet 5.4
 
-df = DataFrame!(CSV.File(joinpath("..", "..", "data", "WaffleDivorce.csv"), delim=';'))
+df = CSV.read(joinpath("..", "..", "data", "WaffleDivorce.csv"), DataFrame)
 
 mean_ma = mean(df[:, :Marriage])
 df[!, :Marriage_s] = convert(Vector{Float64},

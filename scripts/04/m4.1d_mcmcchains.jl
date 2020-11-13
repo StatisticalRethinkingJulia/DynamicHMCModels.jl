@@ -9,7 +9,7 @@ cd(ProjDir)
 
 # Import the dataset.
 
-data = DataFrame!(CSV.File(rel_path("..", "data", "Howell1.csv"), delim=';'));
+data = CSV.read(rel_path("..", "data", "Howell1.csv"), DataFrame)
 
 # Use only adults and standardize
 

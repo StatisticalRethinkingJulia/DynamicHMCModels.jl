@@ -45,6 +45,7 @@ posterior = P.transformation.(results.chain)
 
 # Create Particles NamedTuple object
 
+println()
 p = as_particles(posterior)
 p |> display
 

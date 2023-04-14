@@ -1,16 +1,11 @@
 module DynamicHMCModels
 
-using Reexport, Requires
+using Reexport
 
-@reexport using DynamicHMC, LogDensityProblems, TransformVariables
-@reexport using Distributions, Random, Statistics
+@reexport using DynamicHMC, LogDensityProblems,  LogDensityProblemsAD
+@reexport using TransformVariables, TransformedLogDensities, ForwardDiff
+@reexport using MCMCDiagnosticTools, DynamicHMC.Diagnostics
+@reexport using Distributions, Random, Statistics, LinearAlgebra
 @reexport using Parameters, CSV, DataFrames
-@reexport using MonteCarloMeasurements
-
-function __init__()
-  @require MCMCChains="c7f686f2-ff18-58e9-bc7b-31028e88f75d" include("require/chains.jl")
-end
-
-include("particles.jl")
 
 end # module

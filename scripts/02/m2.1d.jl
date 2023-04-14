@@ -1,56 +1,50 @@
-# # Estimate Binomial draw probabilility
+# Estimate Binomial draw probabilility
 
 using DynamicHMCModels
+using Test
+
+# StatisticalRethinking model `m2.1d`"
 
 Random.seed!(1356779)
 
-# Define a structure to hold the data.
-
-Base.@kwdef struct BernoulliProblem
+struct BernoulliProblem
     "Total number of draws in the data."
     n::Int
-    "Number of draws ' == 1' "
+    "Observations"
     obs::Vector{Int}
-end;
-
-# Write a function to return properly dimensioned transformation.
-
-make_transformation(model::BernoulliProblem) =
-    as((p = as𝕀, ))
+end
 
 # Add data
 
-model = BernoulliProblem(; n = 9, obs = rand(Binomial(9, 2/3), 3))
 
 # Make the type callable with the parameters *as a single argument*. 
 
-function (model::BernoulliProblem)(θ)
-    @unpack n, obs = model        # extract the data
+function (problem::BernoulliProblem)(θ)
+    @unpack n, obs = problem        # extract the data
     @unpack p = θ
     loglikelihood(Binomial(n, p), obs)
 end
 
+p = BernoulliProblem(9, rand(Binomial(9, 2/3), 3))
+
+p((p = 0.5,))
+
+t = as((p = as𝕀,))
+
 # Use a flat priors (the default, omitted) for α
 
-P = TransformedLogDensity(make_transformation(model), model)
+P = TransformedLogDensity(t, p)
+
 ∇P = ADgradient(:ForwardDiff, P);
 
-# Sample chain
+results = [mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000; reporter = NoProgressReport()) for _ in 1:4]
 
-results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000;
-  reporter = NoProgressReport()
-)
+posterior = TransformVariables.transform.(t, eachcol(pool_posterior_matrices(results)))
 
-posterior = P.transformation.(results.chain)
+posterior_p = first.(posterior)
 
-# Create Particles NamedTuple object
+@test mean(posterior_p) ≈ 0.69 atol=0.1
 
-println()
-p = as_particles(posterior)
-p |> display
+ess, R̂ = ess_rhat(stack_posterior_matrices(results))
 
-println()
-DynamicHMC.Diagnostics.EBFMI(results.tree_statistics) |> display
-
-println()
-DynamicHMC.Diagnostics.summarize_tree_statistics(results.tree_statistics) |> display
+summarize_tree_statistics(results[1].tree_statistics)

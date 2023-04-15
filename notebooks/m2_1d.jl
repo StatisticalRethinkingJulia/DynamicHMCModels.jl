@@ -11,12 +11,15 @@ using Pkg
 Pkg.activate(expanduser("~/.julia/dev/DynamicHMCModels"))
 
 # ╔═╡ efd842c3-2249-42f7-94a2-6d2c0c501102
-# # Estimate Binomial draw probabilility
-
-using DynamicHMCModels
+begin
+	using DynamicHMCModels
+end
 
 # ╔═╡ 3ba50f6a-d047-465b-92fd-d977ac1055d1
-md" ## StatisticalRethinking model `m2.1d`"
+md" ## Statistical Rethinking model `m2.1d`"
+
+# ╔═╡ fede9986-c2b9-4bc6-b3ec-3d95179a3115
+md" ### Estimate Binomial draw probabilility."
 
 # ╔═╡ afda9d87-70d8-45c3-86a7-9e81bf433026
 html"""
@@ -31,7 +34,7 @@ html"""
 """
 
 # ╔═╡ f4acdcbc-fefc-421f-bbe9-2e0c39282229
-Random.seed!(1356779)
+Random.seed!(123)
 
 # ╔═╡ 6bb507e4-2999-4d71-8c8f-cd6dff8203ec
 begin
@@ -54,31 +57,29 @@ begin
 	end
 end
 
-# ╔═╡ 2b4e5d5c-3cef-459c-b4cb-d2a42394a780
-θ = (n = 9, obs = rand(Binomial(9, 2/3), 3))
-
-# ╔═╡ 814bd7b4-2ea4-4b18-80d9-a5dad0c3d408
-θ.obs
-
 # ╔═╡ c0584575-c85e-46bb-bd9b-a0bf9b3b00cd
-p = BernoulliProblem(θ.n, θ.obs)
+p = BernoulliProblem(9, rand(Binomial(9, 2/3), 30))
+
+# ╔═╡ a24ab951-cdaa-4ea7-8a0b-5bd1b3210768
+md" ##### Test the model."
 
 # ╔═╡ 14077de1-0794-48a7-a99d-1c895353acf8
 p((p = 0.5,))
+
+# ╔═╡ 60c2830d-25b6-4091-b308-889742adac04
+md" ##### Use a flat priors (the default, omitted) for p."
 
 # ╔═╡ d49ed813-6435-4d16-b0e1-534425ad2e91
 t = as((p = as𝕀,))
 
 # ╔═╡ adb30652-feca-4447-a9e3-5e67d9940240
-# Use a flat priors (the default, omitted) for α
-
 P = TransformedLogDensity(t, p)
 
 # ╔═╡ c1d4dc80-6aa6-4c7e-82cf-a00cfdc861b1
 ∇P = ADgradient(:ForwardDiff, P);
 
 # ╔═╡ 903f6acd-8301-4d78-831e-aad350775662
-md" ##### Sample chain."
+md" ##### Sample and retrieve results."
 
 # ╔═╡ 45f77656-eae2-4b26-9f4f-ab8cb04b5b49
 results = [mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000; reporter = NoProgressReport()) for _ in 1:4]
@@ -98,18 +99,22 @@ ess, R̂ = ess_rhat(stack_posterior_matrices(results))
 # ╔═╡ 3bdaa02b-e8cc-4020-97e7-aab6880c9cff
 summarize_tree_statistics(results[1].tree_statistics)
 
+# ╔═╡ d3bd0571-90a5-4fee-b1fd-6402c7816179
+md" ##### End of m2.1d.jl"
+
 # ╔═╡ Cell order:
 # ╟─3ba50f6a-d047-465b-92fd-d977ac1055d1
+# ╟─fede9986-c2b9-4bc6-b3ec-3d95179a3115
 # ╠═afda9d87-70d8-45c3-86a7-9e81bf433026
 # ╠═d9073ce1-b770-4bc8-b0c9-61c5600b6576
 # ╠═eca4fd61-9e23-49d4-92b4-7f3d66afc208
 # ╠═efd842c3-2249-42f7-94a2-6d2c0c501102
 # ╠═f4acdcbc-fefc-421f-bbe9-2e0c39282229
 # ╠═6bb507e4-2999-4d71-8c8f-cd6dff8203ec
-# ╠═2b4e5d5c-3cef-459c-b4cb-d2a42394a780
-# ╠═814bd7b4-2ea4-4b18-80d9-a5dad0c3d408
 # ╠═c0584575-c85e-46bb-bd9b-a0bf9b3b00cd
+# ╟─a24ab951-cdaa-4ea7-8a0b-5bd1b3210768
 # ╠═14077de1-0794-48a7-a99d-1c895353acf8
+# ╟─60c2830d-25b6-4091-b308-889742adac04
 # ╠═d49ed813-6435-4d16-b0e1-534425ad2e91
 # ╠═adb30652-feca-4447-a9e3-5e67d9940240
 # ╠═c1d4dc80-6aa6-4c7e-82cf-a00cfdc861b1
@@ -120,3 +125,4 @@ summarize_tree_statistics(results[1].tree_statistics)
 # ╠═dab6f092-66c0-4f8d-afc6-23a01d1c01dd
 # ╠═8e54b9ec-314d-484b-827d-b5e785eee901
 # ╠═3bdaa02b-e8cc-4020-97e7-aab6880c9cff
+# ╟─d3bd0571-90a5-4fee-b1fd-6402c7816179

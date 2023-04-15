@@ -18,7 +18,7 @@ begin
 end
 
 # ╔═╡ c565bfd9-b5d2-4e50-9527-c8df52579858
-md" ## Linear regression"
+md" ## Linear regression example"
 
 # ╔═╡ 2cf37bf9-9412-42cf-a524-0041581b48f9
 html"""
@@ -27,7 +27,7 @@ html"""
 		margin: 0 auto;
 		max-width: 3500px;
     	padding-left: max(10px, 5%);
-    	padding-right: max(10px, 30%);
+    	padding-right: max(10px, 5%);
 	}
 </style>
 """
@@ -93,17 +93,20 @@ function problem_transformation(p::LinearRegressionProblem)
     as((β = as(Array, size(p.X, 2)), σ = asℝ₊))
 end
 
-# ╔═╡ 731bd8af-0007-44e0-9303-ba38df784fbd
-# Wrap the problem with a transformation, then use ForwardDiff for the gradient.
+# ╔═╡ f825e1bb-13d1-42f5-9808-de29b85604a2
+md" ##### Wrap the problem with a transformation, then use ForwardDiff for the gradient."
 
-begin
-	t = problem_transformation(p)
-	P = TransformedLogDensity(t, p)
-	∇P = ADgradient(:ForwardDiff, P);
-end
+# ╔═╡ 8519b5bd-797a-4513-82b3-1cfc072db755
+t = problem_transformation(p)
+
+# ╔═╡ 70418813-3ea7-4143-9804-3a98f3f682dc
+P = TransformedLogDensity(t, p)
+
+# ╔═╡ 275a0030-11ef-4533-b412-4ac82a8c795f
+∇P = ADgradient(:ForwardDiff, P);
 
 # ╔═╡ ce7f9c63-6f71-480b-ad5b-95dae7f08dac
-md" ##### Finally, we sample from the posterior. `chain` holds the chain (positions and diagnostic information), while the second returned value is the tuned sampler which would allow continuation of sampling."
+md" ##### Sample from the posterior. `results` holds the chain, positions, diagnostic information, and the tuned sampler (which would allow continuation of sampling)."
 
 # ╔═╡ 3b727805-8d0a-4d72-8b8c-7135095e1ff5
 results = map(_ -> mcmc_with_warmup(Random.default_rng(), ∇P, 1000), 1:5)
@@ -133,7 +136,7 @@ md" ##### Effective sample sizes (of untransformed draws)"
 ess, R̂ = ess_rhat(stack_posterior_matrices(results))
 
 # ╔═╡ e3c07642-86f0-4d5c-b9e3-dc4f59731604
-md" ##### summarize NUTS-specific statistics of all chains"
+md" ##### Summarize NUTS-specific statistics of all chains"
 
 # ╔═╡ 2580659d-1186-481b-a1e7-d0f21cf08d94
 summarize_tree_statistics(mapreduce(x -> x.tree_statistics, vcat, results))
@@ -151,7 +154,10 @@ summarize_tree_statistics(mapreduce(x -> x.tree_statistics, vcat, results))
 # ╠═c3294c81-72a3-4435-8019-b0285ad33f6d
 # ╟─21f09380-9554-47b3-b8b8-d04b6fc7260e
 # ╠═14d716cb-6c14-45c0-8ef3-0065b2076b57
-# ╠═731bd8af-0007-44e0-9303-ba38df784fbd
+# ╟─f825e1bb-13d1-42f5-9808-de29b85604a2
+# ╠═8519b5bd-797a-4513-82b3-1cfc072db755
+# ╠═70418813-3ea7-4143-9804-3a98f3f682dc
+# ╠═275a0030-11ef-4533-b412-4ac82a8c795f
 # ╟─ce7f9c63-6f71-480b-ad5b-95dae7f08dac
 # ╠═3b727805-8d0a-4d72-8b8c-7135095e1ff5
 # ╟─83bef086-3538-4ae8-ac10-778fb1d0ce30

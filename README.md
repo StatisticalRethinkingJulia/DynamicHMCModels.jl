@@ -1,9 +1,15 @@
 # DynamicHMCModels
 
+| **Project Status**          |  **Build Status** |
+|:---------------------------:|:-----------------:|
+|![][project-status-img] | ![][CI-build] |
 
-| **Project Status**                                                               |  **Documentation**                                                               | **Build Status**                                                                                |
-|:-------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------:|
-|![][project-status-img] |
+[CI-build]: https://github.com/statisticalrethinkingjulia/DynamicHMCModels.jl/workflows/CI/badge.svg?branch=master
+
+[issues-url]: https://github.com/StatisticalRethinkingJulia/DynamicHMCModels.jl/issues
+
+[project-status-img]: https://img.shields.io/badge/lifecycle-wip-orange.svg
+
 ## Introduction
 
 This package contains Julia versions of the mcmc models contained in the R package "rethinking" associated with the book [Statistical Rethinking](https://xcelab.net/rm/statistical-rethinking/) by Richard McElreath. It is part of the [StatisticalRethinkingJulia](https://github.com/StatisticalRethinkingJulia) Github organization of packages.
@@ -26,7 +32,4 @@ Tamas Papp has been very helpful during the development of the DynamicHMC versio
 
 Questions and contributions are very welcome, as are feature requests and suggestions. Please open an [issue][issues-url] if you encounter any problems or have a question.
 
-[issues-url]: https://github.com/StatisticalRethinkingJulia/DynamicHMCModels.jl/issues
-
-[project-status-img]: https://img.shields.io/badge/lifecycle-wip-orange.svg
 

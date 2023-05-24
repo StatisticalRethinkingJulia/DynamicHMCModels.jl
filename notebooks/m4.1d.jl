@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.24
+# v0.19.25
 
 using Markdown
 using InteractiveUtils
@@ -127,7 +127,7 @@ summarize_tree_statistics(mapreduce(x -> x.tree_statistics, vcat, results))
 md" ##### End of m4.1d.jl."
 
 # ╔═╡ Cell order:
-# ╠═474de18f-ddd6-4706-9350-1e1f57c49a88
+# ╟─474de18f-ddd6-4706-9350-1e1f57c49a88
 # ╠═dc8ff75e-0595-49dc-932e-f5def2628b65
 # ╠═bcea290f-8f44-41a2-a187-511d9dea69e4
 # ╠═2b7daaf6-fbbc-4b69-b471-b0e2cd22ca0d
@@ -150,4 +150,4 @@ md" ##### End of m4.1d.jl."
 # ╠═59c39d89-a46f-48de-b50f-8852d1a374a2
 # ╠═58eee139-40f0-42e3-a751-5d928fb26a04
 # ╠═cab7a6cf-e142-4024-b554-330cce7773c3
-# ╠═768ae547-2a06-4be2-8d1e-5b0e80f8b498
+# ╟─768ae547-2a06-4be2-8d1e-5b0e80f8b498

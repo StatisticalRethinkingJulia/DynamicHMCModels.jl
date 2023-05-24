@@ -9,61 +9,67 @@ cd(ProjDir)
 
 # ### snippet 5.1
 
-df = CSV.read(joinpath("..", "..", "data", "WaffleDivorce.csv"), DataFrame)
-mean_ma = mean(df[:, :MedianAgeMarriage])
-df[!, :MedianAgeMarriage_s] = convert(Vector{Float64},
-  (df[:, :MedianAgeMarriage]) .- mean_ma)/std(df[:, :MedianAgeMarriage]);
+begin
+    df = CSV.read(joinpath("..", "..", "data", "WaffleDivorce.csv"), DataFrame)
+    mean_ma = mean(df[:, :MedianAgeMarriage])
+    df[!, :MedianAgeMarriage_s] = convert(Vector{Float64},
+      (df[:, :MedianAgeMarriage]) .- mean_ma)/std(df[:, :MedianAgeMarriage]);
+end
 
 # Model ``y ∼ Normal(y - Xβ, σ)``. Flat prior `β`, half-T for `σ`.
 
-Base.@kwdef mutable struct WaffleDivorce{Ty <: AbstractVector, 
-  Tx <: AbstractMatrix}
-    "Observations."
-    y::Ty
-    "Covariates"
-    x::Tx
-end
+begin
+    struct WaffleDivorce{Ty <: AbstractVector, Tx <: AbstractMatrix}
+        "Observations."
+        y::Ty
+        "Covariates"
+        x::Tx
+    end
 
-# Write a function to return a properly dimensioned transformation.
+    # Write a function to return a properly dimensioned transformation.
 
-function make_transformation(model::WaffleDivorce)
-  as((β = as(Array, size(model.x, 2)), σ = asℝ₊))
+    function make_transformation(model::WaffleDivorce)
+      as((β = as(Array, size(model.x, 2)), σ = asℝ₊))
+    end
+
+    # Make tmodel callable with the parameters *as a single argument*.
+
+    function (model::WaffleDivorce)(θ)
+        @unpack y, x = model   # extract the data
+        @unpack β, σ = θ            # works on the named tuple too
+        ll = 0.0
+        ll += logpdf(Normal(10, 10), x[1]) # alpha
+        ll += logpdf(Normal(0, 1), x[2]) # beta
+        ll += logpdf(TDist(1.0), σ)
+        ll += loglikelihood(Normal(0, σ), y .- x*β)
+        ll
+    end
+
 end
 
 # Instantiate the model with data and inits.
 
 x = hcat(ones(size(df, 1)), df[:, :MedianAgeMarriage_s]);
-model = WaffleDivorce(;y=df[:, :Divorce], x=x);
+p = WaffleDivorce(df[:, :Divorce], x);
 
-# Make tmodel callable with the parameters *as a single argument*.
-
-function (model::WaffleDivorce)(θ)
-    @unpack y, x = model   # extract the data
-    @unpack β, σ = θ            # works on the named tuple too
-    ll = 0.0
-    ll += logpdf(Normal(10, 10), x[1]) # alpha
-    ll += logpdf(Normal(0, 1), x[2]) # beta
-    ll += logpdf(TDist(1.0), σ)
-    ll += loglikelihood(Normal(0, σ), y .- x*β)
-    ll
-end
-
-println()
-model((β = [1.0, 2.0], σ = 1.0)) |> display
-println()
+p((β = [1.0, 2.0], σ = 1.0)) |> display
+t = make_transformation(p)
 
 # Wrap the problem with a transformation, then use Flux for the gradient.
 
-P = TransformedLogDensity(make_transformation(model), model)
+P = TransformedLogDensity(t, p)
 ∇P = ADgradient(:ForwardDiff, P);
 
 # Tune and sample.
 
-results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000)
-posterior = P.transformation.(results.chain)
+results = map(_ -> mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000), 1:4)
+posterior = TransformVariables.transform.(t, eachcol(pool_posterior_matrices(results)))
 
-p = as_particles(posterior)
-display(p)
+posterios_σ = round(mean(last, posterior); digits=2)
+posterios_σ |> display
+
+posterios_β = round.(mean(first, posterior); digits=2)
+posterios_β |> display
 
 stan_result = "
 Iterations = 1:1000

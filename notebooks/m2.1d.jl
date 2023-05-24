@@ -8,7 +8,7 @@ using InteractiveUtils
 using Pkg
 
 # ╔═╡ eca4fd61-9e23-49d4-92b4-7f3d66afc208
-Pkg.activate(expanduser("~/.julia/dev/DynamicHMCModels"))
+#Pkg.activate(expanduser("~/.julia/dev/DynamicHMCModels"))
 
 # ╔═╡ efd842c3-2249-42f7-94a2-6d2c0c501102
 begin

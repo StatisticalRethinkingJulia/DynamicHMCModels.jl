@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.22
+# v0.19.25
 
 using Markdown
 using InteractiveUtils
@@ -30,30 +30,12 @@ html"""
 
 # ╔═╡ d98a3a0a-947e-11ed-13a2-61b5b69b4df5
 notebook_files = [
-    "~/.julia/dev/SR2StanPluto/notebooks/00-Preface.jl",
-    "~/.julia/dev/SR2StanPluto/notebooks/02-Small Worlds and Large World.jl",
-    "~/.julia/dev/SR2StanPluto/notebooks/03-Sampling the imaginary.jl",
-    "~/.julia/dev/SR2StanPluto/notebooks/04.1-Why normal distributions are normal.jl",
-    "~/.julia/dev/SR2StanPluto/notebooks/04.2-A language for describing models.jl",
-    "~/.julia/dev/SR2StanPluto/notebooks/04.3-Gaussian model of height.jl",
-    "~/.julia/dev/SR2StanPluto/notebooks/04.4-Linear prediction.jl",
-    "~/.julia/dev/SR2StanPluto/notebooks/04.5-Curves from lines.jl",
-    "~/.julia/dev/SR2StanPluto/notebooks/05.1-Spurious associations.jl",
-    "~/.julia/dev/SR2StanPluto/notebooks/05.2-Masked relationships.jl",
-    "~/.julia/dev/SR2StanPluto/notebooks/05.3-Categorical variables.jl",
-    "~/.julia/dev/SR2StanPluto/notebooks/09.1-Good King Markov.jl",
-    "~/.julia/dev/SR2StanPluto/notebooks/09.2-Metropolis algorithm.jl",
-    "~/.julia/dev/SR2StanPluto/notebooks/09.3-Hamiltonian Monte Carlo.jl",
-    "~/.julia/dev/SR2StanPluto/notebooks/09.4-Easy HMC.jl",
-    "~/.julia/dev/SR2StanPluto/notebooks/09.5-Care of Markov chains.jl",
+    "~/.julia/dev/DynamicHMCModels/notebooks/bernoulli_example.jl",
+    "~/.julia/dev/DynamicHMCModels/notebooks/linear_regression_example.jl",
+    "~/.julia/dev/DynamicHMCModels/notebooks/m2_1d.jl",
+    "~/.julia/dev/DynamicHMCModels/notebooks/m4_1d.jl",
 	
-    "~/.julia/dev/SR2StanPluto/notebooks/CausalInference/PC Algorithm: Basic example.jl",
-    "~/.julia/dev/SR2StanPluto/notebooks/CausalInference/PC Algorithm: Example with real data.jl",
-    "~/.julia/dev/SR2StanPluto/notebooks/CausalInference/PC Algorithm: Further example.jl",
-    "~/.julia/dev/SR2StanPluto/notebooks/CausalInference/PC Algorithm: How it works.jl",
-    "~/.julia/dev/SR2StanPluto/notebooks/CausalInference/PC Algorithm: Reasoning about experiments.jl",
-	
-	"~/.julia/dev/SR2StanPluto/notebooks/Maintenance/Notebook-to-reset-SR2StanPluto-jl-notebooks.jl"
+	"~/.julia/dev/DynamicHMCModels/notebooks/Maintenance/Notebook-to-reset-DynamicHMCModels-jl-notebooks.jl"
 ];
 
 # ╔═╡ 0f10a758-e442-4cd8-88bc-d82d8de97ede

@@ -1,44 +1,37 @@
-# # Polynomial weight model model
-
 using DynamicHMCModels
+using BenchmarkTools
+using RegressionAndOtherStories
 
-ProjDir = @__DIR__
-cd(ProjDir)
+ProjDir = expanduser("~/.julia/dev/DynamicHMCModels")
 
-# Import the dataset.
+data = CSV.read(joinpath(ProjDir, "data", "Howell1.csv"), DataFrame)
 
-data = CSV.read(joinpath("..", "..", "data", "Howell1.csv"), DataFrame)
-
-# Use only adults and standardize
-
-df = filter(row -> row[:age] >= 18, data);
-df[!, :weight] = convert(Vector{Float64}, df[:, :weight]);
-df[!, :weight_s] = (df[:, :weight] .- mean(df[:, :weight])) / std(df[:, :weight]);
-df[!, :weight_s2] = df[:, :weight_s] .^ 2;
+begin
+  df = filter(row -> row[:age] >= 18, data)
+  df[!, :weight] = convert(Vector{Float64}, df[:, :weight])
+  df[!, :weight_s] = (df[:, :weight] .- mean(df[:, :weight])) / std(df[:, :weight])
+  df[!, :weight_s2] = df[:, :weight_s] .^ 2
+  df
+end
 
 # LR model ``y ∼ xβ + ϵ``, where ``ϵ ∼ N(0, σ²)`` IID.
 
-Base.@kwdef mutable struct ConstraintHeightProblem{Ty <: AbstractVector,
-  Tx <: AbstractMatrix}
+struct Heights2{Ty <: AbstractVector, Tx <: AbstractMatrix}
     "Observations."
     y::Ty
     "Covariates"
     x::Tx
-end;
+end
 
 # Write a function to return a properly dimensioned transformation.
 
-function make_transformation(model::ConstraintHeightProblem)
+function make_transformation(model::Heights2)
   as((β = as(Array, size(model.x, 2)), σ = asℝ₊))
 end
 
-N = size(df, 1)
-x = hcat(ones(N), hcat(df[:, :weight_s], df[:, :weight_s2]));
-model = ConstraintHeightProblem(;y = df[:, :height], x=x)
-  
 # Pack the parameters in a single argument θ.
 
-function (problem::ConstraintHeightProblem)(θ)
+function (problem::Heights2)(θ)
     @unpack y, x = problem   # extract the data
     @unpack β, σ = θ            # works on the named tuple too
     ll = 0.0
@@ -50,24 +43,30 @@ function (problem::ConstraintHeightProblem)(θ)
     ll
 end
 
-# Evaluate at model function at some initial valuues
+  N = size(df, 1)
+  x = hcat(ones(N), hcat(df[:, :weight_s], df[:, :weight_s2]));
+  p = Heights2(df[:, :height], x)
 
-println()
-model((β = [1.0, 2.0, 3.0], σ = 1.0)) |> display
-println()
+p((β = [1.0, 2.0, 3.0], σ = 1.0)) |> display
+
+t = make_transformation(p)
 
 # Wrap the problem with a transformation, then use Flux for the gradient.
 
-P = TransformedLogDensity(make_transformation(model), model)
+P = TransformedLogDensity(t, p)
+
 ∇P = ADgradient(:ForwardDiff, P);
 
 # Tune and sample.
 
-results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000)
-posterior = P.transformation.(results.chain)
+results = map(_ -> mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000), 1:4)
 
-p = as_particles(posterior)
-display(p)
+posterior = TransformVariables.transform.(t, eachcol(pool_posterior_matrices(results)))
+
+posterios_σ = round(mean(last, posterior); digits=2)
+
+posterios_β = round.(mean(first, posterior); digits=2)
+posterios_β |> display
 
 stan_result = "
 Iterations = 1:1000
@@ -90,4 +89,6 @@ Quantiles:
 sigma   4.76114350   4.9816850   5.10326000   5.2300450   5.51500975
 ";
 
-# end of m4.5d.jl
+ess, R̂ = ess_rhat(stack_posterior_matrices(results))
+
+summarize_tree_statistics(mapreduce(x -> x.tree_statistics, vcat, results))

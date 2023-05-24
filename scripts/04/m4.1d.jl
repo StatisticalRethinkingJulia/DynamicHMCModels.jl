@@ -1,58 +1,52 @@
-# # Heights_1 problem
-
-# We estimate simple linear regression model with a half-T prior.
-
-using DynamicHMCModels
-
-ProjDir = @__DIR__
-cd(ProjDir)
-
-# Import the dataset.
-
-delim = ';'
-data = CSV.read(joinpath("..", "..", "data", "Howell1.csv"), DataFrame; delim);
-
-# Use only adults and standardize
-
-df = filter(row -> row[:age] >= 18, data);
-
-# Half-T for `σ`, see below.
-
-Base.@kwdef mutable struct Heights_1{Ty <: AbstractVector, Tν <: Real}
-    "Observations."
-    y::Ty
-    "Degrees of freedom for prior on sigma."
-    v::Tν
-end;
-
-# Write a function to return properly dimensioned transformation.
-
-function make_transformation(model::Heights_1)
-    as((σ = asℝ₊, μ  = as(Real, 100, 250)), )
+begin
+    using DynamicHMCModels
+    using BenchmarkTools
+    using RegressionAndOtherStories
 end
 
-model = Heights_1(;y = df[:, :height], v=1.0)
-  
-# Then make the type callable with the parameters *as a single argument*.
+ProjDir = expanduser("~/.julia/dev/DynamicHMCModels")
 
-function (model::Heights_1)(θ)
-    @unpack y, v = model   # extract the data
-    @unpack μ, σ = θ
-    loglikelihood(Normal(μ, σ), y) + logpdf(TDist(v), σ)
-end;
+howell1 = CSV.read(joinpath(ProjDir, "data", "Howell1.csv"), DataFrame)
 
-# Wrap the problem with a transformation, then use Flux for the gradient.
+df = filter(row -> row[:age] >= 18, howell1);
 
-P = TransformedLogDensity(make_transformation(model), model)
+begin
+    struct Heights{Ty <: AbstractVector, Tν <: Real}
+        "Observations."
+        y::Ty
+        "Degrees of freedom for prior on sigma."
+        v::Tν
+    end
+
+    function make_transformation(model::Heights)
+        as((σ = asℝ₊, μ  = as(Real, 100, 250)), )
+    end
+
+    function (model::Heights)(θ)
+        @unpack y, v = model   # extract the data
+        @unpack μ, σ = θ
+        # Half-T for `σ`
+        loglikelihood(Normal(μ, σ), y) + logpdf(TDist(v), σ)
+    end
+end
+
+p = Heights(df[:, :height], 1.0)
+
+p((μ=150.0, σ=7.7))
+
+t = make_transformation(p)
+
+P = TransformedLogDensity(t, p)
+
 ∇P = ADgradient(:ForwardDiff, P);
 
-# Tune and sample.
+results = map(_ -> mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000), 1:4)
 
-results = mcmc_with_warmup(Random.GLOBAL_RNG, ∇P, 1000)
-posterior = P.transformation.(results.chain)
+posterior = TransformVariables.transform.(t, eachcol(pool_posterior_matrices(results)))
 
-p = as_particles(posterior)
-display(p)
+posterior_σ = round(mean(first, posterior); digits=2)
+
+posterior_μ = round(mean(last, posterior); digits=2)
 
 # Stan.jl results
 
@@ -73,4 +67,6 @@ sigma   7.21853   7.5560625   7.751355   7.9566775   8.410391
    mu 153.77992 154.3157500 154.602000 154.8820000 155.431000
 ";
 
-# end of m4.1d.jl
+ess, R̂ = ess_rhat(stack_posterior_matrices(results))
+
+summarize_tree_statistics(mapreduce(x -> x.tree_statistics, vcat, results))

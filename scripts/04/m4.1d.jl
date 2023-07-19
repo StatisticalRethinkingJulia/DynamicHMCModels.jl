@@ -4,9 +4,9 @@ begin
     using RegressionAndOtherStories
 end
 
-ProjDir = expanduser("~/.julia/dev/DynamicHMCModels")
+ProjDir = @__DIR__
 
-howell1 = CSV.read(joinpath(ProjDir, "data", "Howell1.csv"), DataFrame)
+howell1 = CSV.read(joinpath(ProjDir, "..", "..", "data", "Howell1.csv"), DataFrame)
 
 df = filter(row -> row[:age] >= 18, howell1);
 

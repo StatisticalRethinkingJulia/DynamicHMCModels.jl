@@ -2,9 +2,9 @@ using DynamicHMCModels
 using BenchmarkTools
 using RegressionAndOtherStories
 
-ProjDir = expanduser("~/.julia/dev/DynamicHMCModels")
+ProjDir = @__DIR__
 
-data = CSV.read(joinpath(ProjDir, "data", "Howell1.csv"), DataFrame)
+data = CSV.read(joinpath(ProjDir, "..", "..", "data", "Howell1.csv"), DataFrame)
 
 begin
   df = filter(row -> row[:age] >= 18, data)
